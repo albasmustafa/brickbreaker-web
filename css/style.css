@@ -1,0 +1,138 @@
+/* Brick Breaker AI — renkler temadan gelir: applyTheme() bu CSS değişkenlerini günceller */
+:root {
+  --accent: #4cc9f0; --accent-ink: #16213e; --panel: #16213e; --panel-soft: rgba(22, 33, 62, 0.55); --panel2: #1a1a2e;
+  --line: #2a3a5e; --uitext: #e0e0e0; --uidim: #8892b0; --board: rgba(22, 33, 62, 0.8); --boardvid: rgba(22, 33, 62, 0.62);
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; min-height: 100%; background: #1a1a2e; }
+body {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 16px;
+  font-family: ui-monospace, "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace; color: var(--uitext);
+}
+button {
+  font: inherit; font-size: 13px; color: var(--uitext); background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+  padding: 6px 12px; cursor: pointer; transition: transform 0.08s, border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+button:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 4px 12px -6px var(--accent); }
+button:active { transform: translateY(1px); }
+button.active { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button.muted { background: #e94560; color: #ffffff; border-color: #e94560; }
+button:disabled { opacity: 0.4; cursor: default; transform: none; box-shadow: none; }
+input[type=range] { accent-color: var(--accent); }
+input[type=text], textarea {
+  background: var(--panel2); color: var(--uitext); border: 1px solid var(--line); border-radius: 8px; padding: 6px 9px; font: inherit; font-size: 13px;
+}
+.label { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--uidim); margin-right: 4px; }
+
+/* Oyun alanı: tuval pencereye sığar (genişlik hem pencere genişliği hem yüksekliğiyle sınırlı, 4:3) */
+#arena { display: flex; gap: 12px; align-items: flex-start; justify-content: center; flex-wrap: wrap; }
+#stage { position: relative; border-radius: 14px; box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45), 0 0 0 1px var(--line), 0 0 60px -20px var(--accent); }
+#bgvid { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 14px; display: none; }
+canvas {
+  display: block; position: relative; z-index: 1; width: min(800px, calc(100vw - 32px), calc((100vh - 150px) * 4 / 3)); height: auto;
+  background: var(--board); border-radius: 14px; touch-action: none;
+}
+#stage.hasbg canvas { background: var(--boardvid); }
+#stage:fullscreen { display: flex; align-items: center; justify-content: center; background: var(--panel2); border-radius: 0; }
+#stage:fullscreen canvas { width: min(100vw, 133.33vh); }
+
+/* Araç çubuğu ve medya çubuğu */
+#toolbar, #mediabar { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: center; width: 800px; max-width: calc(100vw - 32px); }
+#toolbar { width: 900px; }      /* 8 düğme tek satıra sığsın */
+#toolbar button { padding: 8px 14px; border-radius: 10px; max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#mediabar { background: var(--panel-soft); border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; }
+#audiohint, #mediastatus { font-size: 12px; color: var(--uidim); }
+#mediavol { width: 100px; }
+#beatdot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); opacity: 0; }
+#musicinfo { font-size: 12px; font-weight: bold; }
+
+/* Paneller: ekranın ortasında açılan pencereler */
+#backdrop { position: fixed; inset: 0; z-index: 20; background: rgba(0, 0, 0, 0.45); backdrop-filter: blur(2px); }
+.panel {
+  position: fixed; z-index: 21; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(820px, calc(100vw - 24px));
+  max-height: calc(100vh - 32px); overflow: auto; display: flex; flex-direction: column; gap: 10px; padding: 0 18px 16px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+}
+.panel-head { position: sticky; top: 0; z-index: 1; display: flex; justify-content: space-between; align-items: center; padding: 12px 0 8px; background: var(--panel); border-bottom: 1px solid var(--line); }
+.panel-head strong { font-size: 15px; letter-spacing: 0.04em; }
+.panel button { background: var(--panel2); font-size: 12px; padding: 5px 11px; }
+.panel button.active { background: var(--accent); color: var(--accent-ink); }
+.setrow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.setrow .label { width: 150px; }
+.sethead { color: var(--accent); font-weight: bold; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; border-top: 1px solid var(--line); padding-top: 12px; margin-top: 2px; }
+.setnote { font-size: 12px; color: var(--uidim); line-height: 1.5; }
+#fxvol { flex: 1; }
+.rangeval { width: 34px; font-size: 13px; text-align: right; }
+
+/* Tema stüdyosu */
+#themegrid, #suggestgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 6px; flex: 1; }
+.panel button.swatch { padding: 6px; display: flex; flex-direction: column; gap: 5px; text-align: left; border-width: 2px; }
+.panel button.swatch.active { box-shadow: 0 0 0 2px var(--accent); }
+.swname { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.swatch .bars { display: flex; gap: 3px; height: 10px; }
+.swatch .bars span { flex: 1; border-radius: 2px; }
+#th-colors { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px; flex: 1; }
+#th-colors label { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+#th-colors input[type=color] { width: 34px; height: 24px; border: 1px solid var(--line); border-radius: 4px; background: none; padding: 0; cursor: pointer; }
+#th-code, #net-answer, #net-invcode { flex: 1; min-width: 180px; }
+
+/* Rekabet paneli */
+#net-offer, #net-answercode { width: 100%; height: 64px; resize: vertical; word-break: break-all; font-size: 11px; }
+#vs-rows, #vs-netrows, #net-hostbox, #net-joinbox { display: flex; flex-direction: column; gap: 8px; }
+#net-players { display: flex; gap: 6px; flex-wrap: wrap; }
+.netp { padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line); font-size: 12px; }
+#lb-table, #cr-history { width: 100%; border-collapse: collapse; font-size: 12px; }
+#lb-table th, #lb-table td, #cr-history th, #cr-history td { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line); }
+#lb-table th, #cr-history th { color: var(--uidim); font-weight: normal; }
+
+/* Kariyer: rütbe kartı, istatistikler, başarımlar, bildirimler */
+.rank-card { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: var(--panel2); border: 1px solid var(--line); border-left: 4px solid var(--c); border-radius: 12px; }
+.rank-icon { font-size: 30px; line-height: 1; }
+.rank-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.rank-name { font-size: 14px; }
+.rank-name strong { color: var(--c); }
+.rank-bar { height: 6px; background: rgba(0, 0, 0, 0.35); border-radius: 3px; overflow: hidden; }
+.rank-bar span { display: block; height: 100%; background: var(--c); }
+.rank-sub { font-size: 11px; color: var(--uidim); }
+.rank-rec { display: flex; flex-direction: column; align-items: flex-end; font-size: 11px; color: var(--uidim); }
+.rank-rec strong { font-size: 16px; color: var(--uitext); }
+#cr-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px; }
+.stat { display: flex; flex-direction: column; gap: 2px; padding: 7px 9px; background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; }
+.stat strong { font-size: 15px; }
+.stat span { font-size: 11px; color: var(--uidim); }
+#cr-ach { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px; }
+.ach { display: flex; align-items: center; gap: 9px; padding: 7px 9px; border: 1px solid var(--line); border-radius: 10px; opacity: 0.45; filter: grayscale(1); }
+.ach.got { opacity: 1; filter: none; background: var(--panel2); border-color: var(--accent); }
+.ach-icon { font-size: 22px; }
+.ach div { display: flex; flex-direction: column; gap: 1px; font-size: 12px; }
+.ach div span { font-size: 11px; color: var(--uidim); }
+#toasts { position: absolute; z-index: 5; top: 44px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; width: max-content; max-width: 90%; pointer-events: none; }
+.toast {
+  display: flex; flex-direction: column; gap: 2px; padding: 8px 16px; text-align: center; font-size: 13px;
+  background: var(--panel); border: 1px solid var(--c); border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 0 18px -6px var(--c); animation: toast 2.6s forwards;
+}
+.toast span { font-size: 11px; color: var(--uidim); }
+@keyframes toast { 0% { opacity: 0; transform: translateY(-10px) scale(0.95); } 8%, 85% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-6px); } }
+
+/* Kapışma: tuvalin yanında rakip kartları */
+#opponents { width: 210px; display: flex; flex-direction: column; gap: 8px; max-height: 600px; overflow-y: auto; }
+.opp-head, .opp { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; }
+.opp-head { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-weight: bold; font-size: 13px; }
+.opp { border-left: 4px solid var(--c); display: flex; flex-direction: column; gap: 4px; font-size: 12px; }
+.opp.me { box-shadow: 0 0 0 2px var(--accent); }
+.opp.dead { opacity: 0.45; filter: grayscale(0.8); }
+.opp.hit { animation: opphit 0.4s; }
+@keyframes opphit { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+.opp-top { display: flex; gap: 6px; align-items: center; }
+.opp-rank { color: var(--uidim); font-weight: bold; min-width: 22px; }
+.opp-name { font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.opp-mid { display: flex; justify-content: space-between; align-items: baseline; }
+.opp-score { font-size: 16px; font-weight: bold; }
+.opp-lives { color: #ff4d6d; letter-spacing: 1px; }
+.opp-sub { color: var(--uidim); font-size: 11px; }
+.opp-bar { height: 4px; background: rgba(0, 0, 0, 0.35); border-radius: 2px; overflow: hidden; }
+.opp-bar span { display: block; height: 100%; background: var(--c); }
+.opp-feed { font-size: 11px; color: var(--uidim); background: var(--panel-soft); border: 1px solid var(--line); border-radius: 10px; padding: 6px 8px; display: flex; flex-direction: column; gap: 2px; }
+
+@media (pointer: coarse) { #toolbar button, #mediabar button { padding: 10px 14px; } }

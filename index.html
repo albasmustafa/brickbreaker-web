@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="description" content="Brick Breaker AI — kaos, lanetler, boss'lar, sonsuz temalar, müzikle senkron efektler ve çevrim içi kapışma.">
+<meta name="theme-color" content="#16213e">
+<title>Brick Breaker AI</title>
+<link rel="icon" href="favicon.svg">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="arena">
+  <div id="stage">
+    <video id="bgvid" loop playsinline></video>
+    <canvas id="game" width="800" height="600" aria-label="Brick Breaker oyun alanı"></canvas>
+  </div>
+  <aside id="opponents" hidden></aside>
+</div>
+<div id="toolbar"><span id="audiohint" title="Tarayıcı sesi ilk tıklamadan sonra açar">🔊 ses için bir kez tıkla</span></div>
+<div id="mediabar">
+  <span class="label">Arka plan</span>
+  <button id="pickvid">🎬 Video</button>
+  <button id="pickmusic">🎵 Müzik</button>
+  <button id="clearmedia" title="Arka planı kapat">✕ Kapat</button>
+  <span class="label">🔊</span>
+  <input type="range" id="mediavol" min="0" max="100" value="70" aria-label="Arka plan ses seviyesi">
+  <span id="beatdot"></span>
+  <span id="musicinfo"></span>
+  <span id="mediastatus"></span>
+</div>
+
+<div id="backdrop" hidden></div>
+<!-- Ayarlar: satırlar js/settings.js tablosundan üretilir -->
+<section id="settingspanel" class="panel" role="dialog" aria-label="Ayarlar" hidden></section>
+<section id="themepanel" class="panel" role="dialog" aria-label="Tema stüdyosu" hidden>
+  <div class="setrow"><span class="label">Hazır + kayıtlı</span><div id="themegrid"></div></div>
+  <div class="setrow"><span class="label">Rastgele öneriler</span><div id="suggestgrid"></div></div>
+  <div class="setrow"><button id="th-random">🎲 Rastgele tema (R)</button><button id="th-reroll">🔄 Yeni öneriler</button></div>
+  <div class="sethead">Düzenle</div>
+  <div class="setrow"><div id="th-colors"></div></div>
+  <div class="setrow">
+    <span class="label">Tema adı</span><input type="text" id="th-name" maxlength="30">
+    <button id="th-save">💾 Kaydet</button><button id="th-delete">🗑 Sil</button>
+  </div>
+  <div class="setrow">
+    <span class="label">Paylaş</span><input type="text" id="th-code" placeholder="BB1:... tema kodunu buraya yapıştır">
+    <button id="th-export">📤 Kodu al</button><button id="th-import">📥 Yükle</button>
+  </div>
+  <div class="setnote" id="th-msg"></div>
+  <div class="setnote">Hazır ya da rastgele bir temayı düzenlemek onu bozmaz; Kaydet ile kendi temana dönüşür. T: sıradaki tema · R: rastgele tema.</div>
+</section>
+<section id="versuspanel" class="panel" role="dialog" aria-label="Rekabet" hidden>
+  <div class="setrow"><span class="label">Oyuncu adı</span><input type="text" id="vs-name" maxlength="16"></div>
+  <div class="sethead">Dereceli lig</div>
+  <div class="rank-slot"></div>
+  <div class="setrow"><button id="rank-start">🏅 Dereceli maç (3 bot · 3 dk)</button><button id="rank-career">📊 Kariyer ve başarımlar</button></div>
+  <div class="setnote">Dereceli maçta rakip botların puanı seninkine yakındır ve güçleri puanlarından gelir: kazandıkça rakipler zorlaşır, kaybettikçe kolaylaşır. Puan çok oyunculu Elo ile hesaplanır: önünde bitirdiğin her rakip kazandırır, arkanda kaldığın her rakip kaybettirir; güçlü rakibi geçmek daha çok kazandırır. İlk 5 maç yerleştirmedir (puan iki kat hızlı oynar). Bitmemiş dereceli maçı bırakmak (yeni maç, odadan ayrılma, sayfayı kapatma) son sıra sayılır. Arkadaşlarla maçta oda sahibi "Dereceli"yi açarsa herkesin puanı değişir.</div>
+  <div class="sethead">Botlarla kapışma (dostluk, puansız)</div>
+  <div id="vs-rows"></div>
+  <div class="setrow"><button id="vs-start">⚔ Botlarla kapışmayı başlat</button></div>
+  <div class="sethead">Arkadaşlarla (çevrim içi)</div>
+  <div class="setnote">Sunucu yok: oyunlar doğrudan birbirine bağlanır (WebRTC). Oda sahibi her arkadaşı için bir davet kodu üretir, arkadaşı bir cevap kodu üretip geri gönderir. Kodları istediğiniz mesajlaşma uygulamasıyla paylaşın. Bağlantı kurulurken adres öğrenmek için Google'ın genel STUN sunucusu kullanılır; oyun verisi oradan geçmez. En çok 4 oyuncu; çevrim içi maçta duraklatma yoktur.</div>
+  <div class="setrow"><button id="net-host">🏠 Oda kur</button><button id="net-join">🔗 Odaya katıl</button><button id="net-leave">✕ Ayrıl</button></div>
+  <div id="net-hostbox" hidden>
+    <div class="setrow"><button id="net-invite">➕ Davet kodu oluştur</button></div>
+    <textarea id="net-offer" readonly placeholder="Davet kodu burada belirecek"></textarea>
+    <div class="setrow"><input type="text" id="net-answer" placeholder="Arkadaşının gönderdiği cevap kodu"><button id="net-accept">Bağla</button></div>
+    <div id="vs-netrows"></div>
+    <div class="setrow"><button id="net-start">⚔ Maçı başlat</button></div>
+  </div>
+  <div id="net-joinbox" hidden>
+    <div class="setrow"><input type="text" id="net-invcode" placeholder="Oda sahibinin davet kodu"><button id="net-mkanswer">Cevap kodu oluştur</button></div>
+    <textarea id="net-answercode" readonly placeholder="Cevap kodu burada belirecek"></textarea>
+  </div>
+  <div class="setnote" id="net-status"></div>
+  <div id="net-players"></div>
+  <div class="sethead">Liderlik tablosu</div>
+  <div class="setrow"><button data-lb="klasik">Klasik</button><button data-lb="kapisma">Kapışma</button></div>
+  <table id="lb-table"></table>
+  <div class="setrow"><button id="lb-clear">Bu tabloyu temizle</button></div>
+</section>
+<section id="careerpanel" class="panel" role="dialog" aria-label="Kariyer" hidden>
+  <div class="rank-slot"></div>
+  <div class="sethead">İstatistikler</div>
+  <div id="cr-stats"></div>
+  <div class="sethead">Son maçlar</div>
+  <table id="cr-history"></table>
+  <div class="sethead" id="cr-achhead">Başarımlar</div>
+  <div id="cr-ach"></div>
+  <div class="setnote">Kariyer bu cihazda saklanır. Sayaçlar her oyunda (klasik ve kapışma) canlı artar, başarımlar açıldığı anda tuvalin üstünde duyurulur.</div>
+  <div class="setrow"><button id="cr-reset">Kariyeri sıfırla</button></div>
+</section>
+<input type="file" id="vidfile" accept="video/*" hidden>
+<input type="file" id="audfile" accept="audio/*" hidden>
+
+<!-- Sıra önemli: dosyalar tek bir betik gibi sırayla yüklenir (ortak kapsam). tools/build.mjs bunları tek dosyada birleştirir. -->
+<script src="js/core.js"></script>
+<script src="js/themes.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/levels.js"></script>
+<script src="js/state.js"></script>
+<script src="js/flow.js"></script>
+<script src="js/effects.js"></script>
+<script src="js/physics.js"></script>
+<script src="js/curses.js"></script>
+<script src="js/update.js"></script>
+<script src="js/render.js"></script>
+<script src="js/music.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/career.js"></script>
+<script src="js/versus.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

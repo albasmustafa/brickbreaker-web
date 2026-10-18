@@ -1,0 +1,19 @@
+{
+  "name": "brickbreaker-ai",
+  "version": "1.0.0",
+  "description": "Tarayıcıda çalışan kaotik tuğla kırma oyunu: lanetler, boss'lar, sonsuz temalar, müzikle senkron efektler, botlarla ve arkadaşlarla kapışma.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node tools/serve.mjs 8080",
+    "build": "node tools/build.mjs",
+    "test": "node tests/run.mjs",
+    "test:dist": "node tests/run.mjs dist/index.html && node tests/run.mjs dist/brickbreaker.min.html"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
