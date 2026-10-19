@@ -81,10 +81,11 @@ function clearEffects() {
 }
 function addScore(n) {
   state.score += n;
-  if (state.score > state.high) store.set("bb_highscore", (state.high = state.score));
+  if (!run.practice && state.score > state.high) store.set("bb_highscore", (state.high = state.score));
 }
 
 function startGame() {
+  if (run.daily && typeof finishDaily === "function") finishDaily();
   resetRun();
   const diff = DIFFICULTY[settings.difficulty];
   Object.assign(state, { level: 1, score: 0, diffSpeed: diff.speedMul, lives: diff.lives, combo: 0, startHigh: state.high,
@@ -99,6 +100,7 @@ function startGame() {
   callout("BÖLÜM 1", T().accent);
 }
 function toMenu() {
+  if (run.daily && typeof finishDaily === "function") finishDaily();
   state.mode = "menu";
   state.callout = null;
   state.inset = 0;
@@ -150,10 +152,12 @@ function loseLife() {
 }
 function gameOver() {
   state.mode = "gameover";
-  state.newRecord = state.score > state.startHigh && state.score > 0;
+  state.newRecord = !run.practice && state.score > state.startHigh && state.score > 0;
   sfx("gameover");
   if (battle.active) battleEliminated();   // kapışmada elendin
+  else if (run.practice) state.lbRank = 0;
   else { state.lbRank = recordScore("klasik", { score: state.score, level: state.level }); careerGameEnd(); }
+  if (run.daily && typeof finishDaily === "function") finishDaily();
 }
 function levelCleared() {
   if (state.mode !== "playing") return;    // aynı karede iki kez tetiklenmesin

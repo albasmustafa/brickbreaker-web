@@ -78,6 +78,18 @@ test("Oyun akışı: servis, oynanış, can, oyun sonu, duraklatma", async ({ p,
   expect(r.paused === "paused" && r.resumed === "playing", "duraklat / devam");
 });
 
+test("Koşu özeti: sayaçlar ve pratikte kayıt dışı", async ({ p, expect }) => {
+  const r = await p.eval(`(() => {
+    __start(1); __sim(900, true);
+    const stats = { bricks: run.bricks, combo: run.bestCombo };
+    const highBefore = state.high;
+    __start(1); run.practice = true; addScore(9999); state.lives = 1; loseLife();
+    return { stats, highBefore, mode: state.mode, rank: state.lbRank, high: state.high, games: career.stats.games, practice: run.practice };
+  })()`);
+  expect(r.stats.bricks > 0 && r.stats.combo > 0, "koşu sayaçları: " + JSON.stringify(r.stats));
+  expect(r.mode === "gameover" && r.rank === 0 && r.high === r.highBefore && r.games === 0, "pratik kayıt dışı: " + JSON.stringify(r));
+});
+
 test("Kapsüller: 15 kapsülün hepsi etkisini gösterir", async ({ p, expect }) => {
   const checks = {
     W: "paddle.wideUntil > state.time && paddle.w > 140", M: "balls.length === 3", S: "fxOn('slow')", F: "isFire()",
