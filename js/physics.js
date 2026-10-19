@@ -26,7 +26,7 @@ const POWERS = {
   C: { label: "LANET",  color: "#5a189a", w: 5, bad: true, sound: "bad", fx: () => curseFromCapsule() },
 };
 // Can doluyken +CAN, lanetler kapalıyken LANET düşmez
-const powerAllowed = k => !(k === "H" && state.lives >= MAX_LIVES) && !(k === "C" && settings.hazards === "kapali");
+const powerAllowed = k => !(k === "H" && state.lives >= MAX_LIVES) && !(k === "C" && hazardLevel() === "kapali");
 function pickPower(goodOnly) {
   const entries = Object.entries(POWERS).filter(([k, p]) => !(goodOnly && (p.bad || k === "Q")) && powerAllowed(k));
   let r = Math.random() * entries.reduce((s, [, p]) => s + p.w, 0);

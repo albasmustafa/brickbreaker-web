@@ -101,6 +101,8 @@ function startGame() {
 }
 function toMenu() {
   if (run.daily && typeof finishDaily === "function") finishDaily();
+  run.daily = false;
+  run.dailyFinished = false;
   state.mode = "menu";
   state.callout = null;
   state.inset = 0;

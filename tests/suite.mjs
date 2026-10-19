@@ -95,14 +95,53 @@ test("Bölüm seçimi: kilit ve pratik", async ({ p, expect }) => {
     const before = [...levelGrid.querySelectorAll("button")].filter(b => !b.disabled).length;
     career.stats.bestLevel = 5; renderChallenge();
     const unlocked = [...levelGrid.querySelectorAll("button")].filter(b => !b.disabled).length;
+    const blocked = startPractice(9);
     startPractice(3);
     const started = { level: state.level, practice: run.practice, mode: state.mode };
     state.score = 5000; state.lives = 1; loseLife();
-    return { before, unlocked, started, high: state.high, rank: state.lbRank };
+    return { before, unlocked, blocked, started, high: state.high, rank: state.lbRank, ach: Object.keys(career.ach).length };
   })()`);
   expect(r.before === 1 && r.unlocked === 5, "kilit: " + JSON.stringify([r.before, r.unlocked]));
+  expect(r.blocked === false, "kilitli bölüm doğrudan çağrıyla açılmadı");
   expect(r.started.level === 3 && r.started.practice && r.started.mode === "serve", "pratik başladı: " + JSON.stringify(r.started));
-  expect(r.high === 0 && r.rank === 0, "pratik rekor yazmadı: " + JSON.stringify(r));
+  expect(r.high === 0 && r.rank === 0 && r.ach === 0, "pratik rekor/başarım yazmadı: " + JSON.stringify(r));
+});
+
+test("Günlük meydan okuma: tek deneme, kurallar, kayıt", async ({ p, expect }) => {
+  const dates = await p.eval(`({
+    y1: yesterdayOf("2026-03-01"), y2: yesterdayOf("2026-01-01"),
+    s1: streakAfter("2026-10-18", 4, "2026-10-19"), s2: streakAfter("2026-10-17", 4, "2026-10-19"),
+    s3: streakAfter("2026-10-19", 4, "2026-10-19"),
+  })`);
+  expect(dates.y1 === "2026-02-28" && dates.y2 === "2025-12-31", "tarih dönüşü: " + JSON.stringify(dates));
+  expect(dates.s1 === 5 && dates.s2 === 1 && dates.s3 === 4, "seri hesabı: " + JSON.stringify(dates));
+
+  const r = await p.eval(`(() => {
+    const used0 = dailyUsed();
+    const first = startDaily();
+    const rules = { lives: state.lives, daily: run.daily, hazards: hazardLevel(), speed: state.speed };
+    const used1 = dailyUsed();
+    const second = startDaily();
+    state.score = 1234; state.lives = 1; loseLife();
+    const after = { score: daily.score, best: daily.best, streak: daily.streak, used: dailyUsed(), mode: state.mode,
+                    dailyFlag: run.daily, dailyDone: run.dailyFinished };
+    const third = startDaily();
+    return { used0, first, second, third, rules, used1, after, modeAfter: state.mode };
+  })()`);
+  expect(r.used0 === false && r.first === true && r.second === false, "tek deneme: " + JSON.stringify(r));
+  expect(r.rules.lives === 1 && r.rules.daily && r.rules.hazards === "kabus" && r.rules.speed > 340, "günlük kuralları: " + JSON.stringify(r.rules));
+  expect(r.used1 && r.after.score === 1234 && r.after.best === 1234 && r.after.streak === 1 && r.after.used, "günlük kayıt: " + JSON.stringify(r.after));
+  expect(r.after.dailyFlag === true && r.after.dailyDone === true, "özet için günlük bayrağı: " + JSON.stringify(r.after));
+  expect(r.third === false && r.modeAfter === "gameover", "ikinci deneme yok: " + JSON.stringify(r));
+
+  await p.reload();
+  const saved = await p.eval(`({ used: dailyUsed(), best: daily.best, streak: daily.streak, start: startDaily() })`);
+  expect(saved.used && saved.best === 1234 && saved.streak === 1 && saved.start === false, "kalıcı günlük: " + JSON.stringify(saved));
+
+  await p.eval(`localStorage.setItem("bb_daily", "{bozuk"), 1`);
+  await p.reload();
+  const broken = await p.eval(`({ used: dailyUsed(), best: daily.best, streak: daily.streak, start: startDaily() })`);
+  expect(broken.used === false && broken.best === 0 && broken.streak === 0 && broken.start === true, "bozuk kayıt: " + JSON.stringify(broken));
 });
 
 test("Kapsüller: 15 kapsülün hepsi etkisini gösterir", async ({ p, expect }) => {

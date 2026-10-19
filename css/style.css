@@ -39,7 +39,7 @@ canvas {
 
 /* Araç çubuğu ve medya çubuğu */
 #toolbar, #mediabar { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: center; width: 800px; max-width: calc(100vw - 32px); }
-#toolbar { width: 900px; }      /* 8 düğme tek satıra sığsın */
+#toolbar { width: max-content; max-width: calc(100vw - 32px); }   /* 9 düğme tek satıra sığsın */
 #toolbar button { padding: 8px 14px; border-radius: 10px; max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #mediabar { background: var(--panel-soft); border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; }
 #audiohint, #mediastatus { font-size: 12px; color: var(--uidim); }

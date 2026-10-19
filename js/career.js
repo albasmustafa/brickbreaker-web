@@ -88,8 +88,8 @@ function nextToast() {
 }
 
 // --- Sayaçlar ve başarımlar: oyun içi olaylar sayaçları canlı artırır, başarım anında açılır ---
-const run = { lifeLost: 0, ended: false, practice: false, daily: false, bricks: 0, powers: 0, bosses: 0, bestCombo: 0 };
-const resetRun = () => Object.assign(run, { lifeLost: 0, ended: false, practice: false, daily: false, bricks: 0, powers: 0, bosses: 0, bestCombo: 0 });
+const run = { lifeLost: 0, ended: false, practice: false, daily: false, dailyFinished: false, bricks: 0, powers: 0, bosses: 0, bestCombo: 0 };
+const resetRun = () => Object.assign(run, { lifeLost: 0, ended: false, practice: false, daily: false, dailyFinished: false, bricks: 0, powers: 0, bosses: 0, bestCombo: 0 });
 function track(key, n = 1) {
   if (run.practice) return;
   career.stats[key] += n;
