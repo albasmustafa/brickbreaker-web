@@ -99,12 +99,15 @@ test("Bölüm seçimi: kilit ve pratik", async ({ p, expect }) => {
     startPractice(3);
     const started = { level: state.level, practice: run.practice, mode: state.mode };
     state.score = 5000; state.lives = 1; loseLife();
-    return { before, unlocked, blocked, started, high: state.high, rank: state.lbRank, ach: Object.keys(career.ach).length };
+    const high = state.high, rank = state.lbRank, ach = Object.keys(career.ach).length;
+    toMenu();
+    return { before, unlocked, blocked, started, high, rank, ach, practiceAfterMenu: run.practice };
   })()`);
   expect(r.before === 1 && r.unlocked === 5, "kilit: " + JSON.stringify([r.before, r.unlocked]));
   expect(r.blocked === false, "kilitli bölüm doğrudan çağrıyla açılmadı");
   expect(r.started.level === 3 && r.started.practice && r.started.mode === "serve", "pratik başladı: " + JSON.stringify(r.started));
   expect(r.high === 0 && r.rank === 0 && r.ach === 0, "pratik rekor/başarım yazmadı: " + JSON.stringify(r));
+  expect(r.practiceAfterMenu === false, "menüde pratik bayrağı temizlendi");
 });
 
 test("Günlük meydan okuma: tek deneme, kurallar, kayıt", async ({ p, expect }) => {

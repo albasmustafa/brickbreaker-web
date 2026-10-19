@@ -8,7 +8,7 @@ Tarayıcıda çalışan, kaotik bir tuğla kırma oyunu: lanetler, boss'lar, 15 
 |---|---|
 | Oyna | `index.html`'i çift tıkla (ya da `xdg-open index.html`) — sunucu, internet, kurulum gerekmez |
 | Uygulama olarak kur / çevrim dışı oyna | `npm start` → <http://localhost:8080> → tarayıcıda "Uygulamayı yükle"; bir kez açıldıktan sonra internetsiz de çalışır |
-| Tek dosya üret | `npm run build` → `dist/index.html` (okunaklı) ve `dist/brickbreaker.min.html` (sıkıştırılmış, ~141 KB) |
+| Tek dosya üret | `npm run build` → `dist/index.html` (okunaklı) ve `dist/brickbreaker.min.html` (sıkıştırılmış, ~146 KB) |
 | Test et | `npm test` → 20 özellik testi başsız Chromium'da (Node 22+, Chromium/Chrome) |
 | Yayınla | `npm run release` → test + derleme + ana oyun dosyasını güncelleme |
 
