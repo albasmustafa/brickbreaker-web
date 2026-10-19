@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: browser-actions/setup-chrome@v2
+        id: chrome
+        with:
+          install-dependencies: true
+      - name: Test kaynak
+        run: npm test
+        env:
+          BB_CHROME: ${{ steps.chrome.outputs.chrome-path }}
+      - name: Derle
+        run: npm run build
+      - name: Test tek dosya
+        run: node tests/run.mjs dist/index.html
+        env:
+          BB_CHROME: ${{ steps.chrome.outputs.chrome-path }}
