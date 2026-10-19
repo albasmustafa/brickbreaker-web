@@ -2,7 +2,7 @@
 // Önce ağ (güncel dosya), ağ yoksa önbellek. Yalnızca http/https üzerinden çalışır (npm start ya da bir web sunucusu).
 const CACHE = "brickbreaker-v2";
 const FILES = ["./", "index.html", "css/style.css", "favicon.svg", "manifest.webmanifest",
-  ...["core", "themes", "settings", "audio", "levels", "state", "flow", "effects", "physics", "curses", "update", "render", "music", "ui", "career", "versus", "main"].map(f => "js/" + f + ".js")];
+  ...["core", "themes", "settings", "audio", "levels", "state", "flow", "effects", "physics", "curses", "update", "render", "music", "ui", "career", "challenge", "versus", "main"].map(f => "js/" + f + ".js")];
 
 self.addEventListener("install", e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())));
 self.addEventListener("activate", e => e.waitUntil(

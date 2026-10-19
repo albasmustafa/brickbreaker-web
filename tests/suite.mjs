@@ -47,7 +47,7 @@ test("Yükleme, arayüz ve özellik envanteri", async ({ p, expect }) => {
     tiers: TIERS.map(t => t.name).join(), ach: ACHIEVEMENTS.length, stats: Object.keys(STATS).length, career: careerPanel.hidden && versusPanel.querySelector(".rank-card") !== null })`);
   expect(r.mode === "menu" && r.bricks === 46 && r.levels === 11, "menü ve ilk bölüm: " + JSON.stringify(r));
   expect(r.themes === 25, "25 hazır tema");
-  expect(r.tools === 8, "araç çubuğunda 8 düğme (ses, tema, rastgele, stüdyo, rekabet, kariyer, ayarlar, tam ekran): " + r.tools);
+  expect(r.tools === 9, "araç çubuğunda 9 düğme (ses, tema, rastgele, stüdyo, rekabet, meydan, kariyer, ayarlar, tam ekran): " + r.tools);
   expect(r.tiers === "Bronz,Gümüş,Altın,Platin,Elmas,Usta,Efsane" && r.ach === 25 && r.stats === 18 && r.career, "7 lig, 25 başarım, 18 sayaç, rütbe kartı: " + JSON.stringify([r.tiers, r.ach, r.stats, r.career]));
   expect(r.panels, "paneller kapalı başlar");
   expect(r.powers === "WMSFLYDKOHQRNZC", "15 kapsül: " + r.powers);
@@ -88,6 +88,21 @@ test("Koşu özeti: sayaçlar ve pratikte kayıt dışı", async ({ p, expect })
   })()`);
   expect(r.stats.bricks > 0 && r.stats.combo > 0, "koşu sayaçları: " + JSON.stringify(r.stats));
   expect(r.mode === "gameover" && r.rank === 0 && r.high === r.highBefore && r.games === 0, "pratik kayıt dışı: " + JSON.stringify(r));
+});
+
+test("Bölüm seçimi: kilit ve pratik", async ({ p, expect }) => {
+  const r = await p.eval(`(() => {
+    const before = [...levelGrid.querySelectorAll("button")].filter(b => !b.disabled).length;
+    career.stats.bestLevel = 5; renderChallenge();
+    const unlocked = [...levelGrid.querySelectorAll("button")].filter(b => !b.disabled).length;
+    startPractice(3);
+    const started = { level: state.level, practice: run.practice, mode: state.mode };
+    state.score = 5000; state.lives = 1; loseLife();
+    return { before, unlocked, started, high: state.high, rank: state.lbRank };
+  })()`);
+  expect(r.before === 1 && r.unlocked === 5, "kilit: " + JSON.stringify([r.before, r.unlocked]));
+  expect(r.started.level === 3 && r.started.practice && r.started.mode === "serve", "pratik başladı: " + JSON.stringify(r.started));
+  expect(r.high === 0 && r.rank === 0, "pratik rekor yazmadı: " + JSON.stringify(r));
 });
 
 test("Kapsüller: 15 kapsülün hepsi etkisini gösterir", async ({ p, expect }) => {

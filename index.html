@@ -92,6 +92,15 @@
   <div class="setnote">Kariyer bu cihazda saklanır. Sayaçlar her oyunda (klasik ve kapışma) canlı artar, başarımlar açıldığı anda tuvalin üstünde duyurulur.</div>
   <div class="setrow"><button id="cr-reset">Kariyeri sıfırla</button></div>
 </section>
+<section id="challengepanel" class="panel" role="dialog" aria-label="Meydan okuma" hidden>
+  <div class="sethead">Günlük meydan okuma</div>
+  <div id="daily-card"></div>
+  <div class="setrow"><button id="daily-start">☀️ Bugünün koşusunu başlat</button></div>
+  <div class="setnote">Günde tek deneme · 1 can · Kabus lanetleri · +%15 hız. Deneme başladığı an kullanılmış sayılır.</div>
+  <div class="sethead">Bölüm seçimi (pratik)</div>
+  <div id="level-grid"></div>
+  <div class="setnote">Pratik koşularda rekor, liderlik tablosu, kariyer ve başarımlar sayılmaz. Bölümler, klasik oyunda ulaştığın en ileri bölüme kadar açılır.</div>
+</section>
 <input type="file" id="vidfile" accept="video/*" hidden>
 <input type="file" id="audfile" accept="audio/*" hidden>
 
@@ -111,6 +120,7 @@
 <script src="js/music.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/career.js"></script>
+<script src="js/challenge.js"></script>
 <script src="js/versus.js"></script>
 <script src="js/main.js"></script>
 </body>
