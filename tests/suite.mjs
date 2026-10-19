@@ -595,18 +595,23 @@ test("Çevrim içi kapışma (iki sayfa, WebRTC)", async ({ p, open, expect, sle
   await g.eval("(updateBattle(0), 1)");
   const sync = [await g.eval("pById('h').score"), await p.eval("pById('g1').score"), await p.eval("pById('b1').score"), await g.eval("pById('b1').score")];
   expect(sync[0] >= 1111 && sync[1] >= 2222 && sync[2] > 0 && Math.abs(sync[2] - sync[3]) <= 200, "skorlar karşılıklı eşitlenir: " + sync);
-  // Saldırı ulaştı mı: hedef işaretlenir ve ya "⚔ Ad: LANET" duyurulur ya da (arada kalkan kapıldıysa) kalkan engeller.
-  // (Sayfanın kendi döngüsü arka planda sürdüğü için bekleyen lanet bu arada can kaybıyla silinmiş olabilir; duyuru kalıcıdır.)
+  // Saldırı ulaştı mı: kalıcı işaret `hitAt`. Duyuru metni normal oyun akışında üzerine yazılabildiği
+  // için ona bağlı kalmak zamanlamaya duyarlı olurdu; teslim kanıtı doğrudan hitAt.
   const reset = "(state.shield = 0, state.curses = {}, state.pendingCurse = null, state.callout = null, powerups = [], meP().hitAt = 0, 1)";
-  const landed = "meP().hitAt > 0 && ((state.callout && state.callout.text.startsWith('⚔')) || floaters.some(f => f.text.includes('ENGELLENDİ')))";
+  const landed = "meP().hitAt > 0";
+  const landedOn = async page => {
+    for (let i = 0; i < 20; i++) {
+      if (await page.eval(landed)) return true;
+      await sleep(100);
+    }
+    return false;
+  };
   await p.eval(reset);
   await g.eval("(sendAttack(net.myId, 'h'), 1)");
-  await sleep(400);
-  expect(await p.eval(landed), "misafir → oda sahibi saldırısı");
+  expect(await landedOn(p), "misafir → oda sahibi saldırısı");
   await g.eval(reset);
   await p.eval("(sendAttack('h', 'g1'), 1)");
-  await sleep(400);
-  expect(await g.eval(landed), "oda sahibi → misafir saldırısı");
+  expect(await landedOn(g), "oda sahibi → misafir saldırısı");
   expect(await g.eval("(() => { const m = state.mode; pauseGame(); return state.mode === m; })()"), "çevrim içi maçta duraklatma yok");
   await g.eval(`(() => { state.lives = 1; loseLife(); updateBattle(0.3); return 1; })()`);   // son can gider
   await sleep(400);
