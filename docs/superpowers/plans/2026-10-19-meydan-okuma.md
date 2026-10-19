@@ -215,7 +215,7 @@ Expected: FAIL — `dailyUsed is not defined`.
 const daily = { date: "", used: false, score: 0, best: 0, streak: 0, last: "" };
 ```
 
-`localDate()` yerel `YYYY-MM-DD` üretir. `bb_daily` okunurken yalnızca sonlu sayılar ve geçerli tarih kabul edilir. `startDaily()`: `dailyUsed()` ise `false`; tarih dünse `streak++`, değilse `1`; `daily.date = today; daily.used = true; daily.score = 0`; `startGame(); run.daily = true; state.lives = 1; state.diffSpeed = 1.15; state.speed = levelSpeed(1);` ve `true` döner. `finishDaily()`: `run.daily` değilse dön; `daily.score = state.score; daily.best = Math.max(...)`; kaydet; `run.daily = false`.
+`localDate()` yerel `YYYY-MM-DD` üretir. `bb_daily` okunurken yalnızca sonlu sayılar ve geçerli tarih kabul edilir. `startDaily()`: `dailyUsed()` ise `false`; tarih dünse `streak++`, değilse `1`; `daily.date = today; daily.used = true; daily.score = 0`; `startGame(); run.daily = true; state.lives = 1; state.diffSpeed = 1.15; state.speed = levelSpeed(1);` ve `true` döner. `finishDaily()`: `run.daily` değilse ya da zaten bitmişse dön; `daily.score = state.score; daily.best = Math.max(...)`; kaydet; `run.dailyFinished = true` (özet ekranı için `run.daily` açık kalır; `toMenu()` temizler).
 
 `js/flow.js`: `gameOver()` içinde `if (run.daily) finishDaily();`; `toMenu()` içinde aynı çağrı (idempotent). `startGame()` başında `if (run.daily) finishDaily();`.
 
@@ -261,7 +261,7 @@ git commit -m "feat: günlük meydan okuma"
 
 - [ ] **Step 2: Add GitHub Actions**
 
-`.github/workflows/ci.yml`: `push`/`pull_request`; Node 22; `npm ci`; `browser-actions/setup-chrome@v1`; `BB_CHROME` ile `npm test`; `npm run build`; `node tests/run.mjs dist/index.html`.
+`.github/workflows/ci.yml`: `push`/`pull_request`; Node 22; `npm ci`; `browser-actions/setup-chrome@v2`; `BB_CHROME` ile `npm test`; `npm run build`; `node tests/run.mjs dist/index.html`.
 
 - [ ] **Step 3: Verify release locally**
 
@@ -286,7 +286,7 @@ git commit -m "chore: CI ve release otomasyonu"
 
 ### Task 5: Son doğrulama
 
-- [ ] `npm test` → 19+ test, 0 hata.
+- [ ] `npm test` → 20 test, 0 hata.
 - [ ] `npm run build` → iki dist dosyası.
 - [ ] `node tests/run.mjs dist/index.html` → tüm testler.
 - [ ] `node tests/run.mjs dist/brickbreaker.min.html` → tüm testler.

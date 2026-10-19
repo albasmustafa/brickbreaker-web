@@ -30,6 +30,8 @@ sürecini otomatikleştirmek.
   kaydında bugünkü skor, en iyi skor ve seri tutulur.
 - Günlük kuralları global ayarları kalıcı olarak değiştirmez. Lanet yoğunluğu `run.daily`
   üzerinden okunur; can ve hız `startDaily()` içinde ayarlanır.
+- Günlük koşu bitince `run.daily` özet ekranı için açık kalır; kayıt bir kez yazılsın diye
+  `run.dailyFinished` kullanılır. Menüye dönüşte ikisi de temizlenir.
 - Release komutu ana oyun kopyasını yalnızca hedef klasör varsa yazar; yoksa uyarı verip atlar.
   `--ai-out <yol>` ile hedef değiştirilebilir, `--no-ai` ile kopyalama kapatılabilir.
 
