@@ -47,7 +47,7 @@ test("Yükleme, arayüz ve özellik envanteri", async ({ p, expect }) => {
     tiers: TIERS.map(t => t.name).join(), ach: ACHIEVEMENTS.length, stats: Object.keys(STATS).length, career: careerPanel.hidden && versusPanel.querySelector(".rank-card") !== null })`);
   expect(r.mode === "menu" && r.bricks === 46 && r.levels === 11, "menü ve ilk bölüm: " + JSON.stringify(r));
   expect(r.themes === 25, "25 hazır tema");
-  expect(r.tools === 8, "araç çubuğunda 8 düğme (ses, tema, rastgele, stüdyo, rekabet, kariyer, ayarlar, tam ekran): " + r.tools);
+  expect(r.tools === 9, "araç çubuğunda 9 düğme (ses, tema, rastgele, stüdyo, rekabet, meydan, kariyer, ayarlar, tam ekran): " + r.tools);
   expect(r.tiers === "Bronz,Gümüş,Altın,Platin,Elmas,Usta,Efsane" && r.ach === 25 && r.stats === 18 && r.career, "7 lig, 25 başarım, 18 sayaç, rütbe kartı: " + JSON.stringify([r.tiers, r.ach, r.stats, r.career]));
   expect(r.panels, "paneller kapalı başlar");
   expect(r.powers === "WMSFLYDKOHQRNZC", "15 kapsül: " + r.powers);
@@ -76,6 +76,75 @@ test("Oyun akışı: servis, oynanış, can, oyun sonu, duraklatma", async ({ p,
   expect(r.afterLose[0] === 1 && r.afterLose[1] === "serve", "can kaybı: " + r.afterLose);
   expect(r.over[0] === "gameover" && r.over[1] >= 1 && r.over[2] >= 1, "oyun sonu + klasik liderlik kaydı: " + r.over);
   expect(r.paused === "paused" && r.resumed === "playing", "duraklat / devam");
+});
+
+test("Koşu özeti: sayaçlar ve pratikte kayıt dışı", async ({ p, expect }) => {
+  const r = await p.eval(`(() => {
+    __start(1); __sim(900, true);
+    const stats = { bricks: run.bricks, combo: run.bestCombo };
+    const highBefore = state.high;
+    __start(1); run.practice = true; addScore(9999); state.lives = 1; loseLife();
+    return { stats, highBefore, mode: state.mode, rank: state.lbRank, high: state.high, games: career.stats.games, practice: run.practice };
+  })()`);
+  expect(r.stats.bricks > 0 && r.stats.combo > 0, "koşu sayaçları: " + JSON.stringify(r.stats));
+  expect(r.mode === "gameover" && r.rank === 0 && r.high === r.highBefore && r.games === 0, "pratik kayıt dışı: " + JSON.stringify(r));
+});
+
+test("Bölüm seçimi: kilit ve pratik", async ({ p, expect }) => {
+  const r = await p.eval(`(() => {
+    const before = [...levelGrid.querySelectorAll("button")].filter(b => !b.disabled).length;
+    career.stats.bestLevel = 5; renderChallenge();
+    const unlocked = [...levelGrid.querySelectorAll("button")].filter(b => !b.disabled).length;
+    const blocked = startPractice(9);
+    startPractice(3);
+    const started = { level: state.level, practice: run.practice, mode: state.mode };
+    state.score = 5000; state.lives = 1; loseLife();
+    const high = state.high, rank = state.lbRank, ach = Object.keys(career.ach).length;
+    toMenu();
+    return { before, unlocked, blocked, started, high, rank, ach, practiceAfterMenu: run.practice };
+  })()`);
+  expect(r.before === 1 && r.unlocked === 5, "kilit: " + JSON.stringify([r.before, r.unlocked]));
+  expect(r.blocked === false, "kilitli bölüm doğrudan çağrıyla açılmadı");
+  expect(r.started.level === 3 && r.started.practice && r.started.mode === "serve", "pratik başladı: " + JSON.stringify(r.started));
+  expect(r.high === 0 && r.rank === 0 && r.ach === 0, "pratik rekor/başarım yazmadı: " + JSON.stringify(r));
+  expect(r.practiceAfterMenu === false, "menüde pratik bayrağı temizlendi");
+});
+
+test("Günlük meydan okuma: tek deneme, kurallar, kayıt", async ({ p, expect }) => {
+  const dates = await p.eval(`({
+    y1: yesterdayOf("2026-03-01"), y2: yesterdayOf("2026-01-01"),
+    s1: streakAfter("2026-10-18", 4, "2026-10-19"), s2: streakAfter("2026-10-17", 4, "2026-10-19"),
+    s3: streakAfter("2026-10-19", 4, "2026-10-19"),
+  })`);
+  expect(dates.y1 === "2026-02-28" && dates.y2 === "2025-12-31", "tarih dönüşü: " + JSON.stringify(dates));
+  expect(dates.s1 === 5 && dates.s2 === 1 && dates.s3 === 4, "seri hesabı: " + JSON.stringify(dates));
+
+  const r = await p.eval(`(() => {
+    const used0 = dailyUsed();
+    const first = startDaily();
+    const rules = { lives: state.lives, daily: run.daily, hazards: hazardLevel(), speed: state.speed };
+    const used1 = dailyUsed();
+    const second = startDaily();
+    state.score = 1234; state.lives = 1; loseLife();
+    const after = { score: daily.score, best: daily.best, streak: daily.streak, used: dailyUsed(), mode: state.mode,
+                    dailyFlag: run.daily, dailyDone: run.dailyFinished };
+    const third = startDaily();
+    return { used0, first, second, third, rules, used1, after, modeAfter: state.mode };
+  })()`);
+  expect(r.used0 === false && r.first === true && r.second === false, "tek deneme: " + JSON.stringify(r));
+  expect(r.rules.lives === 1 && r.rules.daily && r.rules.hazards === "kabus" && r.rules.speed > 340, "günlük kuralları: " + JSON.stringify(r.rules));
+  expect(r.used1 && r.after.score === 1234 && r.after.best === 1234 && r.after.streak === 1 && r.after.used, "günlük kayıt: " + JSON.stringify(r.after));
+  expect(r.after.dailyFlag === true && r.after.dailyDone === true, "özet için günlük bayrağı: " + JSON.stringify(r.after));
+  expect(r.third === false && r.modeAfter === "gameover", "ikinci deneme yok: " + JSON.stringify(r));
+
+  await p.reload();
+  const saved = await p.eval(`({ used: dailyUsed(), best: daily.best, streak: daily.streak, start: startDaily() })`);
+  expect(saved.used && saved.best === 1234 && saved.streak === 1 && saved.start === false, "kalıcı günlük: " + JSON.stringify(saved));
+
+  await p.eval(`localStorage.setItem("bb_daily", "{bozuk"), 1`);
+  await p.reload();
+  const broken = await p.eval(`({ used: dailyUsed(), best: daily.best, streak: daily.streak, start: startDaily() })`);
+  expect(broken.used === false && broken.best === 0 && broken.streak === 0 && broken.start === true, "bozuk kayıt: " + JSON.stringify(broken));
 });
 
 test("Kapsüller: 15 kapsülün hepsi etkisini gösterir", async ({ p, expect }) => {
@@ -526,18 +595,23 @@ test("Çevrim içi kapışma (iki sayfa, WebRTC)", async ({ p, open, expect, sle
   await g.eval("(updateBattle(0), 1)");
   const sync = [await g.eval("pById('h').score"), await p.eval("pById('g1').score"), await p.eval("pById('b1').score"), await g.eval("pById('b1').score")];
   expect(sync[0] >= 1111 && sync[1] >= 2222 && sync[2] > 0 && Math.abs(sync[2] - sync[3]) <= 200, "skorlar karşılıklı eşitlenir: " + sync);
-  // Saldırı ulaştı mı: hedef işaretlenir ve ya "⚔ Ad: LANET" duyurulur ya da (arada kalkan kapıldıysa) kalkan engeller.
-  // (Sayfanın kendi döngüsü arka planda sürdüğü için bekleyen lanet bu arada can kaybıyla silinmiş olabilir; duyuru kalıcıdır.)
+  // Saldırı ulaştı mı: kalıcı işaret `hitAt`. Duyuru metni normal oyun akışında üzerine yazılabildiği
+  // için ona bağlı kalmak zamanlamaya duyarlı olurdu; teslim kanıtı doğrudan hitAt.
   const reset = "(state.shield = 0, state.curses = {}, state.pendingCurse = null, state.callout = null, powerups = [], meP().hitAt = 0, 1)";
-  const landed = "meP().hitAt > 0 && ((state.callout && state.callout.text.startsWith('⚔')) || floaters.some(f => f.text.includes('ENGELLENDİ')))";
+  const landed = "meP().hitAt > 0";
+  const landedOn = async page => {
+    for (let i = 0; i < 20; i++) {
+      if (await page.eval(landed)) return true;
+      await sleep(100);
+    }
+    return false;
+  };
   await p.eval(reset);
   await g.eval("(sendAttack(net.myId, 'h'), 1)");
-  await sleep(400);
-  expect(await p.eval(landed), "misafir → oda sahibi saldırısı");
+  expect(await landedOn(p), "misafir → oda sahibi saldırısı");
   await g.eval(reset);
   await p.eval("(sendAttack('h', 'g1'), 1)");
-  await sleep(400);
-  expect(await g.eval(landed), "oda sahibi → misafir saldırısı");
+  expect(await landedOn(g), "oda sahibi → misafir saldırısı");
   expect(await g.eval("(() => { const m = state.mode; pauseGame(); return state.mode === m; })()"), "çevrim içi maçta duraklatma yok");
   await g.eval(`(() => { state.lives = 1; loseLife(); updateBattle(0.3); return 1; })()`);   // son can gider
   await sleep(400);

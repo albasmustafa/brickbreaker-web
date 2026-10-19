@@ -1,6 +1,6 @@
 # Brick Breaker AI — web projesi
 
-Tarayıcıda çalışan, kaotik bir tuğla kırma oyunu: lanetler, boss'lar, 15 kapsül, sonsuz temalar, müzikle senkron efektler, botlarla ve arkadaşlarla (WebRTC, sunucusuz) kapışma, dereceli lig, istatistikler ve başarımlar. Kurulum gerektirmez; modüllere ayrılmış, testli ve tek dosyaya derlenebilen proje sürümüdür.
+Tarayıcıda çalışan, kaotik bir tuğla kırma oyunu: lanetler, boss'lar, 15 kapsül, sonsuz temalar, müzikle senkron efektler, botlarla ve arkadaşlarla (WebRTC, sunucusuz) kapışma, dereceli lig, istatistikler, başarımlar, bölüm seçimi ve günlük meydan okuma. Kurulum gerektirmez; modüllere ayrılmış, testli ve tek dosyaya derlenebilen proje sürümüdür.
 
 ## Hızlı başlangıç
 
@@ -8,8 +8,9 @@ Tarayıcıda çalışan, kaotik bir tuğla kırma oyunu: lanetler, boss'lar, 15 
 |---|---|
 | Oyna | `index.html`'i çift tıkla (ya da `xdg-open index.html`) — sunucu, internet, kurulum gerekmez |
 | Uygulama olarak kur / çevrim dışı oyna | `npm start` → <http://localhost:8080> → tarayıcıda "Uygulamayı yükle"; bir kez açıldıktan sonra internetsiz de çalışır |
-| Tek dosya üret | `npm run build` → `dist/index.html` (okunaklı) ve `dist/brickbreaker.min.html` (sıkıştırılmış, ~141 KB) |
-| Test et | `npm test` → 17 özellik testi başsız Chromium'da (Node 22+, Chromium/Chrome) |
+| Tek dosya üret | `npm run build` → `dist/index.html` (okunaklı) ve `dist/brickbreaker.min.html` (sıkıştırılmış, ~146 KB) |
+| Test et | `npm test` → 20 özellik testi başsız Chromium'da (Node 22+, Chromium/Chrome) |
+| Yayınla | `npm run release` → test + derleme + ana oyun dosyasını güncelleme |
 
 `npm start`, `npm test` ve okunaklı derleme hiçbir bağımlılık istemez. Yalnızca sıkıştırılmış derleme için bir kez `npm install` (esbuild) gerekir.
 
@@ -33,6 +34,7 @@ js/render.js          tuğla sprite'ları, dünya, HUD, durum ekranları
 js/music.js           arka plan medyası, müzik analizi (vuruş/BPM), şarkıya özel efektler
 js/ui.js              araç çubuğu, paneller, tema stüdyosu, klavye/fare/dokunma, tam ekran
 js/career.js          kariyer: dereceli lig (Elo, rütbeler, terk cezası), sayaçlar, maç geçmişi, başarımlar, bildirimler
+js/challenge.js       meydan okuma: günlük koşu, bölüm seçimi, pratik modu
 js/versus.js          kapışma: botlar, dereceli maç, saldırılar, WebRTC, liderlik tablosu, rakip paneli
 js/main.js            ana döngü, servis çalışanı kaydı
 sw.js, manifest.webmanifest, favicon.svg   uygulama olarak kurulma ve çevrim dışı çalışma
@@ -55,7 +57,8 @@ Okunaklı tek dosyada her bölümün başında kaynak dosyanın adı yazar. Ana 
 ## Testler
 
 `npm test` her testi temiz kayıtlı (boş localStorage) yeni bir sayfada çalıştırır; sayfadaki herhangi bir JS hatası testi düşürür. Kapsam:
-- **Oyun:** yükleme ve özellik envanteri; servis, oynanış, can, oyun sonu, duraklatma; 15 kapsülün her biri; duvar bölgeleri, falso ve SMASH; tüm tuğla türleri; boss; kara delik, ÇILGIN MOD, lazer ve kalkan.
+- **Oyun:** yükleme ve özellik envanteri; servis, oynanış, can, oyun sonu, duraklatma; koşu sayaçları ve pratikte kayıt dışı kalma; 15 kapsülün her biri; duvar bölgeleri, falso ve SMASH; tüm tuğla türleri; boss; kara delik, ÇILGIN MOD, lazer ve kalkan.
+- **Meydan okuma:** bölüm kilidi, pratik başlatma, günlük tek deneme, günlük kurallar, seri/tarih hesabı, kalıcılık ve bozuk kayıt.
 - **Lanetler:** 20 lanetin her biri, ayrıntılı davranışlarıyla.
 - **Temalar ve görünüm:** üreteç, stüdyo, paylaşım kodu; 33 görünüm seçeneği ve sayfa yenilenince kalıcılık.
 - **Müzik:** sentetik şarkılarla vuruş, BPM ve profil.
@@ -71,9 +74,24 @@ npm run test:dist                         # iki derlemeyi birden test et
 
 Chromium yolu farklıysa: `BB_CHROME=/yol/chrome npm test`.
 
+## Yayın ve CI
+
+```
+npm run release                         # test + derleme + ../brickbreakerai/index.html
+node tools/release.mjs --no-ai          # yalnızca dist/ üret
+node tools/release.mjs --ai-out yol     # kopyayı başka bir yola yaz
+```
+
+`npm run release` önce testleri çalıştırır, sonra `dist/index.html` ile
+`dist/brickbreaker.min.html` dosyalarını üretir ve okunaklı tek dosyayı ana oyun kopyasına yazar.
+Ana oyun klasörü yoksa kopyalama atlanır.
+
+GitHub Actions (`.github/workflows/ci.yml`) her push ve pull request'te Node 22 + Chrome kurar;
+`npm test`, `npm run build` ve `dist/index.html` testlerini çalıştırır.
+
 ## Kayıtlar (tarayıcıda, localStorage)
 
-`bb_settings` (ayarlar) · `bb_theme_cur` / `bb_custom_themes` (tema) · `bb_highscore` · `bb_muted` · `bb_song_profiles` (şarkı profilleri) · `bb_versus` (rekabet ayarları) · `bb_leaderboard` (liderlik tablosu) · `bb_career` (dereceli puan, sayaçlar, maç geçmişi, başarımlar).
+`bb_settings` (ayarlar) · `bb_theme_cur` / `bb_custom_themes` (tema) · `bb_highscore` · `bb_muted` · `bb_song_profiles` (şarkı profilleri) · `bb_versus` (rekabet ayarları) · `bb_leaderboard` (liderlik tablosu) · `bb_career` (dereceli puan, sayaçlar, maç geçmişi, başarımlar) · `bb_daily` (günlük meydan okuma: bugünkü skor, en iyi, seri).
 
 ## Kontroller
 
@@ -81,7 +99,7 @@ Chromium yolu farklıysa: `BB_CHROME=/yol/chrome npm test`.
 - **Boşluk / tıklama / dokunma**: topu fırlat (YAPIŞ kapsülünde yakalanan topu bırak); menü, duraklatma ve oyun sonu ekranlarında ilerlet
 - **P / Esc**: duraklat (sekme değişince otomatik duraklar); bir panel açıksa **Esc** paneli kapatır
 - **T**: sıradaki tema · **R**: sonsuz rastgele tema · **F**: tam ekran (🖥️ düğmesi de)
-- **Araç çubuğu** (tuvalin altında): 🔊 sesler · 🎨 tema · 🎲 rastgele tema · 🖌️ tema stüdyosu · ⚔ rekabet · 🏅 kariyer · ⚙️ ayarlar · 🖥️ tam ekran. Paneller ekranın ortasında açılır, aynı anda tek panel açık kalır; ✕, Esc ya da dışarı tıklamak kapatır, panel açıkken oyun arkada duraklar.
+- **Araç çubuğu** (tuvalin altında): 🔊 sesler · 🎨 tema · 🎲 rastgele tema · 🖌️ tema stüdyosu · ⚔ rekabet · 🎯 meydan · 🏅 kariyer · ⚙️ ayarlar · 🖥️ tam ekran. Paneller ekranın ortasında açılır, aynı anda tek panel açık kalır; ✕, Esc ya da dışarı tıklamak kapatır, panel açıkken oyun arkada duraklar.
 - **⚙️ Ayarlar**: efekt ses seviyesi, raket sesi, ekran sarsıntısı (Açık/Azaltılmış/Kapalı — `prefers-reduced-motion` açıksa varsayılan Azaltılmış), zorluk (Kolay ×0.85 hız +5 can / Normal / Zor ×1.15 hız +2 can; yalnızca yeni oyunda uygulanır), HP noktacıkları (tuğlada kalan can noktası; WCAG göreli parlaklığına göre temaya kontrastlı renk). Tümü kalıcı.
 
 ## Mekanikler
@@ -196,6 +214,15 @@ Araç çubuğundaki **🏅 Kariyer** (ya da Rekabet panelindeki **📊 Kariyer v
 | 🥇 | Altın Lig | Altın lige yüksel |
 | 💎 | Elmas Lig | Elmas lige yüksel |
 | 🔥 | Efsane Lig | Efsane lige yüksel |
+
+## Meydan okuma (🎯 paneli)
+
+Araç çubuğundaki **🎯 Meydan** düğmesi iki şeyi bir arada açar:
+
+- **Günlük meydan okuma:** her gün **tek deneme**. Koşu **1 can**, **Kabus** lanet yoğunluğu ve **+%15 top hızı** ile başlar. Deneme başladığı anda kullanılmış sayılır; sayfayı yenilemek yeni deneme açmaz. Bugünkü skor, günlük en iyi ve üst üste oynanan gün serisi `bb_daily` içinde saklanır. Seri, dün de oynandıysa artar; bir gün atlanırsa 1'e döner. Yerel tarih kullanılır.
+- **Bölüm seçimi (pratik):** klasik oyunda ulaştığın en ileri bölüme kadar (1 her zaman açık) bölüm seçebilirsin. Seçilen bölüm **pratik koşu** olarak başlar; rekor, liderlik tablosu, kariyer sayaçları ve başarımlar sayılmaz.
+
+**Koşu özeti:** oyun sonu ekranı skorun yanında bölüm, süre, kırılan tuğla, en iyi combo, toplanan kapsül, atlatılan lanet ve yenilen boss sayılarını gösterir. Günlük koşuda ayrıca günlük en iyi ve seri; pratik koşuda “PRATİK” etiketi görünür.
 
 ## Sesler
 

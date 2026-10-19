@@ -26,7 +26,7 @@ const POWERS = {
   C: { label: "LANET",  color: "#5a189a", w: 5, bad: true, sound: "bad", fx: () => curseFromCapsule() },
 };
 // Can doluyken +CAN, lanetler kapalıyken LANET düşmez
-const powerAllowed = k => !(k === "H" && state.lives >= MAX_LIVES) && !(k === "C" && settings.hazards === "kapali");
+const powerAllowed = k => !(k === "H" && state.lives >= MAX_LIVES) && !(k === "C" && hazardLevel() === "kapali");
 function pickPower(goodOnly) {
   const entries = Object.entries(POWERS).filter(([k, p]) => !(goodOnly && (p.bad || k === "Q")) && powerAllowed(k));
   let r = Math.random() * entries.reduce((s, [, p]) => s + p.w, 0);
@@ -64,7 +64,9 @@ function destroyBrick(b) {
   if (b.dead) return;
   b.dead = true;
   state.combo++;
+  run.bricks++;
   track("bricks");
+  run.bestCombo = Math.max(run.bestCombo, state.combo);
   trackBest("bestCombo", state.combo);
   const pts = Math.round(10 * b.maxHp * Math.min(state.combo, 8) * (b.gold ? 10 : 1) * (isFever() ? 2 : 1) * curseBonus());
   addScore(pts);
@@ -333,6 +335,7 @@ function updatePowerups(dt) {
     if (p.y > H + 30) return false;
     if (p.y + p.h >= paddle.y && p.y <= paddle.y + paddle.h && p.x + p.w >= paddle.x && p.x <= paddle.x + paddle.w) {
       addShake(1.5);
+      run.powers++;
       track("powers");
       applyPower(p.type);
       return false;
@@ -469,6 +472,7 @@ function killBoss() {
   addScore(bonus);
   addFloater(cx, cy, "+" + bonus, "#ffd166");
   callout(bo.name + " YENİLDİ!", "#ffd166");
+  run.bosses++;
   track("bosses");
   battleCharge(12);
   checkLevelDone();

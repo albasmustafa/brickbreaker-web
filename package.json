@@ -8,7 +8,8 @@
     "start": "node tools/serve.mjs 8080",
     "build": "node tools/build.mjs",
     "test": "node tests/run.mjs",
-    "test:dist": "node tests/run.mjs dist/index.html && node tests/run.mjs dist/brickbreaker.min.html"
+    "test:dist": "node tests/run.mjs dist/index.html && node tests/run.mjs dist/brickbreaker.min.html",
+    "release": "npm test && node tools/release.mjs"
   },
   "devDependencies": {
     "esbuild": "^0.28.2"

@@ -599,14 +599,18 @@ function drawScreens() {
     drawBattleResults();
   } else if (m === "gameover") {
     overlay(0.45);
-    drawCard(W / 2, H / 2 + 20, 480, 300);
-    titleText("OYUN BİTTİ", W / 2, H / 2 - 70, 44, T().ex, "#ff4d6d");
-    text("Skor: " + state.score, W / 2, H / 2 - 20, "bold 24px monospace", T().text);
-    text("Rekor: " + state.high, W / 2, H / 2 + 10, "18px monospace", T().dim);
-    if (state.newRecord) { ctx.globalAlpha = pulse; text("🏆 YENİ REKOR!", W / 2, H / 2 + 46, "bold 22px monospace", T().b2); ctx.globalAlpha = 1; }
-    text("Atlatılan lanet: " + state.cursesSurvived, W / 2, H / 2 + 80, "16px monospace", CURSE_COLOR);
-    if (state.lbRank) text("Liderlik tablosu: #" + state.lbRank + " (" + vsCfg.name + ")", W / 2, H / 2 + 106, "bold 15px monospace", T().b2);
-    text("menü için tıkla veya boşluk", W / 2, H / 2 + 136, "15px monospace", T().dim);
+    drawCard(W / 2, H / 2, 520, 400);
+    titleText("OYUN BİTTİ", W / 2, H / 2 - 148, 44, T().ex, "#ff4d6d");
+    text("Skor: " + state.score, W / 2, H / 2 - 96, "bold 24px monospace", T().text);
+    if (state.newRecord) { ctx.globalAlpha = pulse; text("🏆 YENİ REKOR!", W / 2, H / 2 - 62, "bold 22px monospace", T().b2); ctx.globalAlpha = 1; }
+    else text("Rekor: " + state.high, W / 2, H / 2 - 62, "18px monospace", T().dim);
+    text("Bölüm " + state.level + " · Süre " + fmtTime(Math.round(state.time)), W / 2, H / 2 - 28, "15px monospace", T().text);
+    text("Tuğla " + run.bricks + " · En iyi combo ×" + run.bestCombo, W / 2, H / 2, "15px monospace", T().text);
+    text("Kapsül " + run.powers + " · Lanet " + state.cursesSurvived + " · Boss " + run.bosses, W / 2, H / 2 + 28, "14px monospace", CURSE_COLOR);
+    if (run.daily && typeof daily !== "undefined") text("GÜNLÜK · en iyi " + daily.best + " · seri " + daily.streak, W / 2, H / 2 + 62, "bold 15px monospace", T().b2);
+    else if (run.practice) text("PRATİK — rekor ve kariyer sayılmadı", W / 2, H / 2 + 62, "14px monospace", T().dim);
+    if (state.lbRank) text("Liderlik tablosu: #" + state.lbRank + " (" + vsCfg.name + ")", W / 2, H / 2 + 96, "bold 15px monospace", T().b2);
+    text("menü için tıkla veya boşluk", W / 2, H / 2 + 158, "15px monospace", T().dim);
   }
 }
 function drawCallout() {

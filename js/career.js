@@ -88,14 +88,16 @@ function nextToast() {
 }
 
 // --- Sayaçlar ve başarımlar: oyun içi olaylar sayaçları canlı artırır, başarım anında açılır ---
-const run = { lifeLost: 0, ended: false };     // o anki oyunun (klasik ya da kapışma) bilgisi
-const resetRun = () => Object.assign(run, { lifeLost: 0, ended: false });
+const run = { lifeLost: 0, ended: false, practice: false, daily: false, dailyFinished: false, bricks: 0, powers: 0, bosses: 0, bestCombo: 0 };
+const resetRun = () => Object.assign(run, { lifeLost: 0, ended: false, practice: false, daily: false, dailyFinished: false, bricks: 0, powers: 0, bosses: 0, bestCombo: 0 });
 function track(key, n = 1) {
+  if (run.practice) return;
   career.stats[key] += n;
   checkAchievements();
 }
-const trackBest = (key, v) => { if (v > career.stats[key]) { career.stats[key] = v; checkAchievements(); } };
+const trackBest = (key, v) => { if (!run.practice && v > career.stats[key]) { career.stats[key] = v; checkAchievements(); } };
 function checkAchievements(m) {
+  if (run.practice) return;
   for (const a of ACHIEVEMENTS) if (!career.ach[a.id] && a.test(career.stats, m)) {
     career.ach[a.id] = Date.now();
     toast(a.icon + " Başarım: " + a.name, a.desc);
@@ -105,12 +107,13 @@ function checkAchievements(m) {
 }
 // Bir oyun bitti (klasik oyun sonu ya da kapışma sonu): süre ve bölüm bir kez işlenir
 function endRun() {
-  if (run.ended) return;
+  if (run.practice || run.ended) return;
   run.ended = true;
   career.stats.time += Math.round(state.time);
   trackBest("bestLevel", state.level);
 }
 function careerGameEnd() {
+  if (run.practice) return;
   endRun();
   track("games");
   saveCareer();

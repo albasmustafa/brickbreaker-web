@@ -37,11 +37,11 @@ let obstacles = [];
 const curseOn = k => (state.curses[k] || 0) > state.time;
 const activeCurses = () => Object.keys(state.curses).filter(curseOn);
 const curseBonus = () => (activeCurses().length ? 1.5 : 1);
-const curseDur = k => CURSES[k].dur * (settings.hazards === "kabus" ? 1.25 : 1);
+const curseDur = k => CURSES[k].dur * (hazardLevel() === "kabus" ? 1.25 : 1);
 const lowestBrick = () => Math.max(0, ...bricks.filter(b => !b.dead).map(b => (b.ty ?? b.y) + BRICK.h));
 
 function scheduleNextCurse(first) {
-  const hz = HAZARD[settings.hazards];
+  const hz = HAZARD[hazardLevel()];
   if (!hz || battle.active) { state.curseAt = Infinity; return; }   // kapışmada lanetler rakiplerden gelir
   const lvlMul = Math.max(0.55, 1 - (state.level - 1) * 0.04);       // bölüm ilerledikçe sıklaşır
   state.curseAt = state.time + (first ? hz.grace : hz.every * lvlMul * rnd(0.7, 1.3));
@@ -50,7 +50,7 @@ function pickCurse() {
   const active = activeCurses(), used = new Set(active.map(k => CURSES[k].group).filter(Boolean));
   const ids = Object.keys(CURSES).filter(id => {
     const c = CURSES[id];
-    return !active.includes(id) && !(settings.hazards !== "kabus" && c.group && used.has(c.group)) && (!c.ok || c.ok());
+    return !active.includes(id) && !(hazardLevel() !== "kabus" && c.group && used.has(c.group)) && (!c.ok || c.ok());
   });
   return ids.length ? pick(ids) : null;
 }
@@ -82,7 +82,7 @@ function updateCurses(dt) {
     state.pendingCurse = null;
     startCurse(pc.id);
   } else if (!pc && state.time >= state.curseAt) {
-    const hz = HAZARD[settings.hazards];
+    const hz = HAZARD[hazardLevel()];
     if (hz && activeCurses().length < hz.max) warnCurse(pickCurse());
     scheduleNextCurse(false);
   }
