@@ -57,6 +57,19 @@ canvas {
 #beatdot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); opacity: 0; }
 #musicinfo { font-size: 12px; font-weight: bold; }
 
+/* Son Top Bahsi: son can gidince açılan tek seferlik teklif */
+#lastchance { position: fixed; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; padding: 16px;
+  background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(3px); }
+#lastcard { width: min(520px, calc(100vw - 32px)); display: flex; flex-direction: column; gap: 10px; padding: 18px;
+  background: var(--panel); border: 1px solid #ff5d8f; border-radius: 14px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 30px -10px #ff5d8f; }
+#lastcard strong { color: #ff5d8f; font-size: 18px; letter-spacing: 0.08em; }
+#lastcard p { margin: 0; font-size: 13px; line-height: 1.5; color: var(--uidim); }
+.last-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.last-actions button { flex: 1; min-width: 180px; display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; font-size: 13px; }
+.last-actions button small { font-size: 10px; color: var(--uidim); }
+#last-continue { border-color: #ff5d8f; color: #ff9fb8; }
+#last-end { border-color: var(--line); }
+
 /* Paneller: ekranın ortasında açılan pencereler */
 #backdrop { position: fixed; inset: 0; z-index: 20; background: rgba(0, 0, 0, 0.45); backdrop-filter: blur(2px); }
 .panel {

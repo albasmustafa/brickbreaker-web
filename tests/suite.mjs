@@ -66,14 +66,17 @@ test("Oyun akışı: servis, oynanış, can, oyun sonu, duraklatma", async ({ p,
     const score = state.score;
     state.lives = 2; loseLife(); const afterLose = [state.lives, state.mode];
     state.score = 4321; state.lives = 1; loseLife();
+    const offer = [state.mode, !lastchance.hidden];
+    lastEnd();
     const over = [state.mode, state.lbRank, leaderboard.klasik.length];
     __start(1); pauseGame(); const paused = state.mode; action(); const resumed = state.mode;
-    return { launched, bad, score, afterLose, over, paused, resumed };
+    return { launched, bad, score, afterLose, offer, over, paused, resumed };
   })()`);
   expect(r.launched === "playing", "fırlatınca oyun başlar");
   expect(r.bad.length === 0, "25 sn otomatik oyunda top hep geçerli: " + r.bad);
   expect(r.score > 0, "skor artar");
   expect(r.afterLose[0] === 1 && r.afterLose[1] === "serve", "can kaybı: " + r.afterLose);
+  expect(r.offer[0] === "lastchance" && r.offer[1], "son top teklifi: " + r.offer);
   expect(r.over[0] === "gameover" && r.over[1] >= 1 && r.over[2] >= 1, "oyun sonu + klasik liderlik kaydı: " + r.over);
   expect(r.paused === "paused" && r.resumed === "playing", "duraklat / devam");
 });
@@ -108,6 +111,32 @@ test("Lanet Paktı: seçenekler, etkiler, sıfırlama ve atlama", async ({ p, ex
   expect(Math.abs(r.gold.mul - 0.9) < 1e-9 && r.gold.goldMul === 2, "altın paktı çarpanları: " + JSON.stringify(r.gold));
   expect(r.fresh.pacts === 0 && r.fresh.shown && r.fresh.offerLevel === 1, "yeni koşu paktları sıfırlar: " + JSON.stringify(r.fresh));
   expect(r.skipped, "pakt seçmeden devam");
+});
+
+test("Son Top Bahsi: tek seferlik devam, lanet bedeli ve bitirme", async ({ p, expect }) => {
+  const r = await p.eval(`(() => {
+    __start(1); state.score = 500;
+    state.lives = 1; loseLife();
+    const offer = [state.mode, state.lives, !lastchance.hidden];
+    lastContinue();
+    const cont = { mode: state.mode, lives: state.lives, used: run.lastChanceUsed, hidden: lastchance.hidden, curse: !!state.pendingCurse };
+    state.lives = 1; loseLife();
+    const second = [state.mode, lastchance.hidden];
+    lastEnd();
+    const over = [state.mode, state.lbRank >= 1];
+    __start(1);
+    const reset = [run.lastChanceUsed, lastchance.hidden];
+    state.lives = 1; loseLife(); lastEnd();
+    __start(1); run.practice = true; state.lives = 1; loseLife();
+    const practice = [state.mode, lastchance.hidden];
+    return { offer, cont, second, over, reset, practice };
+  })()`);
+  expect(r.offer[0] === "lastchance" && r.offer[1] === 0 && r.offer[2], "son can teklifi: " + JSON.stringify(r.offer));
+  expect(r.cont.mode === "serve" && r.cont.lives === 1 && r.cont.used && r.cont.hidden && r.cont.curse, "devam: " + JSON.stringify(r.cont));
+  expect(r.second[0] === "gameover" && r.second[1], "ikinci şans yok: " + JSON.stringify(r.second));
+  expect(r.over[0] === "gameover" && r.over[1], "bitirince oyun sonu: " + JSON.stringify(r.over));
+  expect(r.reset[0] === false && r.reset[1], "yeni koşuda hak sıfırlanır: " + JSON.stringify(r.reset));
+  expect(r.practice[0] === "gameover" && r.practice[1], "pratikte teklif yok: " + JSON.stringify(r.practice));
 });
 
 test("Koşu özeti: sayaçlar ve pratikte kayıt dışı", async ({ p, expect }) => {
@@ -559,7 +588,7 @@ test("Kariyer: sayaçlar, başarımlar, seri, panel, kalıcılık, sıfırlama",
     state.combo = 9; destroyBrick(brick()); const cilgin = !!career.ach.cilgin && career.stats.fevers >= 1;
     state.combo = 19; destroyBrick(brick()); const zincir = !!career.ach.zincir && career.stats.bestCombo >= 20;
     state.level = 10; nextLevel(); const imparator = !!career.ach.imparator && career.stats.bestLevel === 11;
-    state.lives = 1; loseLife(); const classic = { games: career.stats.games, time: career.stats.time > 0, mode: state.mode };
+    state.lives = 1; loseLife(); lastEnd(); const classic = { games: career.stats.games, time: career.stats.time > 0, mode: state.mode };
     toMenu();
     Object.assign(vsCfg, { name: "Albas", bots: 7, skill: "efsane", dur: 120, target: "lider" });
     const win = () => { startBotBattle(); step(4); state.score = 1e6; state.lives = 1; battle.clock = battle.duration; updateBattle(1 / 60); const pl = battle.myPlace; draw(); action(); return pl; };

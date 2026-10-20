@@ -105,6 +105,7 @@ function toMenu() {
   run.dailyFinished = false;
   run.practice = false;
   hidePactOffer();
+  hideLastChance();
   state.mode = "menu";
   state.callout = null;
   state.inset = 0;
@@ -154,10 +155,11 @@ function loseLife() {
   state.combo = 0;
   clearEffects();
   state.speed = levelSpeed(state.level);   // hızlanmayı sıfırla
-  if (--state.lives <= 0) gameOver(); else serveBall();
+  if (--state.lives <= 0) { if (!showLastChance()) gameOver(); } else serveBall();
 }
 function gameOver() {
   hidePactOffer();
+  hideLastChance();
   state.mode = "gameover";
   state.newRecord = !run.practice && state.score > state.startHigh && state.score > 0;
   sfx("gameover");
