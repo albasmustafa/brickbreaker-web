@@ -24,7 +24,8 @@ function brickColor(b) {
 }
 
 function buildLevel(n) {
-  const def = LEVELS[(n - 1) % LEVELS.length], cycle = Math.floor((n - 1) / LEVELS.length);
+  const song = typeof songLevel !== "undefined" && songLevel.active && songLevel.levels[n - 1];
+  const def = song || LEVELS[(n - 1) % LEVELS.length], cycle = song ? 0 : Math.floor((n - 1) / LEVELS.length);
   const map = Array.isArray(def) ? def : def.map;
   bricks = [];
   movingRows = [];
@@ -86,6 +87,7 @@ function addScore(n) {
 
 function startGame() {
   if (typeof weekly !== "undefined" && !weekly.starting) stopWeekly();
+  if (typeof songLevel !== "undefined" && !songLevel.starting) stopSongLevel();
   if (run.daily && typeof finishDaily === "function") finishDaily();
   resetRun();
   const diff = DIFFICULTY[settings.difficulty];
@@ -113,6 +115,7 @@ function toMenu() {
   director.challenge = null;
   stopGhost();
   stopWeekly();
+  stopSongLevel();
   flushCodex();
   state.mode = "menu";
   state.callout = null;
@@ -172,12 +175,13 @@ function gameOver() {
   finishGhostRun();
   const wasWeekly = weekly.active;
   if (wasWeekly) finishWeekly();
+  if (run.song) stopSongLevel();
   flushCodex();
   state.mode = "gameover";
-  state.newRecord = !run.practice && !wasWeekly && state.score > state.startHigh && state.score > 0;
+  state.newRecord = !run.practice && !wasWeekly && !run.song && state.score > state.startHigh && state.score > 0;
   sfx("gameover");
   if (battle.active) battleEliminated();   // kapışmada elendin
-  else if (run.practice || wasWeekly) state.lbRank = 0;
+  else if (run.practice || wasWeekly || run.song) state.lbRank = 0;
   else { state.lbRank = recordScore("klasik", { score: state.score, level: state.level }); careerGameEnd(); }
   if (run.daily && typeof finishDaily === "function") finishDaily();
 }
@@ -192,6 +196,7 @@ function levelCleared() {
   battleCharge(6);
 }
 function nextLevel() {
+  if (typeof songLevel !== "undefined" && songLevel.active && state.level >= songLevel.levels.length) { songComplete(); return; }
   state.level++;
   trackBest("bestLevel", state.level);
   state.speed = levelSpeed(state.level);

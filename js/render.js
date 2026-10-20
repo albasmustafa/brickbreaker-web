@@ -617,7 +617,9 @@ function drawScreens() {
     text("Tuğla " + run.bricks + " · En iyi combo ×" + run.bestCombo, W / 2, H / 2, "15px monospace", T().text);
     text("Kapsül " + run.powers + " · Lanet " + state.cursesSurvived + " · Boss " + run.bosses, W / 2, H / 2 + 28, "14px monospace", CURSE_COLOR);
     if (run.pacts.length) text("📜 " + pactNames(), W / 2, H / 2 + 56, "bold 12px monospace", CURSE_COLOR);
-    const extraY = run.pacts.length ? 34 : 0;
+    const pactY = run.pacts.length ? 34 : 0;
+    if (run.song && typeof songLevel !== "undefined") text("🎵 " + songLevel.name + " · " + Math.round(songLevel.bpm) + " BPM", W / 2, H / 2 + 56 + pactY, "bold 12px monospace", "#ffd166");
+    const extraY = pactY + (run.song ? 26 : 0);
     if (run.daily && typeof daily !== "undefined") text("GÜNLÜK · en iyi " + daily.best + " · seri " + daily.streak, W / 2, H / 2 + 62 + extraY, "bold 15px monospace", T().b2);
     else if (run.practice) text("PRATİK — rekor ve kariyer sayılmadı", W / 2, H / 2 + 62 + extraY, "14px monospace", T().dim);
     if (state.lbRank) text("Liderlik tablosu: #" + state.lbRank + " (" + vsCfg.name + ")", W / 2, H / 2 + 96 + extraY, "bold 15px monospace", T().b2);

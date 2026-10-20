@@ -45,7 +45,7 @@ test("Yükleme, arayüz ve özellik envanteri", async ({ p, expect }) => {
     looks: Object.keys(LOOKS).length, sfx: Object.keys(SFX).length, paddle: Object.keys(PADDLE_SOUNDS).length, arch: Object.keys(ARCHETYPES).length,
     musicFx: MUSIC_FX_ALL.length, skills: Object.keys(BOT_SKILL).join(","), types: Object.keys(BRICK_TYPES).join(""), rows: settingsPanel.querySelectorAll(".setrow").length,
     tiers: TIERS.map(t => t.name).join(), ach: ACHIEVEMENTS.length, stats: Object.keys(STATS).length, career: careerPanel.hidden && versusPanel.querySelector(".rank-card") !== null,
-    codex: CODEX_CARDS.length, codexPanel: codexPanel.hidden })`);
+    codex: CODEX_CARDS.length, codexPanel: codexPanel.hidden, song: typeof generateSongLevels === "function" })`);
   expect(r.mode === "menu" && r.bricks === 46 && r.levels === 11, "menü ve ilk bölüm: " + JSON.stringify(r));
   expect(r.themes === 25, "25 hazır tema");
   expect(r.tools === 9, "araç çubuğunda 9 düğme (ses, tema, rastgele, stüdyo, rekabet, meydan, kariyer, ayarlar, tam ekran): " + r.tools);
@@ -58,6 +58,7 @@ test("Yükleme, arayüz ve özellik envanteri", async ({ p, expect }) => {
   expect(r.sfx >= 36, "ses tablosu: " + r.sfx);
   expect(r.skills === "caylak,usta,efsane" && r.types === "XEZ$+", "bot seviyeleri ve tuğla türleri");
   expect(r.codex === 30 && r.codexPanel, "30 koleksiyon kartı, panel kapalı: " + JSON.stringify([r.codex, r.codexPanel]));
+  expect(r.song, "şarkıdan bölüm üreteci yüklü");
   expect(r.rows >= 18, "ayarlar paneli satırları üretildi: " + r.rows);
 });
 
@@ -247,6 +248,32 @@ test("Haftalık tohum: aynı tohum aynı koşu, sonuç kodu ve kapatma", async (
   expect(r.over.mode === "gameover" && r.over.last === 1234 && r.over.best >= 1234 && r.over.finished && r.over.active && r.over.rank === 0, "haftalık sonuç: " + JSON.stringify(r.over));
   expect(r.code.startsWith("BBW1:") && r.code.includes("1234"), "sonuç kodu: " + r.code);
   expect(r.again === false && r.restore && !r.stopped.active && r.stopped.random, "tohum durunca normal rastgeleliğe döner");
+});
+
+test("Şarkıdan Bölüm: üreteç, aynı şarkı aynı bölüm, kod, başlatma ve bitiş", async ({ p, expect }) => {
+  const r = await p.eval(`(() => {
+    const info = { name: "Test Şarkısı", bpm: 128, duration: 150, boss: true, bossName: "BAS EJDERİ", sections: [
+      { energy: 0.3, bass: 0.2, high: 0.15 }, { energy: 0.62, bass: 0.55, high: 0.4 }, { energy: 0.88, bass: 0.8, high: 0.6 }] };
+    const a = generateSongLevels(info), b = generateSongLevels(info);
+    const maps = a.map(x => Array.isArray(x) ? x : x.map);
+    const valid = maps.every(map => map.length >= 4 && map.every(line => line.length === 10 && /^[123XEZ$+.]+$/.test(line)));
+    const boss = !!(a[a.length - 1].boss && a[a.length - 1].map.slice(0, 5).every(line => line === ".........."));
+    const same = JSON.stringify(a) === JSON.stringify(b);
+    songLevel.name = "Test Şarkısı"; songLevel.bpm = 128; songLevel.duration = 150; songLevel.levels = a;
+    const code = encodeSongLevel();
+    songLevel.levels = [];
+    const imported = importSongLevel(code);
+    const importedBoss = !!(songLevel.levels[2] && songLevel.levels[2].boss);
+    const started = startSongLevel();
+    const runState = { level: state.level, active: songLevel.active, song: run.song, bricks: bricks.length, mode: state.mode };
+    state.level = a.length; nextLevel();
+    const done = { mode: state.mode, active: songLevel.active, song: run.song, rank: state.lbRank };
+    return { levels: a.length, valid, boss, same, code: code.slice(0, 5), imported, importedBoss, started, runState, done };
+  })()`);
+  expect(r.levels === 3 && r.valid && r.boss && r.same, "3 bölüm, geçerli harita, boss, deterministik: " + JSON.stringify(r));
+  expect(r.code === "BBS1:" && r.imported && r.importedBoss, "bölüm kodu: " + JSON.stringify([r.code, r.imported, r.importedBoss]));
+  expect(r.started && r.runState.level === 1 && r.runState.active && r.runState.song && r.runState.bricks > 0 && r.runState.mode === "serve", "şarkı bölümü başladı: " + JSON.stringify(r.runState));
+  expect(r.done.mode === "gameover" && !r.done.active && r.done.song && r.done.rank === 0, "şarkı bitince oyun sonu: " + JSON.stringify(r.done));
 });
 
 test("Koşu özeti: sayaçlar ve pratikte kayıt dışı", async ({ p, expect }) => {

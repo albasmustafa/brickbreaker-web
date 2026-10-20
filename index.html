@@ -129,6 +129,12 @@
   <textarea id="weekly-codebox" placeholder="BBW1:... sonuç kodunu buraya yapıştır"></textarea>
   <div class="setnote" id="weekly-msg"></div>
   <div class="setnote">Her hafta aynı tohum: bölümler, kapsüller ve lanetler aynı sırayla gelir. Pakt, dramaturg, hayalet ve son top bahsi kapalıdır; herkes aynı koşuyu oynar.</div>
+  <div class="sethead">🎵 Şarkıdan Bölüm</div>
+  <div id="song-card" class="setnote"></div>
+  <div class="setrow"><button id="song-pick">🎵 Şarkı seç</button><button id="song-start">▶ Şarkı bölümünü başlat</button><button id="song-code">📤 Bölüm kodu</button><button id="song-import">📥 Kodu yükle</button></div>
+  <textarea id="song-codebox" placeholder="BBS1:... bölüm kodunu buraya yapıştır"></textarea>
+  <div class="setnote" id="song-msg"></div>
+  <div class="setnote">Şarkının BPM'i, bas ve tiz enerjisi 3 bölüme dönüşür; güçlü bir final varsa son bölüme boss eklenir. Aynı şarkı her zaman aynı bölümü üretir. Bölüm kodu arkadaşlarınla paylaşılabilir.</div>
   <div class="sethead">Bölüm seçimi (pratik)</div>
   <div id="level-grid"></div>
   <div class="setnote">Pratik koşularda rekor, liderlik tablosu, kariyer ve başarımlar sayılmaz. Bölümler, klasik oyunda ulaştığın en ileri bölüme kadar açılır.</div>
@@ -141,6 +147,7 @@
 </section>
 <input type="file" id="vidfile" accept="video/*" hidden>
 <input type="file" id="audfile" accept="audio/*" hidden>
+<input type="file" id="songfile" accept="audio/*" hidden>
 
 <!-- Sıra önemli: dosyalar tek bir betik gibi sırayla yüklenir (ortak kapsam). tools/build.mjs bunları tek dosyada birleştirir. -->
 <script src="js/core.js"></script>
@@ -162,6 +169,7 @@
 <script src="js/challenge.js"></script>
 <script src="js/ghost.js"></script>
 <script src="js/weekly.js"></script>
+<script src="js/songlevel.js"></script>
 <script src="js/director.js"></script>
 <script src="js/versus.js"></script>
 <script src="js/pacts.js"></script>
