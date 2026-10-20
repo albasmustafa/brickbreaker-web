@@ -37,7 +37,7 @@ let obstacles = [];
 const curseOn = k => (state.curses[k] || 0) > state.time;
 const activeCurses = () => Object.keys(state.curses).filter(curseOn);
 const curseBonus = () => (activeCurses().length ? 1.5 + pactCurseBonusAdd() : 1);
-const curseDur = k => CURSES[k].dur * (hazardLevel() === "kabus" ? 1.25 : 1) * pactCurseDurMul();
+const curseDur = k => CURSES[k].dur * (hazardLevel() === "kabus" ? 1.25 : 1) * pactCurseDurMul() * codexCurseResist(k);
 const lowestBrick = () => Math.max(0, ...bricks.filter(b => !b.dead).map(b => (b.ty ?? b.y) + BRICK.h));
 
 function scheduleNextCurse(first) {
@@ -66,12 +66,12 @@ function startCurse(id) {
   sfx("curse");
   addShake(3);
   if (c.dur) state.curses[id] = state.time + curseDur(id);
-  else survivedCurse();          // anlık lanet: anında atlatılmış sayılır
+  else survivedCurse(id);        // anlık lanet: anında atlatılmış sayılır
   if (c.start) c.start();
 }
-const survivedCurse = () => { state.cursesSurvived++; track("curses"); };
+const survivedCurse = id => { state.cursesSurvived++; track("curses"); if (id) codexBump("curse:" + id); };
 function endCurse(id) {
-  survivedCurse();
+  survivedCurse(id);
   addFloater(W / 2, H / 2 + 60, CURSES[id].label + " BİTTİ", CURSE_COLOR);
   if (CURSES[id].end) CURSES[id].end();
 }

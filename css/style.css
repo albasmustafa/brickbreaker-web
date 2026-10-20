@@ -131,6 +131,17 @@ canvas {
 .ach div { display: flex; flex-direction: column; gap: 1px; font-size: 12px; }
 .ach div span { font-size: 11px; color: var(--uidim); }
 
+/* Koleksiyon: lanet / tuğla / boss kartları */
+#codex-tabs button.active { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+#codex-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 7px; }
+.codex-card { display: flex; flex-direction: column; gap: 3px; padding: 8px 9px; background: var(--panel2); border: 1px solid var(--line);
+  border-radius: 10px; opacity: 0.5; filter: grayscale(0.8); min-height: 92px; }
+.codex-card.got { opacity: 1; filter: none; border-color: #c77dff; box-shadow: inset 3px 0 0 #c77dff; }
+.codex-icon { font-size: 24px; line-height: 1; }
+.codex-card strong { font-size: 12px; color: var(--uitext); }
+.codex-count { font-size: 10px; color: #c77dff; }
+.codex-desc { font-size: 10px; color: var(--uidim); line-height: 1.35; }
+
 /* Meydan okuma: günlük kart + bölüm ızgarası */
 #level-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); gap: 6px; }
 #level-grid button { min-height: 42px; font-size: 14px; font-weight: bold; }

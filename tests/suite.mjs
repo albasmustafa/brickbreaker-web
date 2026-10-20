@@ -44,7 +44,8 @@ test("Yükleme, arayüz ve özellik envanteri", async ({ p, expect }) => {
     powers: Object.keys(POWERS).join(""), curses: Object.keys(CURSES).length, bosses: LEVELS.filter(l => l.boss).map(l => l.boss.name).join(","),
     looks: Object.keys(LOOKS).length, sfx: Object.keys(SFX).length, paddle: Object.keys(PADDLE_SOUNDS).length, arch: Object.keys(ARCHETYPES).length,
     musicFx: MUSIC_FX_ALL.length, skills: Object.keys(BOT_SKILL).join(","), types: Object.keys(BRICK_TYPES).join(""), rows: settingsPanel.querySelectorAll(".setrow").length,
-    tiers: TIERS.map(t => t.name).join(), ach: ACHIEVEMENTS.length, stats: Object.keys(STATS).length, career: careerPanel.hidden && versusPanel.querySelector(".rank-card") !== null })`);
+    tiers: TIERS.map(t => t.name).join(), ach: ACHIEVEMENTS.length, stats: Object.keys(STATS).length, career: careerPanel.hidden && versusPanel.querySelector(".rank-card") !== null,
+    codex: CODEX_CARDS.length, codexPanel: codexPanel.hidden })`);
   expect(r.mode === "menu" && r.bricks === 46 && r.levels === 11, "menü ve ilk bölüm: " + JSON.stringify(r));
   expect(r.themes === 25, "25 hazır tema");
   expect(r.tools === 9, "araç çubuğunda 9 düğme (ses, tema, rastgele, stüdyo, rekabet, meydan, kariyer, ayarlar, tam ekran): " + r.tools);
@@ -56,7 +57,8 @@ test("Yükleme, arayüz ve özellik envanteri", async ({ p, expect }) => {
   expect(r.looks === 8 && r.paddle === 9 && r.arch === 5 && r.musicFx === 12, "görünüm/raket sesi/müzik tabloları");
   expect(r.sfx >= 36, "ses tablosu: " + r.sfx);
   expect(r.skills === "caylak,usta,efsane" && r.types === "XEZ$+", "bot seviyeleri ve tuğla türleri");
-  expect(r.rows >= 17, "ayarlar paneli satırları üretildi: " + r.rows);
+  expect(r.codex === 30 && r.codexPanel, "30 koleksiyon kartı, panel kapalı: " + JSON.stringify([r.codex, r.codexPanel]));
+  expect(r.rows >= 18, "ayarlar paneli satırları üretildi: " + r.rows);
 });
 
 test("Oyun akışı: servis, oynanış, can, oyun sonu, duraklatma", async ({ p, expect }) => {
@@ -168,6 +170,29 @@ test("Dramaturg: bölüm görevi, ilerleme, ödül ve kapatma", async ({ p, expe
   expect(r.noLose, "can kaybetmeden bitirme görevi bölüm sonunda tamamlanır");
   expect(r.bossChallenge === "boss", "boss bölümünde boss görevi: " + r.bossChallenge);
   expect(r.off, "dramaturg kapatılabilir");
+});
+
+test("Koleksiyon: kartlar, seviye, lanet direnci, kalıcılık ve sıfırlama", async ({ p, expect }) => {
+  const r = await p.eval(`(() => {
+    codex.cards = {};
+    for (let i = 0; i < 5; i++) codexBump("curse:gorunmez");
+    const lvl = cardLevel("curse:gorunmez"), resist = codexCurseResist("gorunmez");
+    codexBump("brick:1"); codexBump("boss:TUĞLA KRAL");
+    codexTab = "curse"; renderCodex();
+    const cards = codexGrid.querySelectorAll(".codex-card").length, got = codexGrid.querySelectorAll(".codex-card.got").length;
+    togglePanel(codexPanel, renderCodex);
+    return { lvl, resist, discovered: codexDiscovered(), cards, got, open: !codexPanel.hidden, dur: curseDur("gorunmez"),
+             progress: codexProgress.textContent, count: codexCard("curse:gorunmez").count };
+  })()`);
+  expect(r.lvl === 2 && Math.abs(r.resist - 0.8) < 1e-9 && r.discovered === 3 && r.count === 5, "kart seviyesi ve direnç: " + JSON.stringify(r));
+  expect(r.cards === 20 && r.got === 1 && r.open && r.progress.includes("1/20"), "koleksiyon paneli: " + JSON.stringify(r));
+  expect(Math.abs(r.dur - 6.4) < 1e-9, "lanet kartı süreyi kısaltır: " + r.dur);
+  const saved = await p.eval("JSON.stringify([cardLevel('curse:gorunmez'), codexDiscovered()])");
+  await p.reload();
+  const after = await p.eval("JSON.stringify([cardLevel('curse:gorunmez'), codexDiscovered()])");
+  expect(after === saved, "koleksiyon sayfa yenilenince korunur: " + saved + " / " + after);
+  const reset = await p.eval(`(() => { codex.cards = {}; saveCodex(); codexTab = "curse"; renderCodex(); return [codexDiscovered(), codexGrid.querySelectorAll(".codex-card.got").length]; })()`);
+  expect(reset[0] === 0 && reset[1] === 0, "koleksiyon sıfırlanır: " + reset);
 });
 
 test("Koşu özeti: sayaçlar ve pratikte kayıt dışı", async ({ p, expect }) => {

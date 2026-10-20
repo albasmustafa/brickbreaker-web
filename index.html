@@ -105,7 +105,18 @@
   <div class="sethead" id="cr-achhead">Başarımlar</div>
   <div id="cr-ach"></div>
   <div class="setnote">Kariyer bu cihazda saklanır. Sayaçlar her oyunda (klasik ve kapışma) canlı artar, başarımlar açıldığı anda tuvalin üstünde duyurulur.</div>
-  <div class="setrow"><button id="cr-reset">Kariyeri sıfırla</button></div>
+  <div class="setrow"><button id="open-codex">📖 Koleksiyon</button><button id="cr-reset">Kariyeri sıfırla</button></div>
+</section>
+<section id="codexpanel" class="panel" role="dialog" aria-label="Koleksiyon" hidden>
+  <div class="setrow"><span class="label">Koleksiyon</span><strong id="codex-progress"></strong></div>
+  <div class="setrow" id="codex-tabs">
+    <button data-codex="curse">🔮 Lanetler</button>
+    <button data-codex="brick">🧱 Tuğlalar</button>
+    <button data-codex="boss">👹 Bosslar</button>
+  </div>
+  <div id="codex-grid"></div>
+  <div class="setnote" id="codex-note"></div>
+  <div class="setrow"><button id="codex-reset">Koleksiyonu sıfırla</button></div>
 </section>
 <section id="challengepanel" class="panel" role="dialog" aria-label="Meydan okuma" hidden>
   <div class="sethead">Günlük meydan okuma</div>
@@ -135,6 +146,7 @@
 <script src="js/music.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/career.js"></script>
+<script src="js/codex.js"></script>
 <script src="js/challenge.js"></script>
 <script src="js/director.js"></script>
 <script src="js/versus.js"></script>

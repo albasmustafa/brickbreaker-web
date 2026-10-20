@@ -66,6 +66,7 @@ function destroyBrick(b) {
   state.combo++;
   run.bricks++;
   if (b.gold) run.goldBricks++;
+  codexBump("brick:" + brickCodexKey(b));
   track("bricks");
   run.bestCombo = Math.max(run.bestCombo, state.combo);
   trackBest("bestCombo", state.combo);
@@ -473,6 +474,7 @@ function killBoss() {
   addScore(bonus);
   addFloater(cx, cy, "+" + bonus, "#ffd166");
   callout(bo.name + " YENİLDİ!", "#ffd166");
+  codexBump("boss:" + bo.name);
   run.bosses++;
   track("bosses");
   battleCharge(12);

@@ -109,6 +109,7 @@ function toMenu() {
   hidePactOffer();
   hideLastChance();
   director.challenge = null;
+  flushCodex();
   state.mode = "menu";
   state.callout = null;
   state.inset = 0;
@@ -164,6 +165,7 @@ function gameOver() {
   hidePactOffer();
   hideLastChance();
   failDirectorChallenge();
+  flushCodex();
   state.mode = "gameover";
   state.newRecord = !run.practice && state.score > state.startHigh && state.score > 0;
   sfx("gameover");
