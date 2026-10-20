@@ -499,6 +499,12 @@ function drawHUD() {
   }
   const pn = pactNames();
   if (pn) text("📜 " + pn, 20, H - 14, "bold 10px monospace", T().dim, "left");
+  const dc = director.challenge;
+  if (dc) {
+    const [v, target] = directorProgress(dc);
+    const label = dc.done ? "🎬 TAMAM! +" + dc.reward : "🎬 " + dc.text + (target ? " (" + v + "/" + target + ")" : "");
+    text(label, W - 20, H - 14, "bold 10px monospace", dc.done ? T().b2 : T().dim, "right");
+  }
   drawBattleHUD();
 }
 function drawPowerups() {

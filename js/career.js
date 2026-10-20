@@ -22,6 +22,7 @@ const STATS = {
   fevers: "ÇILGIN MOD", curses: "Atlatılan lanet", powers: "Yakalanan kapsül", time: "Oynama süresi",
   matches: "Kapışma", wins: "Galibiyet", podiums: "Podyum (ilk 3)", bestStreak: "En uzun seri", ranked: "Dereceli maç",
   rankedWins: "Dereceli galibiyet", online: "Çevrim içi maç", attacks: "Gönderilen saldırı", blocked: "Kalkanla engellenen",
+  director: "Dramaturg görevi",
 };
 // test(s, m): s = kariyer sayaçları, m = biten kapışmanın özeti (yalnızca kapışma sonunda verilir)
 const ACHIEVEMENTS = [
@@ -88,9 +89,9 @@ function nextToast() {
 }
 
 // --- Sayaçlar ve başarımlar: oyun içi olaylar sayaçları canlı artırır, başarım anında açılır ---
-const run = { lifeLost: 0, ended: false, practice: false, daily: false, dailyFinished: false, bricks: 0, powers: 0, bosses: 0, bestCombo: 0,
+const run = { lifeLost: 0, ended: false, practice: false, daily: false, dailyFinished: false, bricks: 0, goldBricks: 0, powers: 0, bosses: 0, bestCombo: 0,
               pacts: [], pactOfferLevel: 0, lastChanceUsed: false };
-const resetRun = () => Object.assign(run, { lifeLost: 0, ended: false, practice: false, daily: false, dailyFinished: false, bricks: 0, powers: 0, bosses: 0, bestCombo: 0,
+const resetRun = () => Object.assign(run, { lifeLost: 0, ended: false, practice: false, daily: false, dailyFinished: false, bricks: 0, goldBricks: 0, powers: 0, bosses: 0, bestCombo: 0,
               pacts: [], pactOfferLevel: 0, lastChanceUsed: false });
 function track(key, n = 1) {
   if (run.practice) return;

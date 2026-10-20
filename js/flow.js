@@ -96,6 +96,8 @@ function startGame() {
   paddle.w = paddle.targetW = PADDLE_W;
   powerups = []; particles = []; fragments = []; floaters = [];
   buildLevel(1);
+  resetDirectorRun();
+  startDirectorChallenge(1);
   serveBall();
   callout("BÖLÜM 1", T().accent);
 }
@@ -106,6 +108,7 @@ function toMenu() {
   run.practice = false;
   hidePactOffer();
   hideLastChance();
+  director.challenge = null;
   state.mode = "menu";
   state.callout = null;
   state.inset = 0;
@@ -160,6 +163,7 @@ function loseLife() {
 function gameOver() {
   hidePactOffer();
   hideLastChance();
+  failDirectorChallenge();
   state.mode = "gameover";
   state.newRecord = !run.practice && state.score > state.startHigh && state.score > 0;
   sfx("gameover");
@@ -171,6 +175,7 @@ function gameOver() {
 function levelCleared() {
   if (state.mode !== "playing") return;    // aynı karede iki kez tetiklenmesin
   addScore(500);
+  directorLevelEnd();
   state.mode = "levelclear";
   state.clearAt = state.time + 1.8;
   state.slowmo = Math.max(state.slowmo, 1.1);   // son tuğla ağır çekimde dağılsın
@@ -183,6 +188,7 @@ function nextLevel() {
   state.speed = levelSpeed(state.level);
   clearEffects();
   buildLevel(state.level);
+  startDirectorChallenge(state.level);
   serveBall();
   if (settings.autoTheme === "bolum") randomTheme();
   if (state.boss) { callout("⚠ " + state.boss.name + " ⚠", "#ff4d6d"); sfx("bossRoar"); }

@@ -48,7 +48,7 @@ test("Yükleme, arayüz ve özellik envanteri", async ({ p, expect }) => {
   expect(r.mode === "menu" && r.bricks === 46 && r.levels === 11, "menü ve ilk bölüm: " + JSON.stringify(r));
   expect(r.themes === 25, "25 hazır tema");
   expect(r.tools === 9, "araç çubuğunda 9 düğme (ses, tema, rastgele, stüdyo, rekabet, meydan, kariyer, ayarlar, tam ekran): " + r.tools);
-  expect(r.tiers === "Bronz,Gümüş,Altın,Platin,Elmas,Usta,Efsane" && r.ach === 25 && r.stats === 18 && r.career, "7 lig, 25 başarım, 18 sayaç, rütbe kartı: " + JSON.stringify([r.tiers, r.ach, r.stats, r.career]));
+  expect(r.tiers === "Bronz,Gümüş,Altın,Platin,Elmas,Usta,Efsane" && r.ach === 25 && r.stats === 19 && r.career, "7 lig, 25 başarım, 19 sayaç, rütbe kartı: " + JSON.stringify([r.tiers, r.ach, r.stats, r.career]));
   expect(r.panels, "paneller kapalı başlar");
   expect(r.powers === "WMSFLYDKOHQRNZC", "15 kapsül: " + r.powers);
   expect(r.curses === 20, "20 lanet");
@@ -137,6 +137,37 @@ test("Son Top Bahsi: tek seferlik devam, lanet bedeli ve bitirme", async ({ p, e
   expect(r.over[0] === "gameover" && r.over[1], "bitirince oyun sonu: " + JSON.stringify(r.over));
   expect(r.reset[0] === false && r.reset[1], "yeni koşuda hak sıfırlanır: " + JSON.stringify(r.reset));
   expect(r.practice[0] === "gameover" && r.practice[1], "pratikte teklif yok: " + JSON.stringify(r.practice));
+});
+
+test("Dramaturg: bölüm görevi, ilerleme, ödül ve kapatma", async ({ p, expect }) => {
+  const r = await p.eval(`(() => {
+    settings.director = "acik"; __start(1);
+    const initial = !!(director.challenge && director.challenge.id);
+    const stat = "director" in career.stats;
+    director.challenge = { id: "bricks", text: "3 tuğla kır", target: 3, reward: 500, startBricks: run.bricks,
+      startGold: run.goldBricks, startCurses: state.cursesSurvived, startLifeLost: run.lifeLost,
+      startTime: state.time, maxCombo: 0, done: false };
+    const before = state.score;
+    for (let i = 0; i < 3; i++) destroyBrick(bricks.find(b => !b.dead && !b.unbreakable));
+    updateDirector(0);
+    const done = { done: director.challenge.done, score: state.score, completed: director.completed,
+      stat: career.stats.director, story: director.story.length };
+    director.challenge = { id: "noLose", text: "can kaybetmeden bitir", target: 0, reward: 800, startBricks: run.bricks,
+      startGold: run.goldBricks, startCurses: state.cursesSurvived, startLifeLost: run.lifeLost,
+      startTime: state.time, maxCombo: 0, done: false };
+    levelCleared();
+    const noLose = director.challenge.done;
+    __start(5);
+    const bossChallenge = director.challenge && director.challenge.id;
+    settings.director = "kapali"; startGame();
+    const off = director.challenge === null;
+    return { initial, stat, before, done, noLose, bossChallenge, off };
+  })()`);
+  expect(r.initial && r.stat, "dramaturg görevi ve kariyer sayacı: " + JSON.stringify(r));
+  expect(r.done.done && r.done.score > r.before && r.done.completed >= 1 && r.done.stat >= 1 && r.done.story > 0, "görev tamamlandı: " + JSON.stringify(r.done));
+  expect(r.noLose, "can kaybetmeden bitirme görevi bölüm sonunda tamamlanır");
+  expect(r.bossChallenge === "boss", "boss bölümünde boss görevi: " + r.bossChallenge);
+  expect(r.off, "dramaturg kapatılabilir");
 });
 
 test("Koşu özeti: sayaçlar ve pratikte kayıt dışı", async ({ p, expect }) => {
@@ -616,7 +647,7 @@ test("Kariyer: sayaçlar, başarımlar, seri, panel, kalıcılık, sıfırlama",
          "galibiyet serisi ve maç başarımları (8 kişilik, efsane bot, son can): " + JSON.stringify(r.streak));
   expect(r.loss.streak === 0 && r.loss.best === 3 && r.loss.attacks >= 1 && r.loss.blocked === 1 && r.loss.hist === 4 && r.loss.mode === "dostluk",
          "yenilgi seriyi bozar; saldırı ve kalkan sayılır; geçmiş: " + JSON.stringify(r.loss));
-  expect(r.panel.open && r.panel.stats === 18 && r.panel.ach === 25 && r.panel.achGot === r.panel.got && r.panel.rows === 5 && r.panel.head.includes(r.panel.got + "/25") && r.panel.card,
+  expect(r.panel.open && r.panel.stats === 19 && r.panel.ach === 25 && r.panel.achGot === r.panel.got && r.panel.rows === 5 && r.panel.head.includes(r.panel.got + "/25") && r.panel.card,
          "kariyer paneli: " + JSON.stringify(r.panel));
   const saved = await p.eval("JSON.stringify([career.stats.matches, career.stats.bricks, Object.keys(career.ach).length, career.history.length])");
   await p.reload();

@@ -65,6 +65,7 @@ function destroyBrick(b) {
   b.dead = true;
   state.combo++;
   run.bricks++;
+  if (b.gold) run.goldBricks++;
   track("bricks");
   run.bestCombo = Math.max(run.bestCombo, state.combo);
   trackBest("bestCombo", state.combo);
