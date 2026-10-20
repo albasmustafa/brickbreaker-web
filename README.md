@@ -9,7 +9,7 @@ Tarayıcıda çalışan, kaotik bir tuğla kırma oyunu: lanetler, boss'lar, 15 
 | Oyna | `index.html`'i çift tıkla (ya da `xdg-open index.html`) — sunucu, internet, kurulum gerekmez |
 | Uygulama olarak kur / çevrim dışı oyna | `npm start` → <http://localhost:8080> → tarayıcıda "Uygulamayı yükle"; bir kez açıldıktan sonra internetsiz de çalışır |
 | Tek dosya üret | `npm run build` → `dist/index.html` (okunaklı) ve `dist/brickbreaker.min.html` (sıkıştırılmış, ~146 KB) |
-| Test et | `npm test` → 20 özellik testi başsız Chromium'da (Node 22+, Chromium/Chrome) |
+| Test et | `npm test` → 27 özellik testi başsız Chromium'da (Node 22+, Chromium/Chrome) |
 | Yayınla | `npm run release` → test + derleme + ana oyun dosyasını güncelleme |
 
 `npm start`, `npm test` ve okunaklı derleme hiçbir bağımlılık istemez. Yalnızca sıkıştırılmış derleme için bir kez `npm install` (esbuild) gerekir.
@@ -34,7 +34,14 @@ js/render.js          tuğla sprite'ları, dünya, HUD, durum ekranları
 js/music.js           arka plan medyası, müzik analizi (vuruş/BPM), şarkıya özel efektler
 js/ui.js              araç çubuğu, paneller, tema stüdyosu, klavye/fare/dokunma, tam ekran
 js/career.js          kariyer: dereceli lig (Elo, rütbeler, terk cezası), sayaçlar, maç geçmişi, başarımlar, bildirimler
-js/challenge.js       meydan okuma: günlük koşu, bölüm seçimi, pratik modu
+js/pacts.js           lanet paktı: bölüm başında risk/ödül seçenekleri ve çarpanları
+js/lastchance.js      son top bahsi: tek seferlik devam + lanet bedeli
+js/director.js        dramaturg: bölüm görevleri, nefes/gösteri anları
+js/codex.js           koleksiyon: lanet/tuğla/boss kartları ve kart seviyeleri
+js/ghost.js           hayalet koşu: en iyi koşu kaydı, oynatma ve paylaşım kodu
+js/weekly.js          haftalık kaos tohumu: tohumlu koşu ve sonuç kodu
+js/songlevel.js       şarkıdan bölüm: BPM/bas/tiz analiziyle bölüm üreteci
+js/challenge.js       meydan okuma: günlük koşu, bölüm seçimi, pratik, hayalet, haftalık, şarkı bölümü
 js/versus.js          kapışma: botlar, dereceli maç, saldırılar, WebRTC, liderlik tablosu, rakip paneli
 js/main.js            ana döngü, servis çalışanı kaydı
 sw.js, manifest.webmanifest, favicon.svg   uygulama olarak kurulma ve çevrim dışı çalışma
@@ -64,6 +71,7 @@ Okunaklı tek dosyada her bölümün başında kaynak dosyanın adı yazar. Ana 
 - **Müzik:** sentetik şarkılarla vuruş, BPM ve profil.
 - **Rekabet:** bot kapışması ve bot dengesi; iki sayfa arasında gerçek WebRTC bağlantısıyla çevrim içi kapışma (puanların paylaşılması ve iki tarafta puan güncellemesi dahil).
 - **Kariyer:** dereceli lig (lig sınırları, Elo, puana göre bot gücü, kazanınca/kaybedince puan, yarıda bırakma ve sayfa yenileme cezası); sayaçlar, anında açılan başarımlar, galibiyet serisi, kariyer paneli, sayfa yenilenince kalıcılık, sıfırlama.
+- **Tutundurma:** lanet paktı seçimi/çarpanları, son top bahsi, dramaturg görevleri, koleksiyon kartları ve lanet direnci, hayalet kaydı/oynatma/kodu, haftalık tohumun deterministik koşusu ve sonuç kodu, şarkıdan bölüm üreteci/kodu.
 
 ```
 npm test                                  # projeyi test et
@@ -91,7 +99,7 @@ GitHub Actions (`.github/workflows/ci.yml`) her push ve pull request'te Node 22 
 
 ## Kayıtlar (tarayıcıda, localStorage)
 
-`bb_settings` (ayarlar) · `bb_theme_cur` / `bb_custom_themes` (tema) · `bb_highscore` · `bb_muted` · `bb_song_profiles` (şarkı profilleri) · `bb_versus` (rekabet ayarları) · `bb_leaderboard` (liderlik tablosu) · `bb_career` (dereceli puan, sayaçlar, maç geçmişi, başarımlar) · `bb_daily` (günlük meydan okuma: bugünkü skor, en iyi, seri).
+`bb_settings` (ayarlar) · `bb_theme_cur` / `bb_custom_themes` (tema) · `bb_highscore` · `bb_muted` · `bb_song_profiles` (şarkı profilleri) · `bb_versus` (rekabet ayarları) · `bb_leaderboard` (liderlik tablosu) · `bb_career` (dereceli puan, sayaçlar, maç geçmişi, başarımlar) · `bb_daily` (günlük meydan okuma: bugünkü skor, en iyi, seri) · `bb_codex` (koleksiyon kartları) · `bb_ghost` (en iyi hayalet koşu) · `bb_weekly` (haftalık tohum: en iyi, sonuç, deneme).
 
 ## Kontroller
 
@@ -100,7 +108,7 @@ GitHub Actions (`.github/workflows/ci.yml`) her push ve pull request'te Node 22 
 - **P / Esc**: duraklat (sekme değişince otomatik duraklar); bir panel açıksa **Esc** paneli kapatır
 - **T**: sıradaki tema · **R**: sonsuz rastgele tema · **F**: tam ekran (🖥️ düğmesi de)
 - **Araç çubuğu** (tuvalin altında): 🔊 sesler · 🎨 tema · 🎲 rastgele tema · 🖌️ tema stüdyosu · ⚔ rekabet · 🎯 meydan · 🏅 kariyer · ⚙️ ayarlar · 🖥️ tam ekran. Paneller ekranın ortasında açılır, aynı anda tek panel açık kalır; ✕, Esc ya da dışarı tıklamak kapatır, panel açıkken oyun arkada duraklar.
-- **⚙️ Ayarlar**: efekt ses seviyesi, raket sesi, ekran sarsıntısı (Açık/Azaltılmış/Kapalı — `prefers-reduced-motion` açıksa varsayılan Azaltılmış), zorluk (Kolay ×0.85 hız +5 can / Normal / Zor ×1.15 hız +2 can; yalnızca yeni oyunda uygulanır), HP noktacıkları (tuğlada kalan can noktası; WCAG göreli parlaklığına göre temaya kontrastlı renk). Tümü kalıcı.
+- **⚙️ Ayarlar**: efekt ses seviyesi, raket sesi, ekran sarsıntısı (Açık/Azaltılmış/Kapalı — `prefers-reduced-motion` açıksa varsayılan Azaltılmış), zorluk (Kolay ×0.85 hız +5 can / Normal / Zor ×1.15 hız +2 can; yalnızca yeni oyunda uygulanır), lanet yoğunluğu, **Lanet Paktı**, **Dramaturg**, **Hayalet koşu**, HP noktacıkları (tuğlada kalan can noktası; WCAG göreli parlaklığına göre temaya kontrastlı renk). Tümü kalıcı.
 
 ## Mekanikler
 
@@ -120,6 +128,16 @@ GitHub Actions (`.github/workflows/ci.yml`) her push ve pull request'te Node 22 
 - **Ağır çekim:** son tuğla kırılınca ve boss ölünce zaman yavaşlar, ekran hafif yakınlaşır; büyük patlamalarda an donması.
 - **Efektler:** her isabette tuğla bir an parlar; kırılmada parçacık + dönen parçalar; kenar vuruşu/patlama/kayıp ekranı sarsar; top izi.
 - **Rekor:** `localStorage` (`bb_highscore`), oyun sonunda "YENİ REKOR" işareti.
+
+## Tutundurma paketi (2026-10)
+
+- **Lanet Paktı:** Klasik koşuda 1. ve her 5. bölümün başında 3 risk/ödül paktı sunulur (CAM TOP, KAN BEDELİ, BOSS AVCI, LANET MIKSI, ALTIN ATEŞİ, KALKAN USTASI, SIFIR NOKTA, SESSİZ GECE). Paktlar koşu boyunca sürer; seçmezsen hiçbiri uygulanmaz. Ayarlar → Lanet Paktı ile kapatılabilir.
+- **Son Top Bahsi:** Son can da gidince bir kez "1 canla devam et" teklifi gelir; devam eden oyuncu hemen bir lanet yer. Günlük, pratik, haftalık ve kapışmada yoktur.
+- **Dramaturg:** Her bölüme isteğe bağlı bir görev koyar (tuğla kır, combo yap, can kaybetmeden bitir, boss'u 30 sn'de yen…). Tamamlanınca puan + iyi kapsül verir; zor anda "nefes", uzun sessizlikte "gösteri" anı yaratır. Ayarlar → Dramaturg ile kapatılabilir.
+- **Koleksiyon:** 20 lanet + 8 tuğla + 2 boss = 30 kart. Kartlar oynadıkça keşfedilir, 1/5/15 eşiklerinde seviye atlar. Lanet kartı seviyesi o lanetin süresini %10 kısaltır. Kariyer panelindeki **📖 Koleksiyon** düğmesiyle açılır.
+- **Hayalet Koşu:** En iyi klasik koşunun raket/top hareketi kaydedilir; yeni koşuda yarı saydam hayalet aynı tempoyu gösterir. 🎯 Meydan panelinden `BBG1:` kodu alınıp arkadaşla paylaşılabilir. Ayarlar → Hayalet koşu ile kapatılabilir.
+- **Haftalık Kaos Tohumu:** Her hafta (pazartesi) aynı tohum: aynı bölümler, aynı kapsül ve lanet sırası. Pakt, dramaturg, hayalet ve son top bahsi kapalıdır; skorlar aynı koşulda karşılaştırılır. 🎯 Meydan panelinden `BBW1:` sonuç kodu alınır.
+- **Şarkıdan Bölüm:** Bir ses dosyası seçilir; BPM, bas ve tiz enerjisi analiz edilip 3 bölüm (+ güçlü finalde boss) üretilir. Aynı şarkı aynı bölümü verir; `BBS1:` kodu ile paylaşılır. Şarkı arka planda çalar ve mevcut müzik senkronuyla birleşir.
 
 ## Lanetler (engeller)
 
