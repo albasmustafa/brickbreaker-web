@@ -78,6 +78,38 @@ test("Oyun akışı: servis, oynanış, can, oyun sonu, duraklatma", async ({ p,
   expect(r.paused === "paused" && r.resumed === "playing", "duraklat / devam");
 });
 
+test("Lanet Paktı: seçenekler, etkiler, sıfırlama ve atlama", async ({ p, expect }) => {
+  const r = await p.eval(`(() => {
+    settings.pacts = "acik"; startGame();
+    const shown = !pactbar.hidden, count = pactCards.querySelectorAll("button").length;
+    const offered = pactOffer.map(x => x.id);
+    launchBall();
+    const hidden = pactbar.hidden, noPact = run.pacts.length;
+    state.score = 0; state.lives = 3; state.shield = 0;
+    applyPact("cam");
+    const speed = state.speed;
+    addScore(100);
+    const cam = { score: state.score, speed, pacts: [...run.pacts], bar: pactbar.hidden };
+    applyPact("kalkan");
+    const shield = state.shield;
+    resetRun(); state.score = 0; state.lives = 3; state.shield = 0; state.speed = levelSpeed(1);
+    applyPact("altin");
+    const gold = { mul: pactScoreMul(), goldMul: pactGoldMul() };
+    startGame();
+    const fresh = { pacts: run.pacts.length, shown: !pactbar.hidden, offerLevel: run.pactOfferLevel };
+    launchBall();
+    const skipped = pactbar.hidden && run.pacts.length === 0;
+    return { shown, count, offered, hidden, noPact, cam, shield, gold, fresh, skipped };
+  })()`);
+  expect(r.shown && r.count === 3 && r.offered.length === 3, "3 pakt seçeneği: " + JSON.stringify(r));
+  expect(r.hidden && r.noPact === 0, "fırlatınca pakt seçimi kapanır");
+  expect(r.cam.score === 125 && r.cam.speed > 340 && r.cam.pacts.includes("cam") && r.cam.bar, "cam top: " + JSON.stringify(r.cam));
+  expect(r.shield === 3, "kalkan paktı +3: " + r.shield);
+  expect(Math.abs(r.gold.mul - 0.9) < 1e-9 && r.gold.goldMul === 2, "altın paktı çarpanları: " + JSON.stringify(r.gold));
+  expect(r.fresh.pacts === 0 && r.fresh.shown && r.fresh.offerLevel === 1, "yeni koşu paktları sıfırlar: " + JSON.stringify(r.fresh));
+  expect(r.skipped, "pakt seçmeden devam");
+});
+
 test("Koşu özeti: sayaçlar ve pratikte kayıt dışı", async ({ p, expect }) => {
   const r = await p.eval(`(() => {
     __start(1); __sim(900, true);

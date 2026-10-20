@@ -68,7 +68,7 @@ function destroyBrick(b) {
   track("bricks");
   run.bestCombo = Math.max(run.bestCombo, state.combo);
   trackBest("bestCombo", state.combo);
-  const pts = Math.round(10 * b.maxHp * Math.min(state.combo, 8) * (b.gold ? 10 : 1) * (isFever() ? 2 : 1) * curseBonus());
+  const pts = Math.round(10 * b.maxHp * Math.min(state.combo, 8) * (b.gold ? 10 * pactGoldMul() : 1) * (isFever() ? 2 : 1) * curseBonus());
   addScore(pts);
   const col = b.explosive || b.electric || b.gold || b.splitter ? brickColor(b) : undefined;
   const cx = b.x + BRICK.w / 2;

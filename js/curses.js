@@ -36,13 +36,13 @@ const CURSES = {
 let obstacles = [];
 const curseOn = k => (state.curses[k] || 0) > state.time;
 const activeCurses = () => Object.keys(state.curses).filter(curseOn);
-const curseBonus = () => (activeCurses().length ? 1.5 : 1);
-const curseDur = k => CURSES[k].dur * (hazardLevel() === "kabus" ? 1.25 : 1);
+const curseBonus = () => (activeCurses().length ? 1.5 + pactCurseBonusAdd() : 1);
+const curseDur = k => CURSES[k].dur * (hazardLevel() === "kabus" ? 1.25 : 1) * pactCurseDurMul();
 const lowestBrick = () => Math.max(0, ...bricks.filter(b => !b.dead).map(b => (b.ty ?? b.y) + BRICK.h));
 
 function scheduleNextCurse(first) {
   const hz = HAZARD[hazardLevel()];
-  if (!hz || battle.active) { state.curseAt = Infinity; return; }   // kapışmada lanetler rakiplerden gelir
+  if (!hz || battle.active || pactNoCurses()) { state.curseAt = Infinity; return; }   // kapışmada lanetler rakiplerden gelir
   const lvlMul = Math.max(0.55, 1 - (state.level - 1) * 0.04);       // bölüm ilerledikçe sıklaşır
   state.curseAt = state.time + (first ? hz.grace : hz.every * lvlMul * rnd(0.7, 1.3));
 }

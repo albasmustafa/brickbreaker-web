@@ -42,6 +42,16 @@ canvas {
 #toolbar { width: max-content; max-width: calc(100vw - 32px); }   /* 9 düğme tek satıra sığsın */
 #toolbar button { padding: 8px 14px; border-radius: 10px; max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #mediabar { background: var(--panel-soft); border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; }
+/* Lanet Paktı: bölüm başında, oyun bekleme ekranındayken sunulur */
+#pactbar { display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; width: 800px; max-width: calc(100vw - 32px);
+  padding: 8px 10px; background: var(--panel-soft); border: 1px solid var(--line); border-radius: 12px; }
+#pactbar .pact-label { font-size: 11px; letter-spacing: 0.08em; color: var(--uidim); white-space: nowrap; }
+#pactbar .pact-label small { display: block; font-size: 10px; letter-spacing: 0; text-transform: none; }
+#pact-cards { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.pact-card { display: flex; flex-direction: column; gap: 2px; text-align: left; min-width: 150px; max-width: 220px; padding: 6px 9px;
+  background: var(--panel2); border: 1px solid var(--c); border-left: 4px solid var(--c); border-radius: 9px; }
+.pact-card strong { color: var(--c); font-size: 12px; }
+.pact-card span { font-size: 11px; color: var(--uidim); line-height: 1.35; }
 #audiohint, #mediastatus { font-size: 12px; color: var(--uidim); }
 #mediavol { width: 100px; }
 #beatdot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); opacity: 0; }

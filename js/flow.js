@@ -43,7 +43,7 @@ function buildLevel(n) {
   state.buildFade = 0;          // tuğlalar satır satır belirsin
 }
 function makeBoss(spec, cycle) {
-  const hp = Math.round(spec.hp * (1 + 0.5 * cycle));
+  const hp = Math.round(spec.hp * (1 + 0.5 * cycle) * pactBossHpMul());
   return { name: spec.name, hp, maxHp: hp, w: 200, h: 62, x: W / 2 - 100, y: 78, baseY: 78, vx: spec.speed * (1 + 0.15 * cycle),
            shootEvery: spec.shootEvery, shootAt: 2.5, minionAt: 6, t: 0, flash: 0, enraged: false, dead: false };
 }
@@ -80,7 +80,7 @@ function clearEffects() {
   paddle.iceV = 0; paddle.aimX = null;
 }
 function addScore(n) {
-  state.score += n;
+  state.score += Math.round(n * pactScoreMul());
   if (!run.practice && state.score > state.high) store.set("bb_highscore", (state.high = state.score));
 }
 
@@ -104,6 +104,7 @@ function toMenu() {
   run.daily = false;
   run.dailyFinished = false;
   run.practice = false;
+  hidePactOffer();
   state.mode = "menu";
   state.callout = null;
   state.inset = 0;
@@ -116,6 +117,7 @@ function serveBall() {
   state.mode = "serve";
   balls = [newBall(true)];
   powerups = []; bullets = []; lasers = [];   // düşen kapsüller bölüm/can geçişinde taşınmaz
+  showPactOffer();                            // bölüm başında risk/ödül seçenekleri
 }
 // Yapışık topu fırlat: raketteki konumuna göre açı (servis topu ortada: rastgele ±25°)
 function releaseBall(b) {
@@ -138,6 +140,7 @@ function releaseCaught() {
   releasePendingMulti();
 }
 function launchBall() {
+  hidePactOffer();              // seçim yapılmadıysa pakt yok
   balls.filter(b => b.stuck).forEach(releaseBall);
   releasePendingMulti();
   scheduleNextCurse(true);      // bölüm/can başında lanetlerden önce nefes payı
@@ -154,6 +157,7 @@ function loseLife() {
   if (--state.lives <= 0) gameOver(); else serveBall();
 }
 function gameOver() {
+  hidePactOffer();
   state.mode = "gameover";
   state.newRecord = !run.practice && state.score > state.startHigh && state.score > 0;
   sfx("gameover");

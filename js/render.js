@@ -497,6 +497,8 @@ function drawHUD() {
     drawHeart(hx, 15, s, "#ff4d6d");
     circle(hx - s * 0.22, 15 + s * 0.28, s * 0.09, "rgba(255,255,255,0.6)");
   }
+  const pn = pactNames();
+  if (pn) text("📜 " + pn, 20, H - 14, "bold 10px monospace", T().dim, "left");
   drawBattleHUD();
 }
 function drawPowerups() {
@@ -607,10 +609,12 @@ function drawScreens() {
     text("Bölüm " + state.level + " · Süre " + fmtTime(Math.round(state.time)), W / 2, H / 2 - 28, "15px monospace", T().text);
     text("Tuğla " + run.bricks + " · En iyi combo ×" + run.bestCombo, W / 2, H / 2, "15px monospace", T().text);
     text("Kapsül " + run.powers + " · Lanet " + state.cursesSurvived + " · Boss " + run.bosses, W / 2, H / 2 + 28, "14px monospace", CURSE_COLOR);
-    if (run.daily && typeof daily !== "undefined") text("GÜNLÜK · en iyi " + daily.best + " · seri " + daily.streak, W / 2, H / 2 + 62, "bold 15px monospace", T().b2);
-    else if (run.practice) text("PRATİK — rekor ve kariyer sayılmadı", W / 2, H / 2 + 62, "14px monospace", T().dim);
-    if (state.lbRank) text("Liderlik tablosu: #" + state.lbRank + " (" + vsCfg.name + ")", W / 2, H / 2 + 96, "bold 15px monospace", T().b2);
-    text("menü için tıkla veya boşluk", W / 2, H / 2 + 158, "15px monospace", T().dim);
+    if (run.pacts.length) text("📜 " + pactNames(), W / 2, H / 2 + 56, "bold 12px monospace", CURSE_COLOR);
+    const extraY = run.pacts.length ? 34 : 0;
+    if (run.daily && typeof daily !== "undefined") text("GÜNLÜK · en iyi " + daily.best + " · seri " + daily.streak, W / 2, H / 2 + 62 + extraY, "bold 15px monospace", T().b2);
+    else if (run.practice) text("PRATİK — rekor ve kariyer sayılmadı", W / 2, H / 2 + 62 + extraY, "14px monospace", T().dim);
+    if (state.lbRank) text("Liderlik tablosu: #" + state.lbRank + " (" + vsCfg.name + ")", W / 2, H / 2 + 96 + extraY, "bold 15px monospace", T().b2);
+    text("menü için tıkla veya boşluk", W / 2, H / 2 + 158 + extraY, "15px monospace", T().dim);
   }
 }
 function drawCallout() {
