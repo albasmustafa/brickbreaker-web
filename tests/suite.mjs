@@ -195,6 +195,32 @@ test("Koleksiyon: kartlar, seviye, lanet direnci, kalıcılık ve sıfırlama", 
   expect(reset[0] === 0 && reset[1] === 0, "koleksiyon sıfırlanır: " + reset);
 });
 
+test("Hayalet Koşu: kayıt, oynatma, paylaşım kodu ve kapatma", async ({ p, expect }) => {
+  const r = await p.eval(`(() => {
+    settings.ghost = "acik"; __start(1);
+    __sim(300, true);
+    state.score = 750; state.lives = 1; loseLife(); lastEnd();
+    const saved = { score: ghost.best.score, samples: ghost.best.rec.length, mode: state.mode };
+    startGame();
+    const play = ghost.play && ghost.runRec.length === 0;
+    launchBall(); __sim(100, true);
+    const scoreNow = ghost.scoreNow;
+    const code = encodeGhost();
+    const before = ghost.best.score;
+    ghost.best = { rec: [], score: 0, level: 1, date: 0 };
+    const imported = importGhost(code);
+    const after = { score: ghost.best.score, samples: ghost.best.rec.length };
+    settings.ghost = "kapali"; startGame();
+    const off = ghost.play;
+    return { saved, play, scoreNow, code: code.slice(0, 5), imported, before, after, off };
+  })()`);
+  expect(r.saved.score === 750 && r.saved.samples > 0 && r.saved.mode === "gameover", "hayalet kaydedildi: " + JSON.stringify(r.saved));
+  expect(r.play, "yeni koşuda hayalet oynar");
+  expect(r.scoreNow >= 0, "hayalet skoru izlenir: " + r.scoreNow);
+  expect(r.code === "BBG1:" && r.imported && r.after.score === r.before && r.after.samples > 0, "paylaşım kodu: " + JSON.stringify([r.imported, r.before, r.after]));
+  expect(r.off === false, "hayalet kapatılabilir");
+});
+
 test("Koşu özeti: sayaçlar ve pratikte kayıt dışı", async ({ p, expect }) => {
   const r = await p.eval(`(() => {
     __start(1); __sim(900, true);

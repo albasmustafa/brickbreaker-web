@@ -30,7 +30,7 @@ function update(dt) {
   }
   for (const b of bricks) if (b.ty != null && b.y < b.ty) b.y = Math.min(b.ty, b.y + 70 * dt);   // TAVAN ÇÖKÜYOR
 
-  if (state.mode === "serve" || state.mode === "playing") { updateBoss(dt); updateBalls(dt); }
+  if (state.mode === "serve" || state.mode === "playing") { updateBoss(dt); updateBalls(dt); updateGhost(dt); }
   if (state.mode === "playing") { updateLasers(dt); updateBullets(dt); updateHoles(dt); updateCurses(dt); updateDirector(dt); }
   if (state.mode === "levelclear" && state.time >= state.clearAt) nextLevel();
   updateEffects(dt);

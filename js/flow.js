@@ -98,6 +98,7 @@ function startGame() {
   buildLevel(1);
   resetDirectorRun();
   startDirectorChallenge(1);
+  resetGhostRun();
   serveBall();
   callout("BÖLÜM 1", T().accent);
 }
@@ -109,6 +110,7 @@ function toMenu() {
   hidePactOffer();
   hideLastChance();
   director.challenge = null;
+  stopGhost();
   flushCodex();
   state.mode = "menu";
   state.callout = null;
@@ -165,6 +167,7 @@ function gameOver() {
   hidePactOffer();
   hideLastChance();
   failDirectorChallenge();
+  finishGhostRun();
   flushCodex();
   state.mode = "gameover";
   state.newRecord = !run.practice && state.score > state.startHigh && state.score > 0;

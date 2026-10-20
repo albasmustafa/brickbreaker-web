@@ -53,6 +53,7 @@ function startDaily() {
   saveDaily();
   startGame();
   run.daily = true;
+  stopGhost();
   state.lives = 1;
   state.diffSpeed = 1.15;
   state.speed = levelSpeed(1);
@@ -83,6 +84,7 @@ function startPractice(level) {
   if (battle.active) closeBattle();
   startGame();
   run.practice = true;
+  stopGhost();
   if (level > 1) { state.level = level - 1; nextLevel(); }
   return true;
 }
@@ -108,6 +110,7 @@ function renderChallenge() {
   );
   dailyStartBtn.disabled = used;
   dailyStartBtn.textContent = used ? "☀️ Bugünkü deneme kullanıldı" : "☀️ Bugünün koşusunu başlat";
+  if (typeof renderGhost === "function") renderGhost();
 }
 
 setupPanel(challengePanel, "🎯 Meydan Okuma");

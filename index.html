@@ -126,6 +126,12 @@
   <div class="sethead">Bölüm seçimi (pratik)</div>
   <div id="level-grid"></div>
   <div class="setnote">Pratik koşularda rekor, liderlik tablosu, kariyer ve başarımlar sayılmaz. Bölümler, klasik oyunda ulaştığın en ileri bölüme kadar açılır.</div>
+  <div class="sethead">👻 Hayalet Koşu</div>
+  <div id="ghost-card" class="setnote"></div>
+  <div class="setrow"><button id="ghost-export">📤 Hayalet kodu al</button><button id="ghost-import">📥 Kodu yükle</button><button id="ghost-clear">🗑 Sil</button></div>
+  <textarea id="ghost-code" placeholder="BBG1:... hayalet kodunu buraya yapıştır"></textarea>
+  <div class="setnote" id="ghost-msg"></div>
+  <div class="setnote">Klasik koşunda en iyi skorun hayaleti kaydedilir; yeni koşuda yarı saydam rakip olarak aynı tempoyu gösterir. Kodla arkadaşına gönderebilirsin.</div>
 </section>
 <input type="file" id="vidfile" accept="video/*" hidden>
 <input type="file" id="audfile" accept="audio/*" hidden>
@@ -148,6 +154,7 @@
 <script src="js/career.js"></script>
 <script src="js/codex.js"></script>
 <script src="js/challenge.js"></script>
+<script src="js/ghost.js"></script>
 <script src="js/director.js"></script>
 <script src="js/versus.js"></script>
 <script src="js/pacts.js"></script>

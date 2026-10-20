@@ -17,6 +17,7 @@ const SETTING_ROWS = [
   { key: "hazards", label: "Lanetler", def: "normal", opts: "kapali:Kapalı|az:Az|normal:Normal|kabus:Kâbus" },
   { key: "pacts", label: "Lanet Paktı", def: "acik", opts: "acik:Açık|kapali:Kapalı" },
   { key: "director", label: "Dramaturg", def: "acik", opts: "acik:Açık|kapali:Kapalı" },
+  { key: "ghost", label: "Hayalet koşu", def: "acik", opts: "acik:Açık|kapali:Kapalı" },
   { key: "hpDots", label: "HP noktacıkları", def: false, opts: "false:Kapalı|true:Açık" },
   { note: "Zorluk yalnızca yeni oyunda uygulanır. Lanetler oyun sırasında rastgele gelen engellerdir (görünmez raket, karanlık, rüzgar…); aktifken kırılan tuğlalar ×1.5 puan verir. Efekt sesi arka plan müziğini etkilemez." },
   { head: "Görünüm" },

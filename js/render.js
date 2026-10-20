@@ -454,6 +454,7 @@ function drawHUD() {
   text(String(state.score), 20, 38, "bold 22px monospace", T().text, "left");
   const scoreW = ctx.measureText(String(state.score)).width;
   text("REKOR " + state.high, 20, 55, "11px monospace", T().dim, "left");
+  if (ghost.play && ghost.best.rec.length) text("👻 " + ghost.scoreNow, W - 20, 56, "bold 11px monospace", "#9aa5b1", "right");
   const colX = Math.max(160, 34 + Math.max(scoreW, ctx.measureText("REKOR " + state.high).width));
   if (state.combo >= 2) {
     const ccol = isFever() ? hslHex(state.time * 400, 90, 62) : T().b2, txt = "COMBO ×" + state.combo;
@@ -672,7 +673,7 @@ function draw() {
     ctx.restore();
   }
   ctx.globalAlpha = 1;
-  drawBolts(); drawMusicMid(); drawLasersAndBullets(); drawPaddle(); drawBalls();
+  drawBolts(); drawMusicMid(); drawLasersAndBullets(); drawGhost(); drawPaddle(); drawBalls();
   ctx.font = "bold 14px monospace";   // skor yazıları: kenarlıklı, büyüyerek belirir
   ctx.textAlign = "center";
   ctx.lineWidth = 3;
