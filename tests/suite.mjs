@@ -221,6 +221,34 @@ test("Hayalet Koşu: kayıt, oynatma, paylaşım kodu ve kapatma", async ({ p, e
   expect(r.off === false, "hayalet kapatılabilir");
 });
 
+test("Haftalık tohum: aynı tohum aynı koşu, sonuç kodu ve kapatma", async ({ p, expect }) => {
+  const r = await p.eval(`(() => {
+    const wk = weekSeed();
+    const first = startWeekly();
+    const flags = { active: weekly.active, pact: pactEnabled(), director: directorEnabled(), ghost: ghostEnabled(), last: lastChanceAvailable() };
+    __sim(400, true);
+    const run1 = { score: state.score, bricks: run.bricks, lives: state.lives, level: state.level, time: Math.round(state.time * 1000) };
+    toMenu();
+    const second = startWeekly();
+    __sim(400, true);
+    const run2 = { score: state.score, bricks: run.bricks, lives: state.lives, level: state.level, time: Math.round(state.time * 1000) };
+    state.score = 1234; state.lives = 1; loseLife();
+    const over = { mode: state.mode, last: weekly.last && weekly.last.score, best: weekly.best, finished: weekly.finished, active: weekly.active, rank: state.lbRank };
+    const code = weeklyCode();
+    const again = startWeekly();
+    const restore = gameRandom === Math.random;
+    toMenu();
+    const stopped = { active: weekly.active, random: gameRandom === Math.random };
+    return { key: wk.key, seed: wk.seed, first, second, flags, run1, run2, over, code, again, restore, stopped };
+  })()`);
+  expect(/^\d{4}-\d{2}-\d{2}$/.test(r.key) && r.seed > 0, "hafta anahtarı ve tohum: " + JSON.stringify([r.key, r.seed]));
+  expect(r.first && r.second && r.flags.active && !r.flags.pact && !r.flags.director && !r.flags.ghost && !r.flags.last, "haftalıkta yardımcılar kapalı: " + JSON.stringify(r.flags));
+  expect(JSON.stringify(r.run1) === JSON.stringify(r.run2), "aynı tohum aynı koşu: " + JSON.stringify([r.run1, r.run2]));
+  expect(r.over.mode === "gameover" && r.over.last === 1234 && r.over.best >= 1234 && r.over.finished && r.over.active && r.over.rank === 0, "haftalık sonuç: " + JSON.stringify(r.over));
+  expect(r.code.startsWith("BBW1:") && r.code.includes("1234"), "sonuç kodu: " + r.code);
+  expect(r.again === false && r.restore && !r.stopped.active && r.stopped.random, "tohum durunca normal rastgeleliğe döner");
+});
+
 test("Koşu özeti: sayaçlar ve pratikte kayıt dışı", async ({ p, expect }) => {
   const r = await p.eval(`(() => {
     __start(1); __sim(900, true);

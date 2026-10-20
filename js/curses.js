@@ -15,7 +15,7 @@ const CURSES = {
   sis:      { label: "SİS",                short: "SİS",      dur: 10, group: "gorus" },
   ayna:     { label: "AYNA DÜNYA",         short: "AYNA",     dur: 8,  group: "kamera" },
   sarhos:   { label: "SARHOŞ KAMERA",      short: "SARHOŞ",   dur: 8,  group: "kamera" },
-  ruzgar:   { label: "RÜZGAR",             short: "RÜZGAR",   dur: 9,  group: "fizik", start: () => (state.windDir = Math.random() < 0.5 ? -1 : 1) },
+  ruzgar:   { label: "RÜZGAR",             short: "RÜZGAR",   dur: 9,  group: "fizik", start: () => (state.windDir = gameRandom() < 0.5 ? -1 : 1) },
   agir:     { label: "AĞIR YERÇEKİMİ",     short: "AĞIR",     dur: 8,  group: "fizik" },
   nabiz:    { label: "NABIZ",              short: "NABIZ",    dur: 8,  group: "fizik" },
   buz:      { label: "BUZLU RAKET",        short: "BUZ",      dur: 9,  group: "raket", start: () => { paddle.iceV = 0; paddle.aimX = null; }, end: () => (paddle.iceV = 0) },
@@ -44,7 +44,7 @@ function scheduleNextCurse(first) {
   const hz = HAZARD[hazardLevel()];
   if (!hz || battle.active || pactNoCurses()) { state.curseAt = Infinity; return; }   // kapışmada lanetler rakiplerden gelir
   const lvlMul = Math.max(0.55, 1 - (state.level - 1) * 0.04);       // bölüm ilerledikçe sıklaşır
-  state.curseAt = state.time + (first ? hz.grace : hz.every * lvlMul * rnd(0.7, 1.3));
+  state.curseAt = state.time + (first ? hz.grace : hz.every * lvlMul * grnd(0.7, 1.3));
 }
 function pickCurse() {
   const active = activeCurses(), used = new Set(active.map(k => CURSES[k].group).filter(Boolean));
@@ -52,7 +52,7 @@ function pickCurse() {
     const c = CURSES[id];
     return !active.includes(id) && !(hazardLevel() !== "kabus" && c.group && used.has(c.group)) && (!c.ok || c.ok());
   });
-  return ids.length ? pick(ids) : null;
+  return ids.length ? gpick(ids) : null;
 }
 // Duyuru: lanet 1.2 sn sonra başlar
 function warnCurse(id) {
@@ -86,7 +86,7 @@ function updateCurses(dt) {
     if (hz && activeCurses().length < hz.max) warnCurse(pickCurse());
     scheduleNextCurse(false);
   }
-  if (curseOn("meteor") && (state.meteorCd -= dt) <= 0) { state.meteorCd = rnd(0.3, 0.6); spawnMeteor(); }
+  if (curseOn("meteor") && (state.meteorCd -= dt) <= 0) { state.meteorCd = grnd(0.3, 0.6); spawnMeteor(); }
   for (const o of obstacles) {   // bariyerler duvarlar arasında gidip gelir
     o.x += o.vx * dt;
     if (o.x < state.inset || o.x + o.w > W - state.inset) {
@@ -108,7 +108,7 @@ function spawnDecoys() {
   if (!src) return;
   spawnParticles(src.x - 10, src.y - 10, CURSE_COLOR, 12, 20, 20);
   for (let i = 0; i < 3 && balls.length < MAX_BALLS + 3; i++) {
-    const a = -Math.PI / 2 + rnd(-1.2, 1.2);
+    const a = -Math.PI / 2 + grnd(-1.2, 1.2);
     balls.push(Object.assign(newBall(false), { decoy: true, x: src.x, y: src.y, dx: Math.cos(a) * mag(), dy: Math.sin(a) * mag() }));
   }
 }
@@ -119,12 +119,12 @@ function popDecoys() {
 const spawnBarriers = () => { obstacles = [{ x: 120, y: 330, w: 110, h: 14, vx: 150 }, { x: W - 230, y: 410, w: 110, h: 14, vx: -190 }]; };
 // Meteor: yukarıdan düşer, rakete çarparsa sersemletir (lazer vurabilir)
 function spawnMeteor() {
-  const a = Math.PI / 2 + rnd(-0.35, 0.35), sp = rnd(260, 380);
-  bullets.push({ x: rnd(state.inset + 20, W - state.inset - 20), y: -10, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, r: 9, dead: false, meteor: true });
+  const a = Math.PI / 2 + grnd(-0.35, 0.35), sp = grnd(260, 380);
+  bullets.push({ x: grnd(state.inset + 20, W - state.inset - 20), y: -10, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, r: 9, dead: false, meteor: true });
 }
 // UFO: geçerken 3 kötü kapsül bırakır; 2 vuruşta düşer (+750 ve iyi kapsül)
 function spawnUfo() {
-  const fromLeft = Math.random() < 0.5;
+  const fromLeft = gameRandom() < 0.5;
   state.ufo = { x: fromLeft ? -70 : W + 6, y: 250, w: 64, h: 26, vx: fromLeft ? 130 : -130, dropAt: 0.9, drops: 0, t: 0, hp: 2, flash: 0 };
 }
 function updateUfo(dt) {
@@ -137,7 +137,7 @@ function updateUfo(dt) {
   if ((u.dropAt -= dt) <= 0 && u.drops < 3 && u.x > 40 && u.x < W - 100) {
     u.dropAt = 1.5;
     u.drops++;
-    powerups.push({ x: u.x + u.w / 2 - 31, y: u.y + u.h, w: 62, h: 18, vy: 170, type: pick(["R", "N", "Z", "C"]) });
+    powerups.push({ x: u.x + u.w / 2 - 31, y: u.y + u.h, w: 62, h: 18, vy: 170, type: gpick(["R", "N", "Z", "C"]) });
     sfx("ufo");
   }
   if (u.x < -90 || u.x > W + 30) state.ufo = null;
@@ -161,7 +161,7 @@ function reviveBricks() {
   const dead = bricks.filter(b => b.dead && !b.unbreakable &&
     !balls.some(ba => ba.x + ba.r > b.x && ba.x - ba.r < b.x + BRICK.w && ba.y + ba.r > b.y && ba.y - ba.r < b.y + BRICK.h));
   for (let i = 0; i < 3 && dead.length; i++) {
-    const b = dead.splice((Math.random() * dead.length) | 0, 1)[0];
+    const b = dead.splice((gameRandom() * dead.length) | 0, 1)[0];
     Object.assign(b, { dead: false, hp: b.maxHp, cracks: null, flash: 1 });
     spawnParticles(b.x, b.y, CURSE_COLOR, 10);
   }

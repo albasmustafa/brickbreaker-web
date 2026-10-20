@@ -85,6 +85,7 @@ function addScore(n) {
 }
 
 function startGame() {
+  if (typeof weekly !== "undefined" && !weekly.starting) stopWeekly();
   if (run.daily && typeof finishDaily === "function") finishDaily();
   resetRun();
   const diff = DIFFICULTY[settings.difficulty];
@@ -111,6 +112,7 @@ function toMenu() {
   hideLastChance();
   director.challenge = null;
   stopGhost();
+  stopWeekly();
   flushCodex();
   state.mode = "menu";
   state.callout = null;
@@ -129,7 +131,7 @@ function serveBall() {
 // Yapışık topu fırlat: raketteki konumuna göre açı (servis topu ortada: rastgele ±25°)
 function releaseBall(b) {
   b.stuck = false;
-  const ang = b.stuckOff ? clamp(b.stuckOff / (paddle.w / 2), -1, 1) * (Math.PI / 3) : rnd(-0.45, 0.45);
+  const ang = b.stuckOff ? clamp(b.stuckOff / (paddle.w / 2), -1, 1) * (Math.PI / 3) : grnd(-0.45, 0.45);
   b.dx = mag() * Math.sin(ang);
   b.dy = -mag() * Math.cos(ang);
   b.stuckOff = 0;
@@ -168,12 +170,14 @@ function gameOver() {
   hideLastChance();
   failDirectorChallenge();
   finishGhostRun();
+  const wasWeekly = weekly.active;
+  if (wasWeekly) finishWeekly();
   flushCodex();
   state.mode = "gameover";
-  state.newRecord = !run.practice && state.score > state.startHigh && state.score > 0;
+  state.newRecord = !run.practice && !wasWeekly && state.score > state.startHigh && state.score > 0;
   sfx("gameover");
   if (battle.active) battleEliminated();   // kapışmada elendin
-  else if (run.practice) state.lbRank = 0;
+  else if (run.practice || wasWeekly) state.lbRank = 0;
   else { state.lbRank = recordScore("klasik", { score: state.score, level: state.level }); careerGameEnd(); }
   if (run.daily && typeof finishDaily === "function") finishDaily();
 }

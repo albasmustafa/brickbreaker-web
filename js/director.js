@@ -4,7 +4,7 @@
 //     Ayrıca oyuncu zorlanınca "nefes" ve ara ara "gösteri" anları yaratır.
 // ======================================================================
 const director = { challenge: null, story: [], tick: 0, lastMercy: -99, lastSpectacle: -99, completed: 0 };
-const directorEnabled = () => settings.director !== "kapali";
+const directorEnabled = () => settings.director !== "kapali" && !weekly.active;
 function resetDirectorRun() {
   Object.assign(director, { challenge: null, story: [], tick: 0, lastMercy: -99, lastSpectacle: -99, completed: 0 });
 }
@@ -20,7 +20,7 @@ function makeDirectorChallenge(level) {
     if (bricks.some(b => b.gold)) pool.push({ id: "gold", text: "2 altın tuğla kır", target: 2, reward: 600 });
     if (hazardLevel() !== "kapali") pool.push({ id: "curse", text: "Bir lanet atlat", target: 1, reward: 400 });
   }
-  const c = pick(pool);
+  const c = gpick(pool);
   return { ...c, startBricks: run.bricks, startGold: run.goldBricks || 0, startCurses: state.cursesSurvived,
            startLifeLost: run.lifeLost, startTime: state.time, maxCombo: 0, done: false };
 }
@@ -77,13 +77,13 @@ function updateDirector(dt) {
   if (director.tick < 6) return;
   director.tick = 0;
   const low = state.lives <= 1;
-  if (low && state.time - director.lastMercy > 30 && Math.random() < 0.5) {
+  if (low && state.time - director.lastMercy > 30 && gameRandom() < 0.5) {
     director.lastMercy = state.time;
     state.shield = Math.max(state.shield, 1);
     dropPowerupAt(paddle.x + paddle.w / 2, paddle.y - 150, true);
     callout("🎬 DRAMATURG: NEFES AL", "#64dfdf");
     director.story.push("Zor anda bir nefes");
-  } else if (state.time - director.lastSpectacle > 40 && Math.random() < 0.35) {
+  } else if (state.time - director.lastSpectacle > 40 && gameRandom() < 0.35) {
     director.lastSpectacle = state.time;
     spawnCoins(W / 2, 120, 24);
     dropPowerupAt(W / 2, 120, true);

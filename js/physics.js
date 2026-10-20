@@ -16,7 +16,7 @@ const POWERS = {
   O: { label: "DELİK",  color: "#9d4edd", w: 6,  fx: () => spawnHole() },
   H: { label: "+CAN",   color: "#ff8fab", w: 2,  sound: "power",  fx: () => { state.lives = Math.min(state.lives + 1, MAX_LIVES); callout("+1 CAN", "#ff8fab"); } },
   Q: { label: "KAOS?",  color: "#ffffff", w: 6,  fx: () => {          // rastgele herhangi bir kapsül
-    const k = pick(Object.keys(POWERS).filter(k => k !== "Q" && powerAllowed(k)));
+    const k = gpick(Object.keys(POWERS).filter(k => k !== "Q" && powerAllowed(k)));
     callout("KAOS → " + POWERS[k].label, POWERS[k].bad ? "#ff4d6d" : "#ffffff");
     applyPower(k);
   } },
@@ -29,7 +29,7 @@ const POWERS = {
 const powerAllowed = k => !(k === "H" && state.lives >= MAX_LIVES) && !(k === "C" && hazardLevel() === "kapali");
 function pickPower(goodOnly) {
   const entries = Object.entries(POWERS).filter(([k, p]) => !(goodOnly && (p.bad || k === "Q")) && powerAllowed(k));
-  let r = Math.random() * entries.reduce((s, [, p]) => s + p.w, 0);
+  let r = gameRandom() * entries.reduce((s, [, p]) => s + p.w, 0);
   for (const [k, p] of entries) if ((r -= p.w) < 0) return k;
   return "W";
 }
@@ -80,7 +80,7 @@ function destroyBrick(b) {
   sfx("brick", state.combo);
   addShake(2.5);
   if (b.gold) { spawnCoins(cx, b.y + BRICK.h / 2, 26); sfx("coin"); dropPowerupAt(cx, b.y, true); }   // altın: kesin iyi kapsül
-  else if (Math.random() < 0.16) dropPowerupAt(cx, b.y);
+  else if (gameRandom() < 0.16) dropPowerupAt(cx, b.y);
   if (b.splitter) spawnSplitBall(cx, b.y + BRICK.h + 10);
   battleCharge(state.combo >= 5 ? 2 : 1);
   // Combo duyuruları; 10'da ÇILGIN MOD
@@ -96,7 +96,7 @@ function destroyBrick(b) {
 // Çoğaltan tuğla: kırıldığı yerden aşağı doğru yeni bir top çıkar
 function spawnSplitBall(x, y) {
   if (state.mode !== "playing" || balls.length >= MAX_BALLS) return;
-  const a = rnd(-0.6, 0.6);
+  const a = grnd(-0.6, 0.6);
   balls.push(Object.assign(newBall(false), { x, y, dx: mag() * Math.sin(a), dy: mag() * Math.cos(a) }));
   addFloater(x, y + 10, "+TOP", "#06d6a0");
   sfx("multi");
@@ -155,15 +155,15 @@ function wallHit(b, side) {
   if (Math.abs(b.spin) > 0.05) { rotate(b, -b.spin * 0.35); b.spin *= -0.6; }
   if (z && z.type === "bumper") {
     b.boost = Math.max(b.boost, 1.6);
-    rotate(b, rnd(-0.35, 0.35));
-    b.spin += rnd(-0.6, 0.6);
+    rotate(b, grnd(-0.35, 0.35));
+    b.spin += grnd(-0.6, 0.6);
     z.flash = 1;
     sfx("bumper");
     addShake(2.5);
     spawnParticles(wallX, b.y - 10, ZONE_STYLE.bumper, 12, 8, 20);
     addFloater(floatX, b.y, "BOING!", ZONE_STYLE.bumper);
   } else if (z && z.type === "spin") {
-    b.spin = (Math.random() < 0.5 ? -1 : 1) * SPIN_MAX * 1.4;
+    b.spin = (gameRandom() < 0.5 ? -1 : 1) * SPIN_MAX * 1.4;
     z.flash = 1;
     sfx("spin");
     spawnParticles(wallX, b.y - 10, ZONE_STYLE.spin, 10, 8, 20);
@@ -190,7 +190,7 @@ function collideRect(b, x, y, w, h, bounce) {
 const laserHits = (l, x, y, w, h) => l.x >= x && l.x <= x + w && l.y <= y + h && l.y + 12 >= y;
 // Kara delikten fırlatma: yukarı doğru rastgele yön, hız patlamasıyla
 function sling(b, h, m) {
-  const a = -Math.PI / 2 + rnd(-1.1, 1.1);
+  const a = -Math.PI / 2 + grnd(-1.1, 1.1);
   Object.assign(b, { dx: Math.cos(a) * m, dy: Math.sin(a) * m, x: h.x + Math.cos(a) * 30, y: h.y + Math.sin(a) * 30, boost: 1.8, trail: [] });
   sfx("sling");
   spawnParticles(h.x - 15, h.y - 15, "#c77dff", 14, 30, 30);
@@ -371,7 +371,7 @@ function updateLasers(dt) {
 // --- Kara delik: 7 sn topları büker, sonunda çöküp çevresini yutar ---
 function spawnHole() {
   if (holes.length >= 2) holes.shift();
-  holes.push({ x: rnd(140, W - 140), y: rnd(230, 380), life: 7, rot: 0 });
+  holes.push({ x: grnd(140, W - 140), y: grnd(230, 380), life: 7, rot: 0 });
   sfx("hole");
   addShake(4);
 }
@@ -424,7 +424,7 @@ function spawnMinions() {
     free.push(c);
   }
   for (let i = 0; i < 4 && free.length; i++) {
-    const br = makeBrick(row, free.splice((Math.random() * free.length) | 0, 1)[0], Math.random() < 0.25 ? "E" : "1");
+    const br = makeBrick(row, free.splice((gameRandom() * free.length) | 0, 1)[0], gameRandom() < 0.25 ? "E" : "1");
     br.flash = 1;
     bricks.push(br);
   }

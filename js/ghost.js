@@ -14,7 +14,7 @@ const ghost = {
     if (rec.length) ghost.best = { rec, score: Math.max(0, Math.round(+v.score) || 0), level: Math.max(1, Math.round(+v.level) || 1), date: +v.date || 0 };
   }
 }
-const ghostEnabled = () => settings.ghost !== "kapali" && !battle.active && !run.daily && !run.practice;
+const ghostEnabled = () => settings.ghost !== "kapali" && !battle.active && !run.daily && !run.practice && !weekly.active;
 const saveGhost = () => store.set("bb_ghost", ghost.best);
 
 function resetGhostRun() {

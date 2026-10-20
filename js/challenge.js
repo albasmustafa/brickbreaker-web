@@ -111,6 +111,7 @@ function renderChallenge() {
   dailyStartBtn.disabled = used;
   dailyStartBtn.textContent = used ? "☀️ Bugünkü deneme kullanıldı" : "☀️ Bugünün koşusunu başlat";
   if (typeof renderGhost === "function") renderGhost();
+  if (typeof renderWeekly === "function") renderWeekly();
 }
 
 setupPanel(challengePanel, "🎯 Meydan Okuma");

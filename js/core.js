@@ -33,6 +33,10 @@ const TAU = Math.PI * 2;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const rnd = (a, b) => a + Math.random() * (b - a);
 const pick = arr => arr[(Math.random() * arr.length) | 0];
+// Oyun içi rastgelelik: haftalık tohumda değiştirilebilir. Görsel rastgelelik Math.random'da kalır.
+let gameRandom = Math.random;
+const grnd = (a = 0, b = 1) => a + gameRandom() * (b - a);
+const gpick = arr => arr[(gameRandom() * arr.length) | 0];
 // Tohumlu rastgele: bölüm düzeni, tema ve şarkı profili her seferinde aynı çıksın
 function seeded(seed) {
   seed = (seed % 2147483646) + 1;

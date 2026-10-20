@@ -49,7 +49,7 @@ const pactNoCurses = () => pactMods().noCurses;
 const pactNames = () => run.pacts.map(id => PACT_BY_ID[id] && (PACT_BY_ID[id].icon + " " + PACT_BY_ID[id].name)).filter(Boolean).join(" · ");
 
 // Paktlar yalnızca klasik koşuda, 1. ve her 5. bölümün başında sunulur.
-const pactEnabled = () => settings.pacts !== "kapali" && !battle.active && !run.daily && !run.practice;
+const pactEnabled = () => settings.pacts !== "kapali" && !battle.active && !run.daily && !run.practice && !weekly.active;
 const pactOfferDue = level => level === 1 || level % 5 === 0;
 
 function showPactOffer() {
