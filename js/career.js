@@ -6,51 +6,51 @@
 const START_LP = 1000, PLACEMENT = 5;           // ilk 5 dereceli maç yerleştirme: puan daha hızlı oynar
 const K_PLACEMENT = 64, K_NORMAL = 40, MAX_HISTORY = 20;
 const TIERS = [
-  { name: "Bronz", min: 0, icon: "🥉", color: "#cd7f32" },
-  { name: "Gümüş", min: 1100, icon: "🥈", color: "#c0c8d8" },
-  { name: "Altın", min: 1250, icon: "🥇", color: "#ffd166" },
-  { name: "Platin", min: 1400, icon: "💠", color: "#5ce1e6" },
-  { name: "Elmas", min: 1550, icon: "💎", color: "#7aa2ff" },
-  { name: "Usta", min: 1700, icon: "👑", color: "#f72585" },
-  { name: "Efsane", min: 1850, icon: "🔥", color: "#ff9f1c" },
+  { name: N_("Bronz"), min: 0, icon: "🥉", color: "#cd7f32" },
+  { name: N_("Gümüş"), min: 1100, icon: "🥈", color: "#c0c8d8" },
+  { name: N_("Altın"), min: 1250, icon: "🥇", color: "#ffd166" },
+  { name: N_("Platin"), min: 1400, icon: "💠", color: "#5ce1e6" },
+  { name: N_("Elmas"), min: 1550, icon: "💎", color: "#7aa2ff" },
+  { name: N_("Usta"), min: 1700, icon: "👑", color: "#f72585" },
+  { name: N_("Efsane"), min: 1850, icon: "🔥", color: "#ff9f1c" },
 ];
 const tierOf = lp => TIERS.reduce((t, x) => (lp >= x.min ? x : t), TIERS[0]);
 const tierTag = lp => tierOf(lp).icon + " " + lp;
 // Kariyer sayaçları (anahtar: panel etiketi); "streak" şu anki galibiyet serisidir, panelde ayrı gösterilir
 const STATS = {
-  games: "Klasik oyun", bricks: "Kırılan tuğla", bestCombo: "En iyi combo", bestLevel: "En uzak bölüm", bosses: "Yenilen boss",
-  fevers: "ÇILGIN MOD", curses: "Atlatılan lanet", powers: "Yakalanan kapsül", time: "Oynama süresi",
-  matches: "Kapışma", wins: "Galibiyet", podiums: "Podyum (ilk 3)", bestStreak: "En uzun seri", ranked: "Dereceli maç",
-  rankedWins: "Dereceli galibiyet", online: "Çevrim içi maç", attacks: "Gönderilen saldırı", blocked: "Kalkanla engellenen",
-  director: "Dramaturg görevi",
+  games: tr("Klasik oyun"), bricks: tr("Kırılan tuğla"), bestCombo: tr("En iyi combo"), bestLevel: tr("En uzak bölüm"), bosses: tr("Yenilen boss"),
+  fevers: tr("ÇILGIN MOD"), curses: tr("Atlatılan lanet"), powers: tr("Yakalanan kapsül"), time: tr("Oynama süresi"),
+  matches: tr("Kapışma"), wins: tr("Galibiyet"), podiums: tr("Podyum (ilk 3)"), bestStreak: tr("En uzun seri"), ranked: tr("Dereceli maç"),
+  rankedWins: tr("Dereceli galibiyet"), online: tr("Çevrim içi maç"), attacks: tr("Gönderilen saldırı"), blocked: tr("Kalkanla engellenen"),
+  director: tr("Dramaturg görevi"),
 };
 // test(s, m): s = kariyer sayaçları, m = biten kapışmanın özeti (yalnızca kapışma sonunda verilir)
 const ACHIEVEMENTS = [
-  { id: "ilk", icon: "🧱", name: "İlk Tuğla", desc: "İlk tuğlanı kır", test: s => s.bricks >= 1 },
-  { id: "yikim", icon: "🏗️", name: "Yıkım Ekibi", desc: "Toplam 1.000 tuğla kır", test: s => s.bricks >= 1000 },
-  { id: "zincir", icon: "🔗", name: "Zincirleme", desc: "20 combo yap", test: s => s.bestCombo >= 20 },
-  { id: "cilgin", icon: "★", name: "Çılgın", desc: "ÇILGIN MOD'a gir", test: s => s.fevers >= 1 },
-  { id: "boss", icon: "👹", name: "Boss Avcısı", desc: "Bir boss yen", test: s => s.bosses >= 1 },
-  { id: "imparator", icon: "⚙️", name: "İmparator Düştü", desc: "Demir İmparator'u yenip 11. bölüme ulaş", test: s => s.bestLevel >= 11 },
-  { id: "labirent", icon: "🌀", name: "Labirentin Sonu", desc: "11. bölümü de bitir", test: s => s.bestLevel >= 12 },
-  { id: "elli", icon: "💯", name: "50.000 Kulübü", desc: "Tek oyunda 50.000 puan topla", test: () => state.score >= 50000 },
-  { id: "lanet", icon: "🔮", name: "Lanet Avcısı", desc: "Toplam 50 lanet atlat", test: s => s.curses >= 50 },
-  { id: "kapsul", icon: "💊", name: "Kapsül Bağımlısı", desc: "Toplam 100 kapsül yakala", test: s => s.powers >= 100 },
-  { id: "kapisma", icon: "⚔", name: "İlk Kapışma", desc: "Bir kapışmayı bitir", test: s => s.matches >= 1 },
-  { id: "zafer", icon: "🏆", name: "İlk Zafer", desc: "Bir kapışmayı kazan", test: s => s.wins >= 1 },
-  { id: "seri3", icon: "📈", name: "Seri Galip", desc: "3 kapışmayı üst üste kazan", test: s => s.bestStreak >= 3 },
-  { id: "seri5", icon: "🚀", name: "Durdurulamaz", desc: "5 kapışmayı üst üste kazan", test: s => s.bestStreak >= 5 },
-  { id: "kalabalik", icon: "🎪", name: "Kalabalığın Kralı", desc: "8 kişilik bir maçı kazan", test: (s, m) => m && m.place === 1 && m.of >= 8 },
-  { id: "makine", icon: "🤖", name: "Makine Avcısı", desc: "Efsane güçte (1600+ LP) bot olan bir maçı kazan", test: (s, m) => m && m.place === 1 && m.topBot >= BOT_SKILL.efsane.elo },
-  { id: "kusursuz", icon: "✨", name: "Kusursuz", desc: "Hiç can kaybetmeden bir kapışmayı kazan", test: (s, m) => m && m.place === 1 && m.flawless },
-  { id: "sonnefes", icon: "💓", name: "Son Nefes", desc: "Tek canın kalmışken bir kapışmayı kazan", test: (s, m) => m && m.place === 1 && m.lastLife },
-  { id: "cevrimici", icon: "🌐", name: "Sokakların Kralı", desc: "Arkadaşlarınla oynanan bir maçı kazan", test: (s, m) => m && m.place === 1 && m.online },
-  { id: "sabotaj", icon: "💣", name: "Sabotajcı", desc: "Toplam 50 saldırı gönder", test: s => s.attacks >= 50 },
-  { id: "kalkan", icon: "🛡", name: "Kalkan Duvarı", desc: "10 saldırıyı kalkanla engelle", test: s => s.blocked >= 10 },
-  { id: "yerlesti", icon: "🎖", name: "Yerleşti", desc: PLACEMENT + " yerleştirme maçını tamamla", test: s => s.ranked >= PLACEMENT },
+  { id: "ilk", icon: "🧱", name: tr("İlk Tuğla"), desc: tr("İlk tuğlanı kır"), test: s => s.bricks >= 1 },
+  { id: "yikim", icon: "🏗️", name: tr("Yıkım Ekibi"), desc: tr("Toplam 1.000 tuğla kır"), test: s => s.bricks >= 1000 },
+  { id: "zincir", icon: "🔗", name: tr("Zincirleme"), desc: tr("20 combo yap"), test: s => s.bestCombo >= 20 },
+  { id: "cilgin", icon: "★", name: tr("Çılgın"), desc: tr("ÇILGIN MOD'a gir"), test: s => s.fevers >= 1 },
+  { id: "boss", icon: "👹", name: tr("Boss Avcısı"), desc: tr("Bir boss yen"), test: s => s.bosses >= 1 },
+  { id: "imparator", icon: "⚙️", name: tr("İmparator Düştü"), desc: tr("Demir İmparator'u yenip 11. bölüme ulaş"), test: s => s.bestLevel >= 11 },
+  { id: "labirent", icon: "🌀", name: tr("Labirentin Sonu"), desc: tr("11. bölümü de bitir"), test: s => s.bestLevel >= 12 },
+  { id: "elli", icon: "💯", name: tr("50.000 Kulübü"), desc: tr("Tek oyunda 50.000 puan topla"), test: () => state.score >= 50000 },
+  { id: "lanet", icon: "🔮", name: tr("Lanet Avcısı"), desc: tr("Toplam 50 lanet atlat"), test: s => s.curses >= 50 },
+  { id: "kapsul", icon: "💊", name: tr("Kapsül Bağımlısı"), desc: tr("Toplam 100 kapsül yakala"), test: s => s.powers >= 100 },
+  { id: "kapisma", icon: "⚔", name: tr("İlk Kapışma"), desc: tr("Bir kapışmayı bitir"), test: s => s.matches >= 1 },
+  { id: "zafer", icon: "🏆", name: tr("İlk Zafer"), desc: tr("Bir kapışmayı kazan"), test: s => s.wins >= 1 },
+  { id: "seri3", icon: "📈", name: tr("Seri Galip"), desc: tr("3 kapışmayı üst üste kazan"), test: s => s.bestStreak >= 3 },
+  { id: "seri5", icon: "🚀", name: tr("Durdurulamaz"), desc: tr("5 kapışmayı üst üste kazan"), test: s => s.bestStreak >= 5 },
+  { id: "kalabalik", icon: "🎪", name: tr("Kalabalığın Kralı"), desc: tr("8 kişilik bir maçı kazan"), test: (s, m) => m && m.place === 1 && m.of >= 8 },
+  { id: "makine", icon: "🤖", name: tr("Makine Avcısı"), desc: tr("Efsane güçte (1600+ LP) bot olan bir maçı kazan"), test: (s, m) => m && m.place === 1 && m.topBot >= BOT_SKILL.efsane.elo },
+  { id: "kusursuz", icon: "✨", name: tr("Kusursuz"), desc: tr("Hiç can kaybetmeden bir kapışmayı kazan"), test: (s, m) => m && m.place === 1 && m.flawless },
+  { id: "sonnefes", icon: "💓", name: tr("Son Nefes"), desc: tr("Tek canın kalmışken bir kapışmayı kazan"), test: (s, m) => m && m.place === 1 && m.lastLife },
+  { id: "cevrimici", icon: "🌐", name: tr("Sokakların Kralı"), desc: tr("Arkadaşlarınla oynanan bir maçı kazan"), test: (s, m) => m && m.place === 1 && m.online },
+  { id: "sabotaj", icon: "💣", name: tr("Sabotajcı"), desc: tr("Toplam 50 saldırı gönder"), test: s => s.attacks >= 50 },
+  { id: "kalkan", icon: "🛡", name: tr("Kalkan Duvarı"), desc: tr("10 saldırıyı kalkanla engelle"), test: s => s.blocked >= 10 },
+  { id: "yerlesti", icon: "🎖", name: tr("Yerleşti"), desc: tr("{n} yerleştirme maçını tamamla", { n: PLACEMENT }), test: s => s.ranked >= PLACEMENT },
   ...[["altin", "Altın"], ["elmas", "Elmas"], ["efsane", "Efsane"]].map(([id, name]) => {
     const t = TIERS.find(x => x.name === name);
-    return { id: "lig-" + id, icon: t.icon, name: name + " Lig", desc: name + " lige yüksel", test: () => career.peak >= t.min };
+    return { id: "lig-" + id, icon: t.icon, name: tr("{tier} Lig", { tier: tr(name) }), desc: tr("{tier} lige yüksel", { tier: tr(name) }), test: () => career.peak >= t.min };
   }),
 ];
 
@@ -103,7 +103,7 @@ function checkAchievements(m) {
   if (run.practice) return;
   for (const a of ACHIEVEMENTS) if (!career.ach[a.id] && a.test(career.stats, m)) {
     career.ach[a.id] = Date.now();
-    toast(a.icon + " Başarım: " + a.name, a.desc);
+    toast(a.icon + " " + tr("Başarım: {name}", { name: a.name }), a.desc);
     sfx("achieve");
     saveCareer();
   }
@@ -140,7 +140,7 @@ function applyLp(delta) {
   career.lp = Math.max(0, career.lp + delta);
   career.peak = Math.max(career.peak, career.lp);
   const after = tierOf(career.lp), up = after.min > before.min;
-  if (after !== before) toast((up ? "⬆ " : "⬇ ") + after.name + " lige " + (up ? "yükseldin!" : "düştün"), after.icon + " " + career.lp + " LP", after.color);
+  if (after !== before) toast((up ? "⬆ " : "⬇ ") + (up ? tr("{tier} lige yükseldin!", { tier: tr(after.name) }) : tr("{tier} lige düştün", { tier: tr(after.name) })), after.icon + " " + career.lp + " LP", after.color);
 }
 function addHistory(entry) {
   career.history.unshift({ date: Date.now(), ...entry });
@@ -162,7 +162,7 @@ function careerAbandon() {
   career.stats.streak = 0;
   addHistory({ mode: pd.mode, place: pd.of, of: pd.of, score: null, delta: pd.delta, left: true });
   saveCareer();
-  toast("🏳 Dereceli maç yarıda kaldı", pd.delta + " LP · son sıra sayıldı", "#ff4d6d");
+  toast(tr("🏳 Dereceli maç yarıda kaldı"), tr("{n} LP · son sıra sayıldı", { n: pd.delta }), "#ff4d6d");
 }
 // Bağlantı oda sahibinden koptu: kimsenin suçu değil, maç puansız sayılır
 const careerVoidMatch = () => { battle.ranked = false; career.pending = null; saveCareer(); };
@@ -188,31 +188,31 @@ function careerBattleEnd(list) {
 function rankCard() {
   const lp = career.lp, t = tierOf(lp), next = TIERS[TIERS.indexOf(t) + 1], s = career.stats;
   const base = next ? Math.max(t.min, next.min - 300) : t.min, pct = next ? clamp((lp - base) / (next.min - base), 0, 1) : 1;
-  const sub = [s.ranked < PLACEMENT ? "Yerleştirme " + s.ranked + "/" + PLACEMENT : "", next ? next.icon + " " + next.name + " için " + (next.min - lp) + " LP" : "En yüksek lig!", "zirve " + career.peak];
+  const sub = [s.ranked < PLACEMENT ? tr("Yerleştirme {a}/{b}", { a: s.ranked, b: PLACEMENT }) : "", next ? next.icon + " " + tr("{tier} için {n} LP", { tier: tr(next.name), n: next.min - lp }) : tr("En yüksek lig!"), tr("zirve {n}", { n: career.peak })];
   return el("div", { className: "rank-card", "--c": t.color },
     el("span", { className: "rank-icon", textContent: t.icon }),
     el("div", { className: "rank-main" },
-      el("div", { className: "rank-name" }, el("strong", { textContent: t.name }), " · " + lp + " LP"),
+      el("div", { className: "rank-name" }, el("strong", { textContent: tr(t.name) }), " · " + lp + " LP"),
       el("div", { className: "rank-bar" }, el("span", { style: { width: Math.round(pct * 100) + "%" } })),
       el("div", { className: "rank-sub", textContent: sub.filter(Boolean).join(" · ") })),
-    el("div", { className: "rank-rec" }, el("strong", { textContent: s.rankedWins + "/" + s.ranked }), el("span", { textContent: "dereceli galibiyet" })));
+    el("div", { className: "rank-rec" }, el("strong", { textContent: s.rankedWins + "/" + s.ranked }), el("span", { textContent: tr("dereceli galibiyet") })));
 }
 const renderRankCards = () => { for (const slot of document.querySelectorAll(".rank-slot")) slot.replaceChildren(rankCard()); };
 
 const careerPanel = $("careerpanel");
-setupPanel(careerPanel, "🏅 Kariyer");
-const careerBtn = el("button", { textContent: "🏅 Kariyer", title: "Dereceli lig, istatistikler, maç geçmişi, başarımlar", onclick: () => togglePanel(careerPanel, renderCareer) });
+setupPanel(careerPanel, tr("🏅 Kariyer"));
+const careerBtn = el("button", { textContent: tr("🏅 Kariyer"), title: tr("Dereceli lig, istatistikler, maç geçmişi, başarımlar"), onclick: () => togglePanel(careerPanel, renderCareer) });
 toolbar.insertBefore(careerBtn, settingsBtn);
-const fmtNum = v => v.toLocaleString("tr-TR");
-const fmtDur = s => (s >= 3600 ? Math.floor(s / 3600) + " sa " : "") + Math.floor((s % 3600) / 60) + " dk";
+const fmtNum = v => v.toLocaleString(LOCALE);
+const fmtDur = s => (s >= 3600 ? tr("{h} sa {m} dk", { h: Math.floor(s / 3600), m: Math.floor((s % 3600) / 60) }) : tr("{m} dk", { m: Math.floor((s % 3600) / 60) }));
 const fmtDelta = d => (d == null ? "—" : (d >= 0 ? "+" : "−") + Math.abs(d));
 const pad2 = n => String(n).padStart(2, "0");
 const STAT_FMT = {
   time: fmtDur,
-  wins: v => fmtNum(v) + (career.stats.matches ? " (%" + Math.round((100 * v) / career.stats.matches) + ")" : ""),
-  bestStreak: v => v + " (şu an " + career.stats.streak + ")",
+  wins: v => fmtNum(v) + (career.stats.matches ? " (" + tr("%{n}", { n: Math.round((100 * v) / career.stats.matches) }) + ")" : ""),
+  bestStreak: v => v + " " + tr("(şu an {n})", { n: career.stats.streak }),
 };
-const MODE_LABEL = { dereceli: "🏅 Dereceli", dostluk: "🤖 Botlar", cevrimici: "🌐 Çevrim içi" };
+const MODE_LABEL = { dereceli: tr("🏅 Dereceli"), dostluk: tr("🤖 Botlar"), cevrimici: tr("🌐 Çevrim içi") };
 function renderCareer() {
   renderRankCards();
   $("cr-stats").replaceChildren(...Object.entries(STATS).map(([k, label]) =>
@@ -220,26 +220,26 @@ function renderCareer() {
   const row = (tag, cells) => el("tr", {}, ...cells.map(c => el(tag, { textContent: c })));
   const rows = career.history.map(h => {
     const d = new Date(h.date);
-    return row("td", [pad2(d.getDate()) + "." + pad2(d.getMonth() + 1) + " " + pad2(d.getHours()) + ":" + pad2(d.getMinutes()), MODE_LABEL[h.mode] || h.mode,
+    return row("td", [d.toLocaleString(LOCALE, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }), MODE_LABEL[h.mode] || h.mode,
                       h.place + "/" + h.of + (h.left ? " 🏳" : h.place === 1 ? " 🏆" : ""), h.score == null ? "—" : fmtNum(h.score), fmtDelta(h.delta)]);
   });
-  if (!rows.length) rows.push(el("tr", {}, el("td", { colSpan: 5, textContent: "Henüz kapışma yok — Rekabet panelinden bir maç başlat!" })));
-  $("cr-history").replaceChildren(row("th", ["Tarih", "Mod", "Sıra", "Skor", "LP"]), ...rows);
+  if (!rows.length) rows.push(el("tr", {}, el("td", { colSpan: 5, textContent: tr("Henüz kapışma yok — Rekabet panelinden bir maç başlat!") })));
+  $("cr-history").replaceChildren(row("th", [tr("Tarih"), tr("Mod"), tr("Sıra"), tr("Skor"), "LP"]), ...rows);
   const got = ACHIEVEMENTS.filter(a => career.ach[a.id]).length;
-  $("cr-achhead").textContent = "Başarımlar · " + got + "/" + ACHIEVEMENTS.length;
+  $("cr-achhead").textContent = tr("Başarımlar · {a}/{b}", { a: got, b: ACHIEVEMENTS.length });
   $("cr-ach").replaceChildren(...ACHIEVEMENTS.map(a => {
     const at = career.ach[a.id];
-    return el("div", { className: "ach" + (at ? " got" : ""), title: at ? "Açıldı: " + new Date(at).toLocaleDateString("tr-TR") : "Kilitli" },
+    return el("div", { className: "ach" + (at ? " got" : ""), title: at ? tr("Açıldı: {date}", { date: new Date(at).toLocaleDateString(LOCALE) }) : tr("Kilitli") },
       el("span", { className: "ach-icon", textContent: a.icon }), el("div", {}, el("strong", { textContent: a.name }), el("span", { textContent: a.desc })));
   }));
 }
 onClick("cr-reset", e => {
   const b = e.currentTarget;
-  if (b.dataset.armed !== "1") { b.dataset.armed = "1"; b.textContent = "Emin misin? Puan, istatistik ve başarımlar silinir — tekrar tıkla"; return; }
+  if (b.dataset.armed !== "1") { b.dataset.armed = "1"; b.textContent = tr("Emin misin? Puan, istatistik ve başarımlar silinir — tekrar tıkla"); return; }
   resetCareer();
   saveCareer();
   b.dataset.armed = "";
-  b.textContent = "Kariyeri sıfırla";
+  b.textContent = tr("Kariyeri sıfırla");
   renderCareer();
 });
 if (career.pending) careerAbandon();           // önceki oturumda yarım kalan dereceli maç

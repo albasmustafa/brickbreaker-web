@@ -14,11 +14,11 @@ const MUSIC_K = { tam: 1, hafif: 0.55, kapali: 0 };
 const PROFILE_LISTEN = 8;       // şarkı karakteri bu kadar saniye dinlendikten sonra belirlenir
 const MUSIC_FX_ALL = ["zoom", "rings", "dance", "eq", "spectrum", "strobe", "tint", "warp", "lasers", "sparkle", "aurora", "glow"];
 const ARCHETYPES = {            // şarkı karakterleri ve efekt setleri
-  bas:     { name: "Bas Fırtınası",  fx: ["zoom", "rings", "dance", "eq", "tint"] },
-  hiz:     { name: "Hız Treni",      fx: ["strobe", "lasers", "warp", "zoom", "eq"] },
-  kristal: { name: "Kristal Yağmur", fx: ["sparkle", "spectrum", "glow", "dance"] },
-  sakin:   { name: "Gece Sakinliği", fx: ["aurora", "glow", "tint", "spectrum"] },
-  neon:    { name: "Neon Dalga",     fx: ["lasers", "rings", "spectrum", "glow", "dance"] },
+  bas:     { name: N_("Bas Fırtınası"),  fx: ["zoom", "rings", "dance", "eq", "tint"] },
+  hiz:     { name: N_("Hız Treni"),      fx: ["strobe", "lasers", "warp", "zoom", "eq"] },
+  kristal: { name: N_("Kristal Yağmur"), fx: ["sparkle", "spectrum", "glow", "dance"] },
+  sakin:   { name: N_("Gece Sakinliği"), fx: ["aurora", "glow", "tint", "spectrum"] },
+  neon:    { name: N_("Neon Dalga"),     fx: ["lasers", "rings", "spectrum", "glow", "dance"] },
 };
 const music = {
   analyser: null, gain: null, freq: null, sources: new Map(), on: false, t: 0,
@@ -27,6 +27,13 @@ const music = {
   key: null, profile: null, listen: 0, stats: null, rings: [], beams: [], sparks: [], uiAt: 0,
 };
 const musicK = () => MUSIC_K[settings.musicFx] || 0;
+// Şarkı profili adı seçilen dilde: "<sıfat> <karakter>" (kayıtlı profiller Türkçe saklanır)
+function profileName(p) {
+  if (!p) return "";
+  if (p.pending || !p.arch || !ARCHETYPES[p.arch]) return tr(p.name);
+  const base = ARCHETYPES[p.arch].name, adj = p.name.endsWith(" " + base) ? p.name.slice(0, -base.length - 1) : null;
+  return adj != null && TH_ADJ.includes(adj) ? tr("{adj} {noun}", { adj: tr("sıfat::" + adj), noun: tr(base) }) : p.name;
+}
 const musicFx = name => music.on && music.profile && musicK() > 0 && music.profile.fx.includes(name) && (name !== "strobe" || settings.musicFx === "tam");
 const strHash = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h >>> 0; };
 let songProfiles = store.get("bb_song_profiles", {}) || {};
@@ -46,7 +53,7 @@ function attachMusic(el, key) {
       const src = c.createMediaElementSource(el);       // öğe başına yalnızca bir kez yapılabilir
       src.connect(music.analyser);
       music.sources.set(el, src);
-    } catch (e) { return mediaStatus("⚠️ Ses analiz edilemedi, efektler kapalı"); }
+    } catch (e) { return mediaStatus(tr("⚠️ Ses analiz edilemedi, efektler kapalı")); }
   }
   setMediaVolume();
   startProfile(key);
@@ -60,7 +67,7 @@ function startProfile(key) {
   } else {
     // Karakter belli olana kadar: tohumdan renk + genel efektler + tohuma özel bir imza efekti
     const seed = strHash(key), r = seeded(seed), hue = r() * 360;
-    music.profile = { seed, hue, hue2: hue + 60 + r() * 120, name: "Dinleniyor…", arch: null, pending: true,
+    music.profile = { seed, hue, hue2: hue + 60 + r() * 120, name: N_("Dinleniyor…"), arch: null, pending: true,
                       fx: ["dance", "glow", "warp", "eq", ["rings", "spectrum", "aurora"][(r() * 3) | 0]] };
   }
   updateMusicInfo(true);
@@ -87,7 +94,7 @@ function finalizeProfile() {
   if (keys.length > 60) delete songProfiles[keys[0]];
   store.set("bb_song_profiles", songProfiles);
   if (settings.songTheme === "acik") setTheme(genTheme(p.seed));
-  callout("♪ " + name.toLocaleUpperCase("tr"), hslHex(p.hue, 85, 65));
+  callout("♪ " + profileName(music.profile).toLocaleUpperCase(LOCALE), hslHex(p.hue, 85, 65));
   updateMusicInfo(true);
 }
 function detachMusic() {
@@ -183,7 +190,7 @@ function updateMusicInfo(force) {
   music.uiAt = music.t + 0.5;
   if (!p) { musicInfo.textContent = ""; return; }
   const bpm = Math.round(music.bpm || p.bpm || 0);
-  musicInfo.textContent = "♪ " + p.name + (bpm ? " · " + bpm + " BPM" : "") + (p.pending && music.on ? " (" + Math.max(0, Math.ceil(PROFILE_LISTEN - music.listen)) + " sn)" : "");
+  musicInfo.textContent = "♪ " + profileName(p) + (bpm ? " · " + bpm + " BPM" : "") + (p.pending && music.on ? " " + tr("({n} sn)", { n: Math.max(0, Math.ceil(PROFILE_LISTEN - music.listen)) }) : "");
   musicInfo.style.color = hslHex(p.hue, 80, 65);
 }
 
@@ -295,7 +302,7 @@ function loadVideoFile(f) {
   attachMusic(bgvid, f.name + "|" + f.size);
   bgvid.play().catch(() => {   // sesli otomatik oynatma engellendiyse sessiz başlat ve haber ver
     bgvid.muted = true;
-    bgvid.play().then(() => mediaStatus("🔇 Video sessiz başlatıldı"), () => mediaStatus("⚠️ Video başlatılamadı — sayfaya bir kez tıkla"));
+    bgvid.play().then(() => mediaStatus(tr("🔇 Video sessiz başlatıldı")), () => mediaStatus(tr("⚠️ Video başlatılamadı — sayfaya bir kez tıkla")));
   });
 }
 function loadMusicFile(f) {
@@ -303,7 +310,7 @@ function loadMusicFile(f) {
   bgmusic.src = audURL = URL.createObjectURL(f);
   mediaStatus("");
   attachMusic(bgmusic, f.name + "|" + f.size);
-  bgmusic.play().catch(() => mediaStatus("⚠️ Müzik başlatılamadı — sayfaya bir kez tıkla"));
+  bgmusic.play().catch(() => mediaStatus(tr("⚠️ Müzik başlatılamadı — sayfaya bir kez tıkla")));
 }
 $("vidfile").addEventListener("change", e => e.target.files[0] && loadVideoFile(e.target.files[0]));
 $("audfile").addEventListener("change", e => e.target.files[0] && loadMusicFile(e.target.files[0]));

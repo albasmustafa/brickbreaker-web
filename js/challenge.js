@@ -57,7 +57,7 @@ function startDaily() {
   state.lives = 1;
   state.diffSpeed = 1.15;
   state.speed = levelSpeed(1);
-  callout("☀️ GÜNLÜK MEYDAN OKUMA", "#ffd166");
+  callout(tr("☀️ GÜNLÜK MEYDAN OKUMA"), "#ffd166");
   return true;
 }
 
@@ -96,29 +96,29 @@ function renderChallenge() {
     return el("button", {
       className: n === max ? "active" : "",
       textContent: (boss ? "☠ " : def.pixel ? "🌀 " : "") + n,
-      title: locked ? "Önce klasik oyunda " + n + ". bölüme ulaş" : "Bölüm " + n + " pratiği",
+      title: locked ? tr("Önce klasik oyunda {n}. bölüme ulaş", { n }) : tr("Bölüm {n} pratiği", { n }),
       disabled: locked,
       onclick: () => startPractice(n),
     });
   }));
   const used = dailyUsed();
-  const todayLabel = new Date().toLocaleDateString("tr-TR", { day: "numeric", month: "long" });
+  const todayLabel = new Date().toLocaleDateString(LOCALE, { day: "numeric", month: "long" });
   dailyCard.replaceChildren(
-    el("strong", { textContent: used ? "Bugünkü deneme kullanıldı" : "Bugünün koşusu hazır" }),
-    el("span", { textContent: todayLabel + " · 1 can · Kabus lanetleri · +%15 hız" }),
-    el("span", { textContent: "En iyi " + daily.best + " · Seri " + currentStreak() + " gün" }),
+    el("strong", { textContent: used ? tr("Bugünkü deneme kullanıldı") : tr("Bugünün koşusu hazır") }),
+    el("span", { textContent: todayLabel + " · " + tr("1 can · Kabus lanetleri · +%15 hız") }),
+    el("span", { textContent: tr("En iyi {best} · Seri {n} gün", { best: daily.best, n: currentStreak() }) }),
   );
   dailyStartBtn.disabled = used;
-  dailyStartBtn.textContent = used ? "☀️ Bugünkü deneme kullanıldı" : "☀️ Bugünün koşusunu başlat";
+  dailyStartBtn.textContent = used ? tr("☀️ Bugünkü deneme kullanıldı") : tr("☀️ Bugünün koşusunu başlat");
   if (typeof renderGhost === "function") renderGhost();
   if (typeof renderWeekly === "function") renderWeekly();
   if (typeof renderSong === "function") renderSong();
 }
 
-setupPanel(challengePanel, "🎯 Meydan Okuma");
+setupPanel(challengePanel, tr("🎯 Meydan Okuma"));
 const challengeBtn = el("button", {
-  textContent: "🎯 Meydan",
-  title: "Bölüm seçimi, pratik ve günlük meydan okuma",
+  textContent: tr("🎯 Meydan"),
+  title: tr("Bölüm seçimi, pratik ve günlük meydan okuma"),
   onclick: () => togglePanel(challengePanel, renderChallenge),
 });
 toolbar.insertBefore(challengeBtn, careerBtn);

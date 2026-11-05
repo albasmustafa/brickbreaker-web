@@ -3,9 +3,9 @@
 //     Kapışmada tuğla kırdıkça saldırı enerjisi dolar; dolunca rakibe lanet gider.
 // ======================================================================
 const BOT_SKILL = {   // rate: saniyede kırılan tuğla · loss: saniyede can kaybı ihtimali · reset: combo sıfırlanma sıklığı (raket vuruşu gibi) · elo: dereceli puanı
-  caylak: { label: "Çaylak", rate: 0.5, loss: 0.02, reset: 0.6, elo: 900 },
+  caylak: { label: tr("Çaylak"), rate: 0.5, loss: 0.02, reset: 0.6, elo: 900 },
   usta:   { label: "Usta", rate: 0.75, loss: 0.011, reset: 0.5, elo: 1250 },
-  efsane: { label: "Efsane", rate: 1.05, loss: 0.0055, reset: 0.4, elo: 1600 },
+  efsane: { label: tr("Efsane"), rate: 1.05, loss: 0.0055, reset: 0.4, elo: 1600 },
 };
 // Dereceli botların gücü puanlarından türetilir: seviyeler arası doğrusal, uçlarda sabit
 const BOT_CURVE = [[700, 0.4, 0.026, 0.65], ...Object.values(BOT_SKILL).map(s => [s.elo, s.rate, s.loss, s.reset]), [2000, 1.3, 0.0035, 0.33]];
@@ -25,20 +25,20 @@ const MAX_GUESTS = 3;           // oda sahibiyle birlikte en çok 4 insan
 const RTC_CFG = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };   // yalnızca bağlantı kurarken adres öğrenmek için
 // Rekabet paneli seçenekleri (ayarlar paneliyle aynı satır üreticisi)
 const VS_ROWS = [
-  { key: "bots", label: "Bot sayısı", def: 3, opts: "1|2|3|5|7" },
-  { key: "skill", label: "Bot seviyesi", def: "usta", opts: "caylak:Çaylak|usta:Usta|efsane:Efsane|karisik:Karışık" },
-  { key: "dur", label: "Süre", def: 180, opts: "120:2 dk|180:3 dk|300:5 dk" },
-  { key: "target", label: "Saldırı hedefi", def: "lider", opts: "lider:Lider|rastgele:Rastgele|son:Son sıradaki" },
-  { note: "Herkes 3 canla aynı anda başlar. Tuğla kırdıkça saldırı enerjin dolar (combo ×2, bölüm +6, boss +12, ÇILGIN MOD +5); dolunca seçtiğin hedefe bir lanet gider. KALKAN gelen saldırıyı engeller. Süre bitince en yüksek skor, ya da son ayakta kalan kazanır." },
+  { key: "bots", label: tr("Bot sayısı"), def: 3, opts: "1|2|3|5|7" },
+  { key: "skill", label: tr("Bot seviyesi"), def: "usta", opts: "caylak:Çaylak|usta:Usta|efsane:Efsane|karisik:Karışık" },
+  { key: "dur", label: tr("Süre"), def: 180, opts: "120:2 dk|180:3 dk|300:5 dk" },
+  { key: "target", label: tr("Saldırı hedefi"), def: "lider", opts: "lider:Lider|rastgele:Rastgele|son:Son sıradaki" },
+  { note: tr("Herkes 3 canla aynı anda başlar. Tuğla kırdıkça saldırı enerjin dolar (combo ×2, bölüm +6, boss +12, ÇILGIN MOD +5); dolunca seçtiğin hedefe bir lanet gider. KALKAN gelen saldırıyı engeller. Süre bitince en yüksek skor, ya da son ayakta kalan kazanır.") },
 ];
 const VS_NET_ROWS = [
-  { key: "netBots", label: "Ek bot", def: 0, opts: "0:Yok|1|2|3" },
-  { key: "ranked", label: "Dereceli", def: true, opts: "true:Açık (herkesin puanı değişir)|false:Kapalı" },
+  { key: "netBots", label: tr("Ek bot"), def: 0, opts: "0:Yok|1|2|3" },
+  { key: "ranked", label: tr("Dereceli"), def: true, opts: "true:Açık (herkesin puanı değişir)|false:Kapalı" },
 ];
-const vsCfg = { name: "Oyuncu" };
+const vsCfg = { name: tr("Oyuncu") };
 {
   const saved = store.get("bb_versus", {}) || {};
-  if (typeof saved.name === "string") vsCfg.name = saved.name.slice(0, 16) || "Oyuncu";
+  if (typeof saved.name === "string") vsCfg.name = saved.name.slice(0, 16) || tr("Oyuncu");
   for (const row of [...VS_ROWS, ...VS_NET_ROWS]) if (row.key) {
     row.opts = parseOpts(row.opts);
     vsCfg[row.key] = row.opts.some(o => o[0] === saved[row.key]) ? saved[row.key] : row.def;
@@ -69,7 +69,7 @@ function startBattle(players, online, dur, ranked) {
   state.speed = levelSpeed(1);
   oppPanel.hidden = false;
   careerBattleStart();
-  callout(battle.ranked ? "🏅 DERECELİ!" : "⚔ KAPIŞMA!", "#ff4d6d");
+  callout(battle.ranked ? tr("🏅 DERECELİ!") : tr("⚔ KAPIŞMA!"), "#ff4d6d");
   renderOpponents();
 }
 function startBotBattle() {
@@ -117,7 +117,7 @@ function endBattle(remoteList) {
   careerBattleEnd(list);
   if (state.mode !== "gameover") { state.mode = "gameover"; state.newRecord = state.score > state.startHigh && state.score > 0; }
   clearEffects();               // lanetler sonuç ekranını bozmasın
-  if (battle.myPlace === 1) { sfx("level"); callout("🏆 KAZANDIN!", "#ffd166"); }
+  if (battle.myPlace === 1) { sfx("level"); callout(tr("🏆 KAZANDIN!"), "#ffd166"); }
   renderOpponents();
 }
 // Kendi canların bitti
@@ -126,20 +126,23 @@ function battleEliminated() {
   if (!me || !me.alive) return;
   Object.assign(me, { alive: false, elimAt: battle.clock, score: state.score, lives: 0 });
   if (net.role === "guest" && battle.online) return netSend({ t: "out", id: me.id, score: me.score });
-  pushFeed(me.name + " elendi");
+  pushFeed("{name} elendi", { name: me.name });
   battle.online ? checkBattleEnd() : endBattle();
 }
 function eliminate(p) {
   Object.assign(p, { alive: false, lives: 0, elimAt: battle.clock });
-  pushFeed(p.name + " elendi ☠");
+  pushFeed("{name} elendi ☠", { name: p.name });
 }
-// Akış: yalnızca oda sahibi / yerel oyun üretir, çevrim içi misafirlere yayınlanır
-function pushFeed(text, fromNet) {
+// Akış: yalnızca oda sahibi / yerel oyun üretir, çevrim içi misafirlere yayınlanır.
+// Olay anahtar + değerler olarak saklanır ve gönderilir: her oyuncu kendi dilinde okur.
+[N_("{name} elendi"), N_("{name} elendi ☠"), N_("{from} ⚔ {to}"), N_("{name} bağlantısı koptu")];
+function pushFeed(k, p, fromNet) {
   if (net.role === "guest" && battle.online && !fromNet) return;
-  battle.feed.unshift(text);
+  battle.feed.unshift({ k, p });
   if (battle.feed.length > 6) battle.feed.pop();
-  if (net.role === "host" && battle.online) netBroadcast({ t: "ev", text });
+  if (net.role === "host" && battle.online) netBroadcast({ t: "ev", k, p });
 }
+const feedText = f => (typeof f === "string" ? f : tr(f.k, f.p));
 // Bot: fiziksiz ama inandırıcı istatistiksel oyun — tuğla kırar, combo yapar, bölüm atlar, can kaybeder, saldırır
 function simBot(p, dt) {
   if (!p.alive) return;
@@ -176,7 +179,7 @@ function battleCharge(n) {
     const t = pickTarget(net.myId, vsCfg.target);
     if (!t) break;
     sendAttack(net.myId, t.id);
-    addFloater(W / 2, H - 125, "⚔ SALDIRI → " + t.name, "#ff4d6d");
+    addFloater(W / 2, H - 125, tr("⚔ SALDIRI → {name}", { name: t.name }), "#ff4d6d");
     sfx("attack");
     track("attacks");
   }
@@ -186,7 +189,7 @@ function deliverAttack(fromId, toId) {
   const from = pById(fromId), to = pById(toId);
   if (!from || !to || !to.alive || battle.over) return;
   to.hitAt = performance.now();
-  pushFeed(from.name + " ⚔ " + to.name);
+  pushFeed("{from} ⚔ {to}", { from: from.name, to: to.name });
   if (toId === net.myId) receiveAttack(from.name);
   else if (to.kind === "bot") { to.debuffUntil = battle.clock + ATTACK_DEBUFF; to.combo = 0; }
   else if (net.role === "host" && net.peers.has(toId)) chanSend(net.peers.get(toId), { t: "atk", from: fromId, to: toId });
@@ -200,9 +203,9 @@ function receiveAttack(fromName) {
     state.shield--;
     sfx("shield");
     track("blocked");
-    return addFloater(W / 2, H - 140, "🛡 SALDIRI ENGELLENDİ (" + fromName + ")", POWERS.K.color);
+    return addFloater(W / 2, H - 140, tr("🛡 SALDIRI ENGELLENDİ ({name})", { name: fromName }), POWERS.K.color);
   }
-  if (activeCurses().length >= 3) return addFloater(W / 2, H - 140, fromName + " saldırısı boşa gitti", T().dim);
+  if (activeCurses().length >= 3) return addFloater(W / 2, H - 140, tr("{name} saldırısı boşa gitti", { name: fromName }), T().dim);
   const id = pickCurse();
   if (!id) return;
   state.pendingCurse ? startCurse(id) : warnCurse(id);
@@ -219,7 +222,7 @@ function updateBattle(dt) {
       const before = Math.ceil(battle.countdown);
       if ((battle.countdown -= dt) <= 0) {
         sfx("go");
-        callout("BAŞLA!", "#06d6a0");
+        callout(tr("BAŞLA!"), "#06d6a0");
         if (state.mode === "serve") launchBall();
       } else if (Math.ceil(battle.countdown) !== before && before <= 3) sfx("countdown");
     } else {
@@ -256,7 +259,7 @@ async function packCode(prefix, obj) {
 }
 async function unpackCode(prefix, code) {
   code = code.trim();
-  if (!code.startsWith(prefix)) throw new Error("kod türü yanlış");
+  if (!code.startsWith(prefix)) throw new Error(tr("kod türü yanlış"));
   const body = atob(code.slice(prefix.length + 1));
   if (code[prefix.length] !== "Z") return JSON.parse(decodeURIComponent(escape(body)));
   const stream = new Blob([Uint8Array.from(body, c => c.charCodeAt(0))]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
@@ -278,7 +281,7 @@ function setupChannel(slot, dc) {
   dc.onopen = () => {
     if (net.role !== "guest") return;
     chanSend(slot, { t: "hello", name: vsCfg.name, lp: career.lp });
-    netStatus("✅ Odaya bağlandın, oda sahibi başlatınca maç başlayacak.");
+    netStatus(tr("✅ Odaya bağlandın, oda sahibi başlatınca maç başlayacak."));
   };
   dc.onmessage = e => { try { handleNet(slot, JSON.parse(e.data)); } catch (err) {} };
   dc.onclose = () => onPeerClosed(slot);
@@ -287,16 +290,16 @@ function onPeerClosed(slot) {
   if (net.role === "host" && slot.id) {
     net.peers.delete(slot.id);
     const p = pById(slot.id);
-    if (p && p.alive && battle.active && !battle.over) { eliminate(p); pushFeed(p.name + " bağlantısı koptu"); checkBattleEnd(); }
-    netStatus("⚠️ " + (slot.name || "Bir oyuncu") + " ayrıldı.");
+    if (p && p.alive && battle.active && !battle.over) { eliminate(p); pushFeed("{name} bağlantısı koptu", { name: p.name }); checkBattleEnd(); }
+    netStatus(tr("⚠️ {name} ayrıldı.", { name: slot.name || tr("Bir oyuncu") }));
     broadcastLobby();
   } else if (net.role === "guest") {
-    netStatus("⚠️ Oda sahibiyle bağlantı koptu.");
+    netStatus(tr("⚠️ Oda sahibiyle bağlantı koptu."));
     if (battle.active && !battle.over) { careerVoidMatch(); endBattle(); }
   }
 }
 async function hostInvite() {
-  if (net.peers.size >= MAX_GUESTS) throw new Error("oda dolu (en çok 4 oyuncu)");
+  if (net.peers.size >= MAX_GUESTS) throw new Error(tr("oda dolu (en çok 4 oyuncu)"));
   const pc = new RTCPeerConnection(RTC_CFG), slot = { pc, dc: null, id: null, name: null, token: net.slotSeq++ };
   net.slots.push(slot);
   setupChannel(slot, pc.createDataChannel("bb"));
@@ -306,8 +309,8 @@ async function hostInvite() {
 }
 async function hostAcceptAnswer(code) {
   const { sdp, slot } = await unpackCode("BBA1:", code), s = net.slots.find(x => x.token === slot);
-  if (!s) throw new Error("bu cevap koduna ait davet yok");
-  if (s.pc.remoteDescription) throw new Error("bu davet zaten kullanıldı");
+  if (!s) throw new Error(tr("bu cevap koduna ait davet yok"));
+  if (s.pc.remoteDescription) throw new Error(tr("bu davet zaten kullanıldı"));
   await s.pc.setRemoteDescription({ type: "answer", sdp });
 }
 async function guestJoin(code) {
@@ -334,7 +337,7 @@ function broadcastLobby() {
 }
 function startNetBattle() {
   if (net.role !== "host") return;
-  if (!net.peers.size) return netStatus("⚠️ Önce en az bir arkadaşın bağlanmalı.");
+  if (!net.peers.size) return netStatus(tr("⚠️ Önce en az bir arkadaşın bağlanmalı."));
   const roster = lobbyPlayers().map((p, i) => ({ ...p, color: PLAYER_COLORS[i % PLAYER_COLORS.length] })), names = shuffledNames();
   for (let i = 0; i < vsCfg.netBots; i++) {
     const skill = vsCfg.skill === "karisik" ? "usta" : vsCfg.skill;
@@ -361,11 +364,11 @@ function handleNet(slot, m) {
     if (m.t === "hello" && !slot.id) {
       if (net.peers.size >= MAX_GUESTS) return slot.pc.close();
       slot.id = "g" + net.nextGuest++;
-      slot.name = String(m.name || "Misafir").slice(0, 16);
+      slot.name = String(m.name || tr("Misafir")).slice(0, 16);
       slot.lp = m.lp == null ? START_LP : clamp(num(m.lp), 0, 5000);
       net.peers.set(slot.id, slot);
       chanSend(slot, { t: "welcome", id: slot.id });
-      netStatus("✅ " + slot.name + " bağlandı.");
+      netStatus(tr("✅ {name} bağlandı.", { name: slot.name }));
       broadcastLobby();
     } else if (m.t === "st" && slot.id === m.id) {
       const p = pById(m.id);
@@ -385,8 +388,12 @@ function handleNet(slot, m) {
         if (p) Object.assign(p, { score: num(r.score), level: num(r.level), lives: num(r.lives), alive: !!r.alive, left: num(r.left), elimAt: num(r.elimAt), debuffUntil: num(r.debuffUntil) });
       }
       if (!battle.over && battle.countdown <= 0) battle.clock = Math.max(battle.clock, num(m.clock));
-    } else if (m.t === "atk" && m.to === net.myId) { const f = pById(m.from); receiveAttack(f ? f.name : "Rakip"); }
-    else if (m.t === "ev") pushFeed(String(m.text).slice(0, 60), true);
+    } else if (m.t === "atk" && m.to === net.myId) { const f = pById(m.from); receiveAttack(f ? f.name : tr("Rakip")); }
+    else if (m.t === "ev") {   // olay: anahtar + değerler (eski sürüm düz metin gönderir)
+      const p = {};
+      if (m.p && typeof m.p === "object") for (const k in m.p) p[k] = String(m.p[k]).slice(0, 30);
+      if (typeof m.k === "string") pushFeed(m.k.slice(0, 80), p, true); else pushFeed(String(m.text).slice(0, 60), null, true);
+    }
     else if (m.t === "end") endBattle(m.list || []);
   }
 }
@@ -397,28 +404,28 @@ function renderOpponents() {
   if (!battle.active) return;
   const now = performance.now(), span = (className, textContent) => el("span", { className, textContent });
   const head = el("div", { className: "opp-head" },
-    span("", battle.countdown > 0 ? "⚔ Hazır ol…" : battle.over ? "⚔ Bitti" : "⚔ " + fmtTime(Math.max(0, battle.duration - battle.clock))),
-    el("span", { textContent: (battle.ranked ? "🏅" : "") + (battle.online ? "🌐" : "🤖"), title: (battle.ranked ? "dereceli " : "") + (battle.online ? "çevrim içi maç" : "botlarla maç") }));
+    span("", battle.countdown > 0 ? tr("⚔ Hazır ol…") : battle.over ? tr("⚔ Bitti") : "⚔ " + fmtTime(Math.max(0, battle.duration - battle.clock))),
+    el("span", { textContent: (battle.ranked ? "🏅" : "") + (battle.online ? "🌐" : "🤖"), title: battle.online ? (battle.ranked ? tr("dereceli çevrim içi maç") : tr("çevrim içi maç")) : battle.ranked ? tr("dereceli botlarla maç") : tr("botlarla maç") }));
   const order = battle.over && battle.results ? battle.results.map(r => pById(r.id) || r) : ranking();
   const cards = order.map((p, i) => {
-    const tag = battle.ranked ? tierTag(lpOf(p)) : p.kind === "bot" ? (BOT_SKILL[p.skill] || {}).label || "Bot" : p.kind === "human" ? "insan" : "sen";
+    const tag = battle.ranked ? tierTag(lpOf(p)) : p.kind === "bot" ? (BOT_SKILL[p.skill] || {}).label || "Bot" : p.kind === "human" ? tr("insan") : tr("sen");
     return el("div", { className: "opp" + (p.id === net.myId ? " me" : "") + (p.alive ? "" : " dead") + (now - (p.hitAt || 0) < 450 ? " hit" : ""), "--c": p.color },
-      el("div", { className: "opp-top" }, span("opp-rank", "#" + (i + 1)), span("opp-name", p.name + (p.id === net.myId ? " (sen)" : ""))),
+      el("div", { className: "opp-top" }, span("opp-rank", "#" + (i + 1)), span("opp-name", p.name + (p.id === net.myId ? " " + tr("(sen)") : ""))),
       el("div", { className: "opp-mid" }, span("opp-score", p.score), span("opp-lives", p.alive ? "♥".repeat(clamp(p.lives, 0, 9)) : "☠")),
-      el("div", { className: "opp-sub", textContent: "Bölüm " + p.level + " · " + tag + (p.debuffUntil > battle.clock && p.alive ? " · ⚠ lanetli" : "") }),
+      el("div", { className: "opp-sub", textContent: tr("Bölüm {n}", { n: p.level }) + " · " + tag + (p.debuffUntil > battle.clock && p.alive ? " · " + tr("⚠ lanetli") : "") }),
       el("div", { className: "opp-bar" }, el("span", { style: { width: Math.round(100 * clamp(1 - (p.left || 0) / levelBricks(p.level || 1), 0, 1)) + "%" } })));
   });
-  const feed = battle.feed.length ? [el("div", { className: "opp-feed" }, ...battle.feed.map(f => el("div", { textContent: f })))] : [];
+  const feed = battle.feed.length ? [el("div", { className: "opp-feed" }, ...battle.feed.map(f => el("div", { textContent: feedText(f) })))] : [];
   oppPanel.replaceChildren(head, ...cards, ...feed);
 }
 
 // --- Rekabet paneli ---
 const versusPanel = $("versuspanel"), vsName = $("vs-name"), netStatusEl = $("net-status"), lbTable = $("lb-table");
 let lbMode = "klasik";
-setupPanel(versusPanel, "⚔ Rekabet");
+setupPanel(versusPanel, tr("⚔ Rekabet"));
 buildRows($("vs-rows"), VS_ROWS, vsCfg, saveVs);
 buildRows($("vs-netrows"), VS_NET_ROWS, vsCfg, saveVs);
-const versusBtn = el("button", { textContent: "⚔ Rekabet", title: "Dereceli maç, botlarla ya da arkadaşlarla kapış, liderlik tablosu", onclick: () => togglePanel(versusPanel, refreshVersusUI) });
+const versusBtn = el("button", { textContent: tr("⚔ Rekabet"), title: tr("Dereceli maç, botlarla ya da arkadaşlarla kapış, liderlik tablosu"), onclick: () => togglePanel(versusPanel, refreshVersusUI) });
 toolbar.insertBefore(versusBtn, careerBtn);
 function refreshVersusUI() {
   vsName.value = vsCfg.name;
@@ -431,28 +438,28 @@ function refreshVersusUI() {
   renderLeaderboard();
 }
 const renderLobby = () => $("net-players").replaceChildren(...(net.role === "host" ? lobbyPlayers() : net.lobby).map(p =>
-  el("span", { className: "netp", textContent: (p.id === "h" ? "🏠 " : "👤 ") + p.name + (p.id === net.myId ? " (sen)" : "") + (Number.isFinite(p.lp) ? " · " + tierTag(p.lp) : "") })));
+  el("span", { className: "netp", textContent: (p.id === "h" ? "🏠 " : "👤 ") + p.name + (p.id === net.myId ? " " + tr("(sen)") : "") + (Number.isFinite(p.lp) ? " · " + tierTag(p.lp) : "") })));
 function renderLeaderboard() {
   const row = (tag, cells) => el("tr", {}, ...cells.map(c => el(tag, { textContent: c })));
   const kap = lbMode === "kapisma", rows = leaderboard[lbMode].map((r, i) => {
     const d = new Date(r.date);
-    return row("td", [i + 1, r.name, r.score, r.level, kap ? r.place + "/" + r.of : "", String(d.getDate()).padStart(2, "0") + "." + String(d.getMonth() + 1).padStart(2, "0")]);
+    return row("td", [i + 1, r.name, r.score, r.level, kap ? r.place + "/" + r.of : "", d.toLocaleDateString(LOCALE, { day: "2-digit", month: "2-digit" })]);
   });
-  if (!rows.length) rows.push(el("tr", {}, el("td", { colSpan: 6, textContent: "Henüz skor yok — bir oyun bitir!" })));
-  lbTable.replaceChildren(row("th", ["#", "Oyuncu", "Skor", "Bölüm", kap ? "Sıra" : "", "Tarih"]), ...rows);
+  if (!rows.length) rows.push(el("tr", {}, el("td", { colSpan: 6, textContent: tr("Henüz skor yok — bir oyun bitir!") })));
+  lbTable.replaceChildren(row("th", ["#", tr("Oyuncu"), tr("Skor"), tr("Bölüm"), kap ? tr("Sıra") : "", tr("Tarih")]), ...rows);
 }
-vsName.addEventListener("input", () => { vsCfg.name = vsName.value.trim().slice(0, 16) || "Oyuncu"; saveVs(); });
+vsName.addEventListener("input", () => { vsCfg.name = vsName.value.trim().slice(0, 16) || tr("Oyuncu"); saveVs(); });
 for (const b of versusPanel.querySelectorAll("[data-lb]")) b.addEventListener("click", () => { lbMode = b.dataset.lb; refreshVersusUI(); });
 onClick("vs-start", startBotBattle);
 onClick("rank-start", startRankedBattle);
 onClick("rank-career", () => togglePanel(careerPanel, renderCareer));
 const setRole = (role, msg) => { netLeave(); net.role = role; if (role === "host") net.myId = "h"; netStatus(msg); refreshVersusUI(); };
-onClick("net-host", () => setRole("host", "🏠 Oda kuruldu. \"Davet kodu oluştur\"a bas, kodu arkadaşına gönder."));
-onClick("net-join", () => setRole("guest", "🔗 Arkadaşının davet kodunu yapıştır, cevap kodunu ona geri gönder."));
-onClick("net-leave", () => setRole(null, "Odadan ayrıldın."));
+onClick("net-host", () => setRole("host", tr("🏠 Oda kuruldu. \"Davet kodu oluştur\"a bas, kodu arkadaşına gönder.")));
+onClick("net-join", () => setRole("guest", tr("🔗 Arkadaşının davet kodunu yapıştır, cevap kodunu ona geri gönder.")));
+onClick("net-leave", () => setRole(null, tr("Odadan ayrıldın.")));
 // Kodu üret, kutuya yaz, panoya kopyalamayı dene
 async function makeCode(boxId, producer, okMsg, manualMsg, errMsg) {
-  netStatus("⏳ Kod hazırlanıyor…");
+  netStatus(tr("⏳ Kod hazırlanıyor…"));
   try {
     const box = $(boxId);
     box.value = await producer();
@@ -461,25 +468,25 @@ async function makeCode(boxId, producer, okMsg, manualMsg, errMsg) {
     if (navigator.clipboard) navigator.clipboard.writeText(box.value).then(() => netStatus(okMsg), () => {});
   } catch (err) { netStatus("⚠️ " + errMsg + ": " + err.message); }
 }
-onClick("net-invite", () => makeCode("net-offer", hostInvite, "📋 Davet kodu panoya kopyalandı — arkadaşına gönder, cevap kodunu aşağı yapıştır.",
-  "Davet kodunu kopyalayıp arkadaşına gönder, gelen cevap kodunu aşağı yapıştır.", "Davet oluşturulamadı"));
-onClick("net-mkanswer", () => makeCode("net-answercode", () => guestJoin($("net-invcode").value), "📋 Cevap kodu panoya kopyalandı — oda sahibine gönder.",
-  "Cevap kodunu kopyalayıp oda sahibine gönder.", "Davet kodu geçersiz"));
+onClick("net-invite", () => makeCode("net-offer", hostInvite, tr("📋 Davet kodu panoya kopyalandı — arkadaşına gönder, cevap kodunu aşağı yapıştır."),
+  tr("Davet kodunu kopyalayıp arkadaşına gönder, gelen cevap kodunu aşağı yapıştır."), tr("Davet oluşturulamadı")));
+onClick("net-mkanswer", () => makeCode("net-answercode", () => guestJoin($("net-invcode").value), tr("📋 Cevap kodu panoya kopyalandı — oda sahibine gönder."),
+  tr("Cevap kodunu kopyalayıp oda sahibine gönder."), tr("Davet kodu geçersiz")));
 onClick("net-accept", async () => {
   try {
     await hostAcceptAnswer($("net-answer").value);
     $("net-answer").value = "";
-    netStatus("⏳ Bağlanılıyor…");
-  } catch (err) { netStatus("⚠️ Cevap kodu geçersiz: " + err.message); }
+    netStatus(tr("⏳ Bağlanılıyor…"));
+  } catch (err) { netStatus(tr("⚠️ Cevap kodu geçersiz: {err}", { err: err.message })); }
 });
 onClick("net-start", startNetBattle);
 onClick("lb-clear", e => {
   const b = e.currentTarget;
-  if (b.dataset.armed !== "1") { b.dataset.armed = "1"; b.textContent = "Emin misin? Tekrar tıkla"; return; }
+  if (b.dataset.armed !== "1") { b.dataset.armed = "1"; b.textContent = tr("Emin misin? Tekrar tıkla"); return; }
   leaderboard[lbMode] = [];
   store.set("bb_leaderboard", leaderboard);
   b.dataset.armed = "";
-  b.textContent = "Bu tabloyu temizle";
+  b.textContent = tr("Bu tabloyu temizle");
   renderLeaderboard();
 });
 refreshVersusUI();
@@ -503,27 +510,27 @@ function drawCountdown() {
   titleText(String(n), 0, 0, 110, "#ff4d6d", "#ffd166");
   ctx.restore();
   ctx.textAlign = "center";
-  outlinedText("rakiplerin hazır…", W / 2, H / 2 + 90, "bold 16px monospace", T().text);
+  outlinedText(tr("rakiplerin hazır…"), W / 2, H / 2 + 90, "bold 16px monospace", T().text);
 }
 function drawBattleResults() {
   overlay(0.45);
   const list = battle.over && battle.results ? battle.results : ranking(), rows = Math.min(list.length, 8), rated = battle.over && battle.rated;
   const off = rated ? 22 : 0, h = 170 + off + rows * 26, top = H / 2 - h / 2;
   drawCard(W / 2, H / 2, 500, h);
-  titleText(!battle.over ? "ELENDİN" : battle.myPlace === 1 ? "🏆 KAZANDIN!" : battle.myPlace + ". OLDUN", W / 2, top + 52, 38, battle.myPlace === 1 ? "#ffd166" : T().ex, "#ff4d6d");
-  text(battle.over ? "Skorun: " + state.score + (state.lbRank ? "  ·  liderlik #" + state.lbRank : "") : "Maç sürüyor… izliyorsun", W / 2, top + 80, "14px monospace", T().dim);
+  titleText(!battle.over ? tr("ELENDİN") : battle.myPlace === 1 ? tr("🏆 KAZANDIN!") : tr("{n}. OLDUN", { n: battle.myPlace }), W / 2, top + 52, 38, battle.myPlace === 1 ? "#ffd166" : T().ex, "#ff4d6d", 440);
+  text(battle.over ? tr("Skorun: {n}", { n: state.score }) + (state.lbRank ? "  ·  " + tr("liderlik #{n}", { n: state.lbRank }) : "") : tr("Maç sürüyor… izliyorsun"), W / 2, top + 80, "14px monospace", T().dim, "center", 440);
   if (rated) {
     const t = tierOf(rated.lp);
-    text(t.icon + " " + t.name + " · " + rated.lp + " LP  (" + fmtDelta(rated.delta) + ")", W / 2, top + 102, "bold 15px monospace", rated.delta >= 0 ? "#06d6a0" : "#ff4d6d");
+    text(t.icon + " " + tr(t.name) + " · " + rated.lp + " LP  (" + fmtDelta(rated.delta) + ")", W / 2, top + 102, "bold 15px monospace", rated.delta >= 0 ? "#06d6a0" : "#ff4d6d");
   }
   for (let i = 0; i < rows; i++) {
     const p = list[i], y = top + 112 + off + i * 26;
     if (p.id === net.myId) fillRR(W / 2 - 220, y - 17, 440, 24, 8, hexToRgba(T().accent, 0.18));
     text("#" + (i + 1), W / 2 - 208, y, "bold 14px monospace", T().dim, "left");
     circle(W / 2 - 162, y - 5, 5, p.color);
-    text(p.name + (p.alive ? "" : " ☠"), W / 2 - 148, y, "bold 14px monospace", p.alive ? T().text : T().dim, "left");
+    text(p.name + (p.alive ? "" : " ☠"), W / 2 - 148, y, "bold 14px monospace", p.alive ? T().text : T().dim, "left", 190);
     if (battle.ranked) text(tierTag(lpOf(p)), W / 2 + 130, y, "12px monospace", T().dim, "right");
     text(String(p.score), W / 2 + 208, y, "bold 14px monospace", p.alive ? T().text : T().dim, "right");
   }
-  text(battle.over ? "menü için tıkla veya boşluk" : "maç bitince sonuçlar burada", W / 2, top + h - 22, "14px monospace", T().dim);
+  text(battle.over ? tr("menü için tıkla veya boşluk") : tr("maç bitince sonuçlar burada"), W / 2, top + h - 22, "14px monospace", T().dim, "center", 440);
 }

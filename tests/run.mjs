@@ -18,7 +18,7 @@ const browser = await launch(pathToFileURL(target).href);
 // Her test temiz kayıtla (localStorage boş) açılan yeni bir sayfada çalışır
 async function freshPage() {
   const page = await browser.open();
-  await page.eval("localStorage.clear(), 1");
+  await page.eval("localStorage.clear(), localStorage.setItem('bb_lang', '\"tr\"'), 1");   // testler Türkçe (kaynak dil) çalışır
   await page.reload();
   await page.eval(HELPERS);
   return page;

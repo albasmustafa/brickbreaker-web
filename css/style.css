@@ -195,3 +195,6 @@ canvas {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
+/* Dil seçici */
+select { font: inherit; font-size: 13px; color: var(--uitext); background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; cursor: pointer; }
+select:hover { border-color: var(--accent); }

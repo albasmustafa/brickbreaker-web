@@ -1,3 +1,5 @@
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 // Brick Breaker AI özellik testleri: her test temiz bir sayfada oyunun kendi fonksiyonlarını çağırır.
 // "Hiçbir özellik kaybolmasın" güvencesi: her özellik en az bir testte doğrulanır.
 
@@ -491,6 +493,61 @@ test("Tünel Fırtınası: piksel duvar, çelik tüneller, zincir, küpler, 300 
   expect(n.menu === false && n.label === "🌀 12", "menüde kapalı, bölüm ızgarasında 🌀 12: " + JSON.stringify(n));
 });
 
+test("Diller: 25 dil eksiksiz, yer tutucular, RTL, dil seçici, tüm ekranlar taşmasız ve çevrilmiş", async ({ p, expect }) => {
+  // Kaynak denetimi: her dil 675/675, yer tutucular birebir (tools/i18n.mjs --check)
+  const tool = spawnSync(process.execPath, [fileURLToPath(new URL("../tools/i18n.mjs", import.meta.url)), "--check"], { encoding: "utf8" });
+  expect(tool.status === 0, "tools/i18n.mjs --check: " + (tool.stdout + tool.stderr).split("\n").filter(l => /eksik|yer tutucu|eski|fazla/.test(l)).slice(0, 4).join(" | "));
+  const codes = await p.eval("LANGS.map(l => l.code)");
+  expect(codes.length === 25, "25 dil: " + codes.join(","));
+  const problems = [];
+  for (const code of codes) {
+    await p.eval(`localStorage.setItem("bb_lang", JSON.stringify("${code}")), 1`);
+    await p.reload();
+    await p.eval(HELPERS);
+    const r = await p.eval(`(() => {
+      const wide = [], drawn = new Set(), proto = CanvasRenderingContext2D.prototype, orig = proto.fillText;
+      proto.fillText = function (s, x, y, mw) {
+        s = String(s); drawn.add(s);
+        if (this.canvas === canvas && this.measureText(s).width > W - 6) wide.push(s.slice(0, 40) + " @" + this.font);
+        return orig.call(this, s, x, y, mw);
+      };
+      try {
+        draw();                                                       // menü
+        __start(5); state.curseAt = Infinity; state.combo = 12; state.shield = 2; state.fireUntil = state.time + 5; state.laserUntil = state.time + 5;
+        state.curses = { gorunmez: state.time + 5, ruzgar: state.time + 5 }; run.pacts = ["cam", "kan", "boss"];
+        powerups.push(...Object.keys(POWERS).map((k, i) => ({ x: 20 + (i % 10) * 76, y: 300 + Math.floor(i / 10) * 30, w: 62, h: 18, vy: 0, type: k })));
+        for (const k of Object.keys(COMBO_CALLS)) { callout(COMBO_CALLS[k]); draw(); }
+        for (const id of Object.keys(CURSES)) { callout("⚠ " + CURSES[id].label, CURSE_COLOR); draw(); }
+        for (const pc of PACT_POOL) { callout(pc.icon + " " + pc.name); draw(); }
+        state.mode = "paused"; draw();
+        state.mode = "levelclear"; draw();
+        state.mode = "playing"; run.daily = false; run.practice = true; state.lbRank = 3; state.newRecord = true; gameOver(); draw();
+        __start(12); pxWin(); state.mode = "levelclear"; draw();
+        for (const panel of [settingsPanel, themePanel, versusPanel, careerPanel, codexPanel, challengePanel]) {
+          const render = { [themePanel.id]: refreshThemeUI, [versusPanel.id]: refreshVersusUI, [careerPanel.id]: renderCareer, [codexPanel.id]: renderCodex, [challengePanel.id]: renderChallenge }[panel.id];
+          togglePanel(panel, render); closePanels();
+        }
+      } finally { proto.fillText = orig; }
+      const domText = [...document.querySelectorAll("section.panel, #toolbar, #mediabar, #pactbar, #lastchance")].map(e => e.textContent).join(" ")
+        + " " + [...document.querySelectorAll("[title],[placeholder],[aria-label]")].map(e => (e.title || "") + " " + (e.placeholder || "") + " " + (e.getAttribute("aria-label") || "")).join(" ");
+      const canvasText = [...drawn].join(" ");
+      const tr = /[ğşıİĞŞ]/;   // Türkçe'ye özgü harfler (Azerbaycancada da var; o dilde taranmaz)
+      const leftDom = (domText.match(/[^\\s]*[ğşıİĞŞ][^\\s]*/g) || []).slice(0, 4);
+      const leftCanvas = [...drawn].filter(s => tr.test(s)).slice(0, 4);
+      return { lang: LANG, html: document.documentElement.lang, dir: document.documentElement.dir, sel: $("langsel").value,
+               wide: wide.slice(0, 3), leftDom, leftCanvas, settingsHead: settingsPanel.querySelector(".panel-head strong").textContent };
+    })()`);
+    const rtl = code === "ar" || code === "fa";
+    if (r.lang !== code || r.sel !== code) problems.push(code + ": dil yüklenmedi " + JSON.stringify([r.lang, r.sel]));
+    if (r.dir !== (rtl ? "rtl" : "ltr") || !r.html.startsWith(code)) problems.push(code + ": html lang/dir " + r.html + "/" + r.dir);
+    if (r.wide.length) problems.push(code + ": tuvale sığmayan yazı " + r.wide.join(" | "));
+    if (code !== "tr" && code !== "az" && (r.leftDom.length || r.leftCanvas.length)) problems.push(code + ": çevrilmemiş Türkçe " + r.leftDom.concat(r.leftCanvas).join(" | "));
+    if (code !== "tr" && code !== "az" && r.settingsHead === "⚙️ Ayarlar") problems.push(code + ": ayarlar başlığı Türkçe kaldı");
+  }
+  await p.eval(`localStorage.setItem("bb_lang", JSON.stringify("tr")), 1`);
+  expect(problems.length === 0, problems.slice(0, 8).join("\n      "));
+});
+
 test("Boss: ateş, öfke, tuğla dikme, ölüm, döngüde güçlenme", async ({ p, expect }) => {
   const r = await p.eval(`(() => {
     __start(5);
@@ -704,7 +761,7 @@ test("Kapışma (botlar): geri sayım, saldırılar, kalkan, sonuç, elenme, lid
     action(); const countdownBlocks = state.mode === "serve";
     step(4); const launched = [state.mode, battle.countdown <= 0];
     step(20, true); const botsPlay = battle.players.filter(p => p.kind === "bot").some(p => p.score > 0) && battle.feed.length > 0;
-    const lead = pickTarget("me", "lider"); battle.charge = 9; battleCharge(1); const attack = lead.debuffUntil > battle.clock && battle.feed[0].startsWith("Albas ⚔");
+    const lead = pickTarget("me", "lider"); battle.charge = 9; battleCharge(1); const attack = lead.debuffUntil > battle.clock && feedText(battle.feed[0]).startsWith("Albas ⚔");
     state.curses = {}; state.pendingCurse = null; state.shield = 0; receiveAttack("Test"); const cursed = !!state.pendingCurse;
     state.shield = 2; state.pendingCurse = null; receiveAttack("Test"); const blocked = state.shield === 1 && !state.pendingCurse;
     scheduleNextCurse(true); const noRandom = state.curseAt === Infinity;

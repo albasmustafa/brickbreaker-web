@@ -23,7 +23,7 @@ function lastContinue() {
   serveBall();                    // aynı bölümde pakt teklifi yeniden açılmaz
   const id = pickCurse();
   if (id) warnCurse(id);          // bedel: hemen bir lanet
-  callout("SON TOP BAHSİ: DEVAM", "#ff5d8f");
+  callout(tr("SON TOP BAHSİ: DEVAM"), "#ff5d8f");
   sfx("power");
 }
 function lastEnd() {

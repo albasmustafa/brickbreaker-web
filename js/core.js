@@ -83,7 +83,15 @@ function lgrad(x0, y0, x1, y1, stops, g = ctx) {
   stops.forEach((s, i) => (Array.isArray(s) ? gr.addColorStop(s[0], s[1]) : gr.addColorStop(i / (stops.length - 1), s)));
   return gr;
 }
-function text(s, x, y, font, color, align = "center") { ctx.font = font; ctx.fillStyle = color; ctx.textAlign = align; ctx.fillText(s, x, y); }
+// Yazı en çok maxW genişliğe sığar: çevirilerde uzun metin taşmaz, yazı boyutu küçülür
+function fitFont(s, font, maxW) {
+  ctx.font = font;
+  const w = ctx.measureText(s).width, m = font.match(/(\d+(?:\.\d+)?)px/);
+  if (w <= maxW || !m) return font;
+  ctx.font = font.replace(m[0], Math.max(7, Math.floor(+m[1] * maxW / w * 10) / 10) + "px");
+  return ctx.font;
+}
+function text(s, x, y, font, color, align = "center", maxW = W - 24) { ctx.font = fitFont(s, font, maxW); ctx.fillStyle = color; ctx.textAlign = align; ctx.fillText(s, x, y); }
 // Bir noktanın çevresinde ölçekle (yakınlaşma efektleri)
 function zoomAt(z, cx = W / 2, cy = H / 2) { ctx.translate(cx, cy); ctx.scale(z, z); ctx.translate(-cx, -cy); }
 

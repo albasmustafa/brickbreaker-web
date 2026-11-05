@@ -117,7 +117,7 @@ function pxBall(b, ox, oy, sdt) {
       if (broke >= 4 || pxWall.grid[i] === PX_STEEL || !pxBreak(i)) continue;
       broke++;
       if (inside) {
-        if (!pxWall.chained) { pxWall.chained = true; callout("ZİNCİR REAKSİYON!", "#4cc9f0"); sfx("boom"); addShake(6); pxIgnite(i, 14); }
+        if (!pxWall.chained) { pxWall.chained = true; callout(tr("ZİNCİR REAKSİYON!"), "#4cc9f0"); sfx("boom"); addShake(6); pxIgnite(i, 14); }
         else pxIgnite(i, 5);
       }
     }
@@ -137,7 +137,7 @@ function pxEnter(b, k) {
   let s = 0;
   tn.segs.forEach((g, j) => { if (inSegRect(b.x, b.y, g.a, g.b)) s = j; });
   b.tun = { k, s };
-  if (!pxWall.entered) { pxWall.entered = true; callout("TÜNEL!", "#c3ccd8"); }
+  if (!pxWall.entered) { pxWall.entered = true; callout(tr("TÜNEL!"), "#c3ccd8"); }
   if (state.time - pxWall.enterSfxAt > 0.12) { pxWall.enterSfxAt = state.time; sfx("portal"); }
   if (particles.length < 300) spawnParticles(b.x - 8, b.y - 8, "#c3ccd8", 5, 16, 16);
 }
@@ -216,11 +216,11 @@ function pxCatch(q) {
   }
   const n = balls.length;
   pxWall.peak = Math.max(pxWall.peak, n);
-  addFloater(paddle.x + paddle.w / 2, paddle.y - 18, K.label + " → " + n + " TOP", K.color);
+  addFloater(paddle.x + paddle.w / 2, paddle.y - 18, K.label + " → " + tr("{n} TOP", { n }), K.color);
   sfx("multi");
   addScore(50);
-  if (!pxWall.storm && n >= STORM_AT) { pxWall.storm = true; callout("🌪 TOP FIRTINASI!", "#4cc9f0"); sfx("fever"); addShake(8); }
-  else if (!pxWall.maxed && n >= STORM_MAX) { pxWall.maxed = true; callout("300 TOP: MAKSİMUM!", "#ffd60a"); sfx("fever"); }
+  if (!pxWall.storm && n >= STORM_AT) { pxWall.storm = true; callout(tr("🌪 TOP FIRTINASI!"), "#4cc9f0"); sfx("fever"); addShake(8); }
+  else if (!pxWall.maxed && n >= STORM_MAX) { pxWall.maxed = true; callout(tr("300 TOP: MAKSİMUM!"), "#ffd60a"); sfx("fever"); }
 }
 
 function pxUpdate(dt) {
@@ -234,7 +234,7 @@ function pxUpdate(dt) {
   // Son %3 kalınca kalanların hepsi tutuşur: son kırıntıları kovalamak gerekmez
   if (!P.finale && state.mode === "playing" && P.left > 0 && P.left <= P.total * 0.03) {
     P.finale = true;
-    callout("FİNAL ZİNCİRİ!", "#ffd60a");
+    callout(tr("FİNAL ZİNCİRİ!"), "#ffd60a");
     sfx("fever");
     for (let i = 0; i < P.grid.length; i++) if (P.grid[i] === PX_BLUE) { P.grid[i] = PX_BURN; P.burns.push({ i, t: state.time + grnd(0.05, 0.7), e: 0 }); }
   }
@@ -373,14 +373,14 @@ function drawPixelWall() {
     ctx.fillStyle = `rgba(76,201,240,${0.05 + 0.03 * Math.sin(state.time * 5)})`;
     ctx.fillRect(0, 0, W, H);
   }
-  if (balls.length > 1) text("● " + balls.length + " TOP", 20, H - 12, "bold 12px monospace", balls.length >= STORM_AT ? "#4cc9f0" : T().dim, "left");
+  if (balls.length > 1) text("● " + tr("{n} TOP", { n: balls.length }), 20, pactNames() ? H - 30 : H - 12, "bold 12px monospace", balls.length >= STORM_AT ? "#4cc9f0" : T().dim, "left");
 }
 function drawPixelWin() {
   const t = (performance.now() - pxWall.wonAt) / 1000;
   overlay(0.25);
   drawCard(W / 2, H / 2, 540, 270);
-  titleText("Congratulations", W / 2, H / 2 - 66, 40, "#ffd60a", T().accent);
-  titleText("You win!", W / 2, H / 2 - 20, 34, "#4cc9f0", "#ffffff");
+  titleText(tr("Congratulations"), W / 2, H / 2 - 66, 40, "#ffd60a", T().accent, 500);
+  titleText(tr("You win!"), W / 2, H / 2 - 20, 34, "#4cc9f0", "#ffffff", 500);
   for (let k = 0; k < 3; k++) {                       // yıldızlar sırayla zıplayarak dolar
     const sx = W / 2 + (k - 1) * 82, sy = H / 2 + 50 - (k === 1 ? 10 : 0), a = clamp((t - 0.35 - k * 0.3) / 0.35, 0, 1);
     star5(sx, sy, 30);
@@ -400,5 +400,5 @@ function drawPixelWin() {
     ctx.stroke();
     ctx.restore();
   }
-  text("+3000 · en çok " + pxWall.peak + " top", W / 2, H / 2 + 110, "bold 15px monospace", T().b2);
+  text(tr("+3000 · en çok {n} top", { n: pxWall.peak }), W / 2, H / 2 + 110, "bold 15px monospace", T().b2, "center", 500);
 }

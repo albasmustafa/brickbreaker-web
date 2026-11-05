@@ -37,7 +37,7 @@ if (extraOut) { writeFileSync(extraOut, single); console.log("→ ayrıca yazıl
 // Sıkıştırılmış sürüm: esbuild varsa JS ve CSS küçültülür, HTML'deki girinti/yorumlar atılır
 try {
   const { transform } = await import("esbuild");
-  const minJs = (await transform(js, { minify: true, target: "es2020" })).code;
+  const minJs = (await transform(js, { minify: true, target: "es2020", charset: "utf8" })).code;   // utf8: 25 dilin harfleri \uXXXX diye şişmesin
   const minCss = (await transform(css, { loader: "css", minify: true })).code;
   const shell = html
     .replace(/<link rel="icon" href="[^"]+">/, `<link rel="icon" href="${favicon}">`)

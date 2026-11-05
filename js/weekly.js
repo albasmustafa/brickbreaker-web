@@ -40,7 +40,7 @@ function startWeekly() {
   if (battle.active) closeBattle();
   startGame();
   weekly.starting = false;
-  callout("🗓 HAFTALIK TOHUM", "#ffd166");
+  callout(tr("🗓 HAFTALIK TOHUM"), "#ffd166");
   renderWeekly();
   return true;
 }
@@ -64,21 +64,21 @@ function renderWeekly() {
   if (!weeklyCard) return;
   const wk = weekSeed();
   if (!weekly.active && weekly.key !== wk.key) loadWeekly();
-  const last = weekly.last ? " · son " + weekly.last.score + " puan (bölüm " + weekly.last.level + ")" : "";
+  const last = weekly.last ? " · " + tr("son {score} puan (bölüm {level})", { score: weekly.last.score, level: weekly.last.level }) : "";
   weeklyCard.replaceChildren(
-    el("strong", { textContent: "Tohum: " + wk.key }),
-    el("span", { textContent: "Aynı bölümler, aynı kapsül sırası · en iyi " + weekly.best + " · deneme " + weekly.attempts + last }),
+    el("strong", { textContent: tr("Tohum: {key}", { key: wk.key }) }),
+    el("span", { textContent: tr("Aynı bölümler, aynı kapsül sırası · en iyi {best} · deneme {n}", { best: weekly.best, n: weekly.attempts }) + last }),
   );
   const btn = $("weekly-start");
-  if (btn) { btn.disabled = weekly.active; btn.textContent = weekly.active ? "🗓 Koşu sürüyor..." : "🗓 Bu haftanın tohumunu oyna"; }
+  if (btn) { btn.disabled = weekly.active; btn.textContent = weekly.active ? tr("🗓 Koşu sürüyor...") : tr("🗓 Bu haftanın tohumunu oyna"); }
 }
 onClick("weekly-start", startWeekly);
 onClick("weekly-code", () => {
-  if (!weekly.last) { $("weekly-msg").textContent = "⚠️ Önce haftalık bir koşu tamamla."; return; }
+  if (!weekly.last) { $("weekly-msg").textContent = tr("⚠️ Önce haftalık bir koşu tamamla."); return; }
   const code = weeklyCode();
   weeklyCodeBox.value = code;
   weeklyCodeBox.select();
-  if (navigator.clipboard) navigator.clipboard.writeText(code).then(() => ($("weekly-msg").textContent = "📋 Sonuç kodu panoya kopyalandı."), () => ($("weekly-msg").textContent = "Kodu kutudan kopyala."));
-  else $("weekly-msg").textContent = "Kodu kutudan kopyala.";
+  if (navigator.clipboard) navigator.clipboard.writeText(code).then(() => ($("weekly-msg").textContent = tr("📋 Sonuç kodu panoya kopyalandı.")), () => ($("weekly-msg").textContent = tr("Kodu kutudan kopyala.")));
+  else $("weekly-msg").textContent = tr("Kodu kutudan kopyala.");
 });
 renderWeekly();

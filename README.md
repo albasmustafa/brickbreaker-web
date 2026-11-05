@@ -19,7 +19,10 @@ Tarayıcıda çalışan, kaotik bir tuğla kırma oyunu: lanetler, boss'lar, 15 
 ```
 index.html            HTML iskeleti; betikleri sırayla yükler
 css/style.css         tüm stiller (renkler temadan gelen CSS değişkenleri)
-js/core.js            tuval, sabitler, renk / çizim / DOM yardımcıları, kalıcı kayıt
+js/core.js            tuval, sabitler, renk / çizim / DOM yardımcıları, yazı sığdırma (fitFont), kalıcı kayıt
+js/lang/keys.js       dil anahtarları (Türkçe kaynak metinler; tools/i18n.mjs üretir)
+js/lang/<kod>.js      24 dilin çevirileri (kimlik → metin)
+js/i18n.js            dil seçimi, tr() çevirisi, RTL, statik HTML çevirisi
 js/themes.js          25 hazır tema, tema yönetimi, sonsuz rastgele tema üreteci
 js/settings.js        ayar tablosu: varsayılanlar + doğrulama + ayarlar panelinin satırları
 js/audio.js           Web Audio ses motoru, olay sesleri tablosu, raket sesleri
@@ -48,6 +51,7 @@ js/main.js            ana döngü, servis çalışanı kaydı
 sw.js, manifest.webmanifest, favicon.svg   uygulama olarak kurulma ve çevrim dışı çalışma
 tools/build.mjs       tek dosyaya derleme (+ esbuild ile sıkıştırma)
 tools/serve.mjs       bağımlılıksız yerel sunucu
+tools/i18n.mjs        dil anahtarlarını çıkarır, keys.js'i günceller, 24 dili denetler
 tests/                test sürücüsü (Chrome DevTools Protocol) ve özellik testleri
 ```
 
@@ -65,7 +69,7 @@ Okunaklı tek dosyada her bölümün başında kaynak dosyanın adı yazar. Ana 
 ## Testler
 
 `npm test` her testi temiz kayıtlı (boş localStorage) yeni bir sayfada çalıştırır; sayfadaki herhangi bir JS hatası testi düşürür. Kapsam:
-- **Oyun:** yükleme ve özellik envanteri; servis, oynanış, can, oyun sonu, duraklatma; koşu sayaçları ve pratikte kayıt dışı kalma; 15 kapsülün her biri; duvar bölgeleri, falso ve SMASH; tüm tuğla türleri; boss; kara delik, ÇILGIN MOD, lazer ve kalkan; Tünel Fırtınası (piksel duvar, tünelde taşınma, içeriden oyma ve zincir, +3/x3 küplerin raketle yakalanması, 300 top sınırı ve akıcılığı, kırılmaz çelik, kazanma ekranı, sonraki bölümde kapanma, panelden pratik).
+- **Oyun:** yükleme ve özellik envanteri; servis, oynanış, can, oyun sonu, duraklatma; koşu sayaçları ve pratikte kayıt dışı kalma; 15 kapsülün her biri; duvar bölgeleri, falso ve SMASH; tüm tuğla türleri; boss; kara delik, ÇILGIN MOD, lazer ve kalkan; 25 dil (her dil eksiksiz ve yer tutucuları uyumlu, html lang/dir ve RTL, dil seçici, tüm ekranlar ve panellerin her dilde hatasız ve tuvale sığarak çizilmesi, çevrilmemiş Türkçe metin kalmaması); Tünel Fırtınası (piksel duvar, tünelde taşınma, içeriden oyma ve zincir, +3/x3 küplerin raketle yakalanması, 300 top sınırı ve akıcılığı, kırılmaz çelik, kazanma ekranı, sonraki bölümde kapanma, panelden pratik).
 - **Meydan okuma:** bölüm kilidi, pratik başlatma, günlük tek deneme, günlük kurallar, seri/tarih hesabı, kalıcılık ve bozuk kayıt.
 - **Lanetler:** 20 lanetin her biri, ayrıntılı davranışlarıyla.
 - **Temalar ve görünüm:** üreteç, stüdyo, paylaşım kodu; 33 görünüm seçeneği ve sayfa yenilenince kalıcılık.
@@ -82,6 +86,8 @@ npm run test:dist                         # iki derlemeyi birden test et
 ```
 
 Chromium yolu farklıysa: `BB_CHROME=/yol/chrome npm test`.
+
+Testler kaynak dil Türkçe ile çalışır (sürücü her sayfada `bb_lang` = `tr` yazar); dil testi 25 dilin her birini ayrıca yükleyip denetler.
 
 ## Yayın ve CI
 
@@ -141,6 +147,26 @@ GitHub Actions (`.github/workflows/ci.yml`) her push ve pull request'te Node 22 
 - **Nereden oynanır:** klasik oyunda 11. bölümden sonra gelir. **🎯 Meydan → 🌀 Tünel Fırtınası'nı oyna** ile her zaman pratik olarak açılır.
 
 Teknik notlar (`js/tunnel.js`): duvar 126×44 hücrelik bir ızgaradır (hücre 6 px, `Uint8Array`: boş/mavi/çelik/tünel içi/tutuşan). Çarpışma, topun değdiği hücrelere bakılarak ve eksen ayrımıyla sekerek yapılır; 300 topta bile hızlıdır. Duvar ekran dışı bir tuvale bir kez çizilir, sonra yalnızca değişen hücreler yeniden boyanır. Tünel yolları `TUNNEL_PATHS`'te nokta listesidir: tünel içi, çelik kaplama (2 hücre) ve çıkış ağzı bu yoldan üretilir. 20 piksel kariyerde 1 tuğla sayılır. Top fırtınasında aynı ses 30 ms'de bir çalar, iz, hale ve gölge çizilmez.
+
+## Diller (25)
+
+Oyun **25 dilde** oynanır: Türkçe, English, Deutsch, Français, Español, Italiano, Português (Brasil), Русский, Українська, Polski, Nederlands, Svenska, Ελληνικά, Čeština, Română, Magyar, Azərbaycanca, العربية, فارسی, हिन्दी, Bahasa Indonesia, Tiếng Việt, 简体中文, 日本語, 한국어.
+
+- **Dil seçimi:** ⚙️ Ayarlar panelinin en üstündeki **🌐 Dil · Language** listesinden. Seçince sayfa o dilde yeniden açılır (oyun kayıtların, ayarların, kariyerin aynen kalır).
+- **İlk açılış:** daha önce dil seçilmediyse tarayıcının dili kullanılır; listede yoksa İngilizce açılır.
+- **Her şey çevrilidir:** menüler, paneller, tuval yazıları (HUD, duyurular, oyun sonu, Tünel Fırtınası'nın kazanma kartı), kapsül ve lanet adları, başarımlar, koleksiyon kartları, ipuçları. Uzun çeviriler kartlara ve kapsüllere sığacak şekilde küçülür.
+- **Sağdan sola:** Arapça ve Farsçada arayüz sağdan sola akar; Farsçada sayılar Fars rakamlarıyla yazılır.
+- **Rastgele tema ve şarkı adları** her dilde o dilin kelime sırasıyla kurulur (ör. Türkçe "Sisli Okyanus" → İngilizce "Misty Ocean", Fransızca "Océan de brume", Japonca "霧の海").
+- **Çevrim içi kapışma:** maç akışındaki olaylar her oyuncuya kendi dilinde gösterilir; farklı dillerdeki oyuncular aynı odada oynayabilir.
+
+Teknik notlar (i18n):
+- Kaynak dil Türkçedir; kodda `tr("Türkçe metin {ad}", { ad: değer })` çağrılır (anahtar Türkçe metnin kendisidir; `t` yerel değişken adı olarak çok kullanıldığı için fonksiyonun adı `tr`). Veri tablolarında yalnızca işaret için `N_("…")`.
+- `js/lang/keys.js` anahtar listesidir (kimlik = sıra), `js/lang/<kod>.js` kimlik → çeviri tablosudur. `js/i18n.js` dili seçer (`bb_lang` → tarayıcı dili → en), `tr()`'yi tanımlar (eksik çeviri → İngilizce → Türkçe), `<html lang dir>`'i ayarlar ve statik HTML metinlerini (metin düğümleri, title/placeholder/aria-label) çevirir. Dil değişince sayfa yeniden yüklenir.
+- Aynı Türkçe kelimenin farklı anlamları `bağlam::metin` anahtarıyla ayrılır (ör. `sıfat::Kristal`); rastgele adlar `tr("{adj} {noun}")` kalıbıyla, sıfatlar her dilde çekimsiz biçimde (tamlayan/"de …"/birleşik) kurulur.
+- Kimlik olarak saklanan veriler Türkçe kalır (boss adı koleksiyon anahtarı, tema adları, şarkı profili); yalnızca görüntü çevrilir. Savaş akışı olayları anahtar + değer olarak gönderilir.
+- Tuval yazıları `text(…, maxW)`, `titleText`, `outlinedText` ve duyurularda en büyük genişliğe göre küçülür (`fitFont`).
+- `node tools/i18n.mjs` yeni anahtarları `keys.js`'e ekler ve her dili denetler (eksik, fazla, yer tutucu uyumsuzluğu). `--check` sorun varsa 1 döner (testler kullanır), `--todo de` o dilin eksiklerini listeler, `--prune` kullanılmayanları silip kimlikleri yeniden numaralar.
+- Yeni metin eklerken: kodda `tr("…")` kullan → `node tools/i18n.mjs` → 24 dil dosyasına çeviriyi ekle → `npm test`.
 
 ## Tutundurma paketi (2026-10)
 

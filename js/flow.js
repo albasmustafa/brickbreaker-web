@@ -87,7 +87,7 @@ function addScore(n) {
   // Rekoru ilk geçtiğin an duyurulur (callout değil: combo/bölüm yazılarını ezmesin)
   if (!run.practice && !state.recordShown && state.startHigh > 0 && state.score > state.startHigh) {
     state.recordShown = true;
-    toast("🏆 Rekoru geçtin!", "eski rekor " + state.startHigh, T().b2);
+    toast(tr("🏆 Rekoru geçtin!"), tr("eski rekor {n}", { n: state.startHigh }), T().b2);
     sfx("achieve");
   }
 }
@@ -110,7 +110,7 @@ function startGame() {
   startDirectorChallenge(1);
   resetGhostRun();
   serveBall();
-  callout("BÖLÜM 1", T().accent);
+  callout(tr("BÖLÜM {n}", { n: 1 }), T().accent);
 }
 function toMenu() {
   if (run.daily && typeof finishDaily === "function") finishDaily();
@@ -213,9 +213,9 @@ function nextLevel() {
   startDirectorChallenge(state.level);
   serveBall();
   if (settings.autoTheme === "bolum") randomTheme();
-  if (state.boss) { callout("⚠ " + state.boss.name + " ⚠", "#ff4d6d"); sfx("bossRoar"); }
-  else if (pxWall.active) callout("🌀 TÜNEL FIRTINASI", "#4cc9f0");
-  else callout("BÖLÜM " + state.level, T().accent);
+  if (state.boss) { callout("⚠ " + tr(state.boss.name) + " ⚠", "#ff4d6d"); sfx("bossRoar"); }
+  else if (pxWall.active) callout(tr("🌀 TÜNEL FIRTINASI"), "#4cc9f0");
+  else callout(tr("BÖLÜM {n}", { n: state.level }), T().accent);
 }
 
 function pauseGame() {

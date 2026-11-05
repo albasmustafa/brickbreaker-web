@@ -91,25 +91,25 @@ function renderGhost() {
   if (!ghostCard) return;
   const b = ghost.best;
   ghostCard.textContent = b.rec.length
-    ? "👻 En iyi hayalet: " + b.score + " puan · bölüm " + b.level + (b.date ? " · " + new Date(b.date).toLocaleDateString("tr-TR") : "")
-    : "Henüz hayalet yok — bir klasik koşu tamamla; en iyi skorun burada saklanır.";
+    ? tr("👻 En iyi hayalet: {score} puan · bölüm {level}", { score: b.score, level: b.level }) + (b.date ? " · " + new Date(b.date).toLocaleDateString(LOCALE) : "")
+    : tr("Henüz hayalet yok — bir klasik koşu tamamla; en iyi skorun burada saklanır.");
   ghostMsg.textContent = "";
 }
 onClick("ghost-export", () => {
   const code = encodeGhost();
-  if (!code) { ghostMsg.textContent = "⚠️ Önce bir klasik koşu tamamla."; return; }
+  if (!code) { ghostMsg.textContent = tr("⚠️ Önce bir klasik koşu tamamla."); return; }
   ghostCode.value = code;
   ghostCode.select();
-  if (navigator.clipboard) navigator.clipboard.writeText(code).then(() => (ghostMsg.textContent = "📋 Hayalet kodu panoya kopyalandı."), () => (ghostMsg.textContent = "Kodu kutudan kopyala."));
-  else ghostMsg.textContent = "Kodu kutudan kopyala.";
+  if (navigator.clipboard) navigator.clipboard.writeText(code).then(() => (ghostMsg.textContent = tr("📋 Hayalet kodu panoya kopyalandı.")), () => (ghostMsg.textContent = tr("Kodu kutudan kopyala.")));
+  else ghostMsg.textContent = tr("Kodu kutudan kopyala.");
 });
 onClick("ghost-import", () => {
-  if (importGhost(ghostCode.value)) ghostMsg.textContent = "📥 Hayalet yüklendi — bir sonraki klasik koşuda yarışır.";
-  else ghostMsg.textContent = "⚠️ Geçersiz hayalet kodu.";
+  if (importGhost(ghostCode.value)) ghostMsg.textContent = tr("📥 Hayalet yüklendi — bir sonraki klasik koşuda yarışır.");
+  else ghostMsg.textContent = tr("⚠️ Geçersiz hayalet kodu.");
 });
 onClick("ghost-clear", () => {
   ghost.best = { rec: [], score: 0, level: 1, date: 0 };
   saveGhost(); renderGhost();
-  ghostMsg.textContent = "🗑 Hayalet silindi.";
+  ghostMsg.textContent = tr("🗑 Hayalet silindi.");
 });
 renderGhost();

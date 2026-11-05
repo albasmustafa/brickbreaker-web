@@ -36,7 +36,7 @@ function generateSongLevels(info) {
     }
     const boss = ix === sections.length - 1 && info.boss;
     if (boss) levels.push({ map: [...Array(5).fill(".........."), ...map.slice(0, 4)],
-      boss: { name: info.bossName || "RİTİM CANAVARI", hp: 30 + Math.round(energy * 40), speed: 100 + Math.round(energy * 60), shootEvery: 2.5 - energy } });
+      boss: { name: info.bossName || N_("RİTİM CANAVARI"), hp: 30 + Math.round(energy * 40), speed: 100 + Math.round(energy * 60), shootEvery: 2.5 - energy } });
     else levels.push(map);
   });
   return levels;
@@ -94,22 +94,22 @@ function analyzeAudioBuffer(buffer, fileName) {
 
 async function loadSongFile(file) {
   if (!file) return false;
-  songMsg.textContent = "⏳ Şarkı analiz ediliyor…";
+  songMsg.textContent = tr("⏳ Şarkı analiz ediliyor…");
   try {
     const ab = await file.arrayBuffer();
     const AC = window.AudioContext || window.webkitAudioContext;
-    if (!AC) throw new Error("Web Audio yok");
+    if (!AC) throw new Error(tr("Web Audio yok"));
     const ac = new AC();
     const audio = await ac.decodeAudioData(ab);
     if (ac.close) ac.close();
     const info = analyzeAudioBuffer(audio, file.name);
     songLevel.name = info.name; songLevel.bpm = info.bpm; songLevel.duration = info.duration;
     songLevel.levels = generateSongLevels(info); songLevel.url = URL.createObjectURL(file); songLevel.fileName = file.name;
-    songMsg.textContent = "✅ " + songLevel.levels.length + " bölüm üretildi.";
+    songMsg.textContent = tr("✅ {n} bölüm üretildi.", { n: songLevel.levels.length });
     renderSong();
     return true;
   } catch (e) {
-    songMsg.textContent = "⚠️ Şarkı çözülemedi: " + (e.message || e);
+    songMsg.textContent = tr("⚠️ Şarkı çözülemedi: {err}", { err: e.message || e });
     return false;
   }
 }
@@ -117,9 +117,9 @@ function renderSong() {
   if (!songCard) return;
   const boss = songLevel.levels.length && songLevel.levels[songLevel.levels.length - 1].boss;
   songCard.textContent = songLevel.levels.length
-    ? "🎵 " + songLevel.name + " · " + songLevel.bpm + " BPM · " + Math.round(songLevel.duration) + " sn · " + songLevel.levels.length + " bölüm" + (boss ? " · boss: " + boss.name : "")
-    : "Henüz şarkı seçilmedi. Bir şarkı seç; enerji, bas ve BPM'e göre bölüm üretilsin.";
-  if (songStartBtn) { songStartBtn.disabled = !songLevel.levels.length || songLevel.active; songStartBtn.textContent = songLevel.active ? "▶ Şarkı bölümü sürüyor…" : "▶ Şarkı bölümünü başlat"; }
+    ? "🎵 " + songLevel.name + " · " + tr("{bpm} BPM · {sec} sn · {n} bölüm", { bpm: songLevel.bpm, sec: Math.round(songLevel.duration), n: songLevel.levels.length }) + (boss ? " · " + tr("boss: {name}", { name: tr(boss.name) }) : "")
+    : tr("Henüz şarkı seçilmedi. Bir şarkı seç; enerji, bas ve BPM'e göre bölüm üretilsin.");
+  if (songStartBtn) { songStartBtn.disabled = !songLevel.levels.length || songLevel.active; songStartBtn.textContent = songLevel.active ? tr("▶ Şarkı bölümü sürüyor…") : tr("▶ Şarkı bölümünü başlat"); }
 }
 function startSongLevel() {
   if (!songLevel.levels.length) return false;
@@ -138,7 +138,7 @@ function startSongLevel() {
       songLevel.playing = true;
     } catch (e) {}
   }
-  callout("🎵 " + songLevel.name.toLocaleUpperCase("tr"), "#ffd166");
+  callout("🎵 " + songLevel.name.toLocaleUpperCase(LOCALE), "#ffd166");
   renderSong();
   return true;
 }
@@ -149,7 +149,7 @@ function stopSongLevel() {
 function songComplete() {
   songLevel.active = false;
   addScore(5000);
-  callout("🎵 ŞARKI TAMAM!", "#ffd166");
+  callout(tr("🎵 ŞARKI TAMAM!"), "#ffd166");
   gameOver();
 }
 
@@ -168,9 +168,9 @@ function importSongLevel(code) {
       const map = Array.isArray(def) ? def : def.map;
       if (!Array.isArray(map) || !map.length) throw new Error("harita");
       const rows = map.map(line => String(line).slice(0, 10).padEnd(10, ".").replace(/[^123XEZ$+.]/g, "."));
-      return Array.isArray(def) ? rows : { map: rows, boss: def.boss && { name: String(def.boss.name || "RİTİM CANAVARI").slice(0, 30), hp: clamp(Math.round(+def.boss.hp) || 40, 10, 300), speed: clamp(+def.boss.speed || 120, 40, 300), shootEvery: clamp(+def.boss.shootEvery || 2, 0.8, 5) } };
+      return Array.isArray(def) ? rows : { map: rows, boss: def.boss && { name: String(def.boss.name || N_("RİTİM CANAVARI")).slice(0, 30), hp: clamp(Math.round(+def.boss.hp) || 40, 10, 300), speed: clamp(+def.boss.speed || 120, 40, 300), shootEvery: clamp(+def.boss.shootEvery || 2, 0.8, 5) } };
     });
-    songLevel.name = String(d.n || "Paylaşılan şarkı").slice(0, 40); songLevel.bpm = clamp(Math.round(+d.b || 0), 0, 240); songLevel.duration = Math.max(0, +d.d || 0);
+    songLevel.name = String(d.n || tr("Paylaşılan şarkı")).slice(0, 40); songLevel.bpm = clamp(Math.round(+d.b || 0), 0, 240); songLevel.duration = Math.max(0, +d.d || 0);
     songLevel.levels = levels; songLevel.url = null; songLevel.fileName = "";
     renderSong();
     return true;
@@ -183,12 +183,12 @@ $("songfile").addEventListener("change", e => { const f = e.target.files && e.ta
 onClick("song-start", startSongLevel);
 onClick("song-code", () => {
   const code = encodeSongLevel();
-  if (!code) { songMsg.textContent = "⚠️ Önce bir şarkı seç."; return; }
+  if (!code) { songMsg.textContent = tr("⚠️ Önce bir şarkı seç."); return; }
   songCodeBox.value = code; songCodeBox.select();
-  if (navigator.clipboard) navigator.clipboard.writeText(code).then(() => (songMsg.textContent = "📋 Bölüm kodu panoya kopyalandı."), () => (songMsg.textContent = "Kodu kutudan kopyala."));
-  else songMsg.textContent = "Kodu kutudan kopyala.";
+  if (navigator.clipboard) navigator.clipboard.writeText(code).then(() => (songMsg.textContent = tr("📋 Bölüm kodu panoya kopyalandı.")), () => (songMsg.textContent = tr("Kodu kutudan kopyala.")));
+  else songMsg.textContent = tr("Kodu kutudan kopyala.");
 });
 onClick("song-import", () => {
-  songMsg.textContent = importSongLevel(songCodeBox.value) ? "📥 Bölüm yüklendi — başlatabilirsin." : "⚠️ Geçersiz bölüm kodu.";
+  songMsg.textContent = importSongLevel(songCodeBox.value) ? tr("📥 Bölüm yüklendi — başlatabilirsin.") : tr("⚠️ Geçersiz bölüm kodu.");
 });
 renderSong();

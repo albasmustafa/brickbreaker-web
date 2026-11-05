@@ -3,22 +3,22 @@
 //     Paktlar koşu boyunca sürer; oyuncu isterse hiçbirini seçmez.
 // ======================================================================
 const PACT_POOL = [
-  { id: "cam",    icon: "💠", name: "CAM TOP",       color: "#4cc9f0",
-    desc: "+%25 puan, top %10 daha hızlı",              mods: { scoreMul: 1.25, speedMul: 1.10 } },
-  { id: "kan",    icon: "🩸", name: "KAN BEDELİ",    color: "#ff4d6d",
-    desc: "-1 can, +%40 puan",                           mods: { scoreMul: 1.40, lives: -1 } },
-  { id: "boss",   icon: "👹", name: "BOSS AVCI",     color: "#ffd166",
-    desc: "Bosslar +%50 can, +%20 puan",                 mods: { scoreMul: 1.20, bossHpMul: 1.5 } },
-  { id: "lanet",  icon: "🔮", name: "LANET MIKSI",   color: "#c77dff",
-    desc: "Lanetler +%25 uzun, lanet bonusu +0.5",       mods: { curseDurMul: 1.25, curseBonusAdd: 0.5 } },
-  { id: "altin",  icon: "💰", name: "ALTIN ATEŞİ",   color: "#ffc300",
-    desc: "Altın tuğla ×2, normal puan -%10",            mods: { goldMul: 2, scoreMul: 0.9 } },
-  { id: "kalkan", icon: "🛡", name: "KALKAN USTASI", color: "#64dfdf",
-    desc: "+3 kalkan, -%10 puan",                        mods: { shield: 3, scoreMul: 0.9 } },
-  { id: "sifir",  icon: "💀", name: "SIFIR NOKTA",   color: "#ff5d8f",
-    desc: "1 cana düş, tüm puanlar ×1.6",                mods: { scoreMul: 1.6, livesSet: 1 } },
-  { id: "sessiz", icon: "🌑", name: "SESSİZ GECE",   color: "#9aa5b1",
-    desc: "Lanetler kapalı, -%20 puan",                  mods: { noCurses: true, scoreMul: 0.8 } },
+  { id: "cam",    icon: "💠", name: tr("CAM TOP"),       color: "#4cc9f0",
+    desc: tr("+%25 puan, top %10 daha hızlı"),              mods: { scoreMul: 1.25, speedMul: 1.10 } },
+  { id: "kan",    icon: "🩸", name: tr("KAN BEDELİ"),    color: "#ff4d6d",
+    desc: tr("-1 can, +%40 puan"),                           mods: { scoreMul: 1.40, lives: -1 } },
+  { id: "boss",   icon: "👹", name: tr("BOSS AVCI"),     color: "#ffd166",
+    desc: tr("Bosslar +%50 can, +%20 puan"),                 mods: { scoreMul: 1.20, bossHpMul: 1.5 } },
+  { id: "lanet",  icon: "🔮", name: tr("LANET MIKSI"),   color: "#c77dff",
+    desc: tr("Lanetler +%25 uzun, lanet bonusu +0.5"),       mods: { curseDurMul: 1.25, curseBonusAdd: 0.5 } },
+  { id: "altin",  icon: "💰", name: tr("ALTIN ATEŞİ"),   color: "#ffc300",
+    desc: tr("Altın tuğla ×2, normal puan -%10"),            mods: { goldMul: 2, scoreMul: 0.9 } },
+  { id: "kalkan", icon: "🛡", name: tr("KALKAN USTASI"), color: "#64dfdf",
+    desc: tr("+3 kalkan, -%10 puan"),                        mods: { shield: 3, scoreMul: 0.9 } },
+  { id: "sifir",  icon: "💀", name: tr("SIFIR NOKTA"),   color: "#ff5d8f",
+    desc: tr("1 cana düş, tüm puanlar ×1.6"),                mods: { scoreMul: 1.6, livesSet: 1 } },
+  { id: "sessiz", icon: "🌑", name: tr("SESSİZ GECE"),   color: "#9aa5b1",
+    desc: tr("Lanetler kapalı, -%20 puan"),                  mods: { noCurses: true, scoreMul: 0.8 } },
 ];
 const PACT_BY_ID = Object.fromEntries(PACT_POOL.map(p => [p.id, p]));
 const pactBar = $("pactbar"), pactCards = $("pact-cards");

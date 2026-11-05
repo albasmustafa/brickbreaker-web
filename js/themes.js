@@ -4,8 +4,8 @@
 // ======================================================================
 const THEME_KEYS = ["bg", "board", "b1", "b2", "b3", "un", "ex", "pad", "ball", "text", "dim", "accent", "star"];
 const THEME_LABELS = {
-  bg: "Sayfa", board: "Tahta", b1: "Tuğla 1", b2: "Tuğla 2", b3: "Tuğla 3", un: "Kırılmaz", ex: "Patlayan",
-  pad: "Raket", ball: "Top", text: "Yazı", dim: "Soluk yazı", accent: "Vurgu", star: "Arka plan efekti",
+  bg: tr("Sayfa"), board: tr("Tahta"), b1: tr("Tuğla 1"), b2: tr("Tuğla 2"), b3: tr("Tuğla 3"), un: tr("Kırılmaz"), ex: tr("Patlayan"),
+  pad: tr("Raket"), ball: tr("Top"), text: tr("Yazı"), dim: tr("Soluk yazı"), accent: tr("Vurgu"), star: tr("Arka plan efekti"),
 };
 // Sıra THEME_KEYS ile aynı: ad | sayfa tahta tuğla1 tuğla2 tuğla3 kırılmaz patlayan raket top yazı soluk vurgu yıldız
 const THEMES = `
@@ -41,6 +41,21 @@ Siberpunk|0d0221 1a0b3b 00f0ff ff2a6d fdf500 3d2c5e ff8800 f5f5f5 ffffff e0f7ff 
     return t;
   });
 const MAX_CUSTOM_THEMES = 60;
+// Hazır tema adları (çeviri anahtarları; tablo yukarıda düz metin)
+[N_("Gece"), N_("Gün Batımı"), N_("Orman"), N_("Neon"), N_("Gameboy"), N_("Buz"), N_("Şeker"), N_("Klasik"), N_("Lav"), N_("Okyanus"), N_("Synthwave"), N_("Matrix"), N_("Sakura"),
+ N_("Çöl"), N_("Uzay"), N_("Kahve"), N_("Altın"), N_("Lavanta"), N_("Vampir"), N_("Kağıt"), N_("Pastel"), N_("Amber"), N_("Sonbahar"), N_("Aurora"), N_("Siberpunk")];
+// Görünen tema adı: hazır tema çevrilir, adı değişmemiş rastgele tema seçilen dilde yeniden adlanır, kullanıcı adları olduğu gibi kalır
+function themeName(t) {
+  if (!t) return "";
+  const p = THEMES.find(x => x.id === t.id);
+  if (p) return p.name === t.name ? tr(t.name) : t.name;
+  const m = /^r(\d+)$/.exec(t.id || "");
+  if (m) {
+    const g = genTheme(+m[1]);
+    if (g.name === t.name) return tr("{adj} {noun}", { adj: tr("sıfat::" + g.adj), noun: tr(g.noun) }) + " #" + (+m[1] % 10000);
+  }
+  return t.name;
+}
 const validTheme = t => !!t && typeof t.name === "string" && THEME_KEYS.every(k => /^#[0-9a-f]{6}$/i.test(t[k]));
 // Kimlikler: hazır "p…", kayıtlı "c…", rastgele "r<tohum>", kaydedilmemiş düzenleme "e"
 let customThemes = (() => { const c = store.get("bb_custom_themes", []); return Array.isArray(c) ? c.filter(validTheme).slice(0, MAX_CUSTOM_THEMES) : []; })();
@@ -85,13 +100,13 @@ function ensureContrast(h, s, l, board, min, dark) {
   for (let i = 0; i < 25 && contrast(c, board) < min; i++) c = hslHex(h, s, (l = clamp(l + (dark ? 3 : -3), 0, 100)));
   return c;
 }
-const TH_ADJ = ["Kızıl", "Kozmik", "Neon", "Sisli", "Altın", "Buzlu", "Elektrik", "Kadife", "Volkanik", "Pastel", "Gizemli",
-  "Tropik", "Kutup", "Dijital", "Antik", "Zehirli", "Gece", "Şafak", "Fırtınalı", "Kristal", "Mistik", "Retro", "Yakut", "Zümrüt", "Safir", "Bakır"];
-const TH_NOUN = ["Nebula", "Okyanus", "Orman", "Çöl", "Rüya", "Kristal", "Fırtına", "Galaksi", "Lav", "Bahar", "Vadi", "Gölge",
-  "Mercan", "Yıldız", "Duman", "Şehir", "Ada", "Buzul", "Bataklık", "Gezegen", "Labirent", "Tapınak", "Kanyon", "Volkan"];
+// Rastgele tema adı parçaları (görünen ad seçilen dilde kurulur: themeName). Sıfatlar "sıfat::" bağlamıyla çevrilir.
+const TH_ADJ = [N_("sıfat::Kızıl"), N_("sıfat::Kozmik"), N_("sıfat::Neon"), N_("sıfat::Sisli"), N_("sıfat::Altın"), N_("sıfat::Buzlu"), N_("sıfat::Elektrik"), N_("sıfat::Kadife"), N_("sıfat::Volkanik"), N_("sıfat::Pastel"), N_("sıfat::Gizemli"), N_("sıfat::Tropik"), N_("sıfat::Kutup"), N_("sıfat::Dijital"), N_("sıfat::Antik"), N_("sıfat::Zehirli"), N_("sıfat::Gece"), N_("sıfat::Şafak"), N_("sıfat::Fırtınalı"), N_("sıfat::Kristal"), N_("sıfat::Mistik"), N_("sıfat::Retro"), N_("sıfat::Yakut"), N_("sıfat::Zümrüt"), N_("sıfat::Safir"), N_("sıfat::Bakır")].map(s => s.split("::")[1]);
+const TH_NOUN = [N_("Nebula"), N_("Okyanus"), N_("Orman"), N_("Çöl"), N_("Rüya"), N_("Kristal"), N_("Fırtına"), N_("Galaksi"), N_("Lav"), N_("Bahar"), N_("Vadi"), N_("Gölge"), N_("Mercan"), N_("Yıldız"), N_("Duman"), N_("Şehir"), N_("Ada"), N_("Buzul"), N_("Bataklık"), N_("Gezegen"), N_("Labirent"), N_("Tapınak"), N_("Kanyon"), N_("Volkan")];
 const SCHEMES = { analog: [0, 30, 60], triad: [0, 120, 240], tamamlayici: [0, 180, 30], bolunmus: [0, 150, 210], dortlu: [0, 90, 180], tek: [0, 6, 12] };
 function genTheme(seed) {
   const r = seeded(seed), choose = arr => arr[(r() * arr.length) | 0];
+  let adj, noun;
   const h = r() * 360;                       // tahta tonu
   const dark = r() < 0.8;                    // çoğunlukla koyu, arada açık tahta
   const sch = choose(Object.keys(SCHEMES));
@@ -101,9 +116,10 @@ function genTheme(seed) {
   const off = r() * 360;                     // tuğla tonları tahtadan bağımsız döner
   const sat = 55 + r() * 40, bl = dark ? 55 + r() * 15 : 40 + r() * 10;
   const ec = (hh, ss, ll, min) => ensureContrast(hh, ss, ll, board, min, dark);
+  adj = choose(TH_ADJ); noun = choose(TH_NOUN);
   const [b1, b2, b3] = SCHEMES[sch].map((o, i) => ec(off + o, sat, bl + (sch === "tek" ? (1 - i) * 12 : 0), 2.4));
   return {
-    id: "r" + seed, name: choose(TH_ADJ) + " " + choose(TH_NOUN) + " #" + (seed % 10000), bg, board, b1, b2, b3,
+    id: "r" + seed, adj, noun, name: adj + " " + noun + " #" + (seed % 10000), bg, board, b1, b2, b3,
     un: ec(h, 12, dark ? 36 : 70, 1.7), ex: ec(18 + r() * 28, 95, dark ? 58 : 50, 2.2), pad: ec(off, 30, dark ? 88 : 22, 6),
     ball: dark ? "#ffffff" : hslHex(h, 30, 12), text: ec(h, 25, dark ? 90 : 14, 7), dim: ec(h, 18, dark ? 60 : 42, 3.2),
     accent: ec(off, sat, bl, 3), star: hslHex(h, bs, dark ? 26 : 78),

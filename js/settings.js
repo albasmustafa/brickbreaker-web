@@ -5,34 +5,34 @@
 // ======================================================================
 const parseOpts = s => s.split("|").map(p => {
   const [v, label] = p.split(":");
-  return [v === "true" ? true : v === "false" ? false : isNaN(v) ? v : +v, label ?? v];
+  return [v === "true" ? true : v === "false" ? false : isNaN(v) ? v : +v, tr(label ?? v)];   // seçenek yazıları çevrilir (tools/i18n.mjs opts dizgelerini de okur)
 });
 const SETTING_ROWS = [
-  { key: "fxVol", label: "Efekt sesi", range: [0, 100], def: 100 },
-  { key: "paddleSound", label: "Raket sesi", def: "random", preview: true,
+  { key: "fxVol", label: tr("Efekt sesi"), range: [0, 100], def: 100 },
+  { key: "paddleSound", label: tr("Raket sesi"), def: "random", preview: true,
     opts: "random:🎲 Rastgele|pop:Pop|bip:Bip|lazer:Lazer|tik:Tık|bas:Bas|zil:Zil|boing:Boing|pluck:Pluck|8bit:8-bit" },
-  { key: "shake", label: "Ekran sarsıntısı", def: matchMedia("(prefers-reduced-motion: reduce)").matches ? "azaltilmis" : "acik",
+  { key: "shake", label: tr("Ekran sarsıntısı"), def: matchMedia("(prefers-reduced-motion: reduce)").matches ? "azaltilmis" : "acik",
     opts: "acik:Açık|azaltilmis:Azaltılmış|kapali:Kapalı" },
-  { key: "difficulty", label: "Zorluk", def: "normal", opts: "kolay:Kolay|normal:Normal|zor:Zor" },
-  { key: "hazards", label: "Lanetler", def: "normal", opts: "kapali:Kapalı|az:Az|normal:Normal|kabus:Kâbus" },
-  { key: "pacts", label: "Lanet Paktı", def: "acik", opts: "acik:Açık|kapali:Kapalı" },
-  { key: "director", label: "Dramaturg", def: "acik", opts: "acik:Açık|kapali:Kapalı" },
-  { key: "ghost", label: "Hayalet koşu", def: "acik", opts: "acik:Açık|kapali:Kapalı" },
-  { key: "hpDots", label: "HP noktacıkları", def: false, opts: "false:Kapalı|true:Açık" },
-  { note: "Zorluk yalnızca yeni oyunda uygulanır. Lanetler oyun sırasında rastgele gelen engellerdir (görünmez raket, karanlık, rüzgar…); aktifken kırılan tuğlalar ×1.5 puan verir. Efekt sesi arka plan müziğini etkilemez." },
-  { head: "Görünüm" },
-  { key: "ballShape", look: true, label: "Top şekli", def: "daire", opts: "daire:● Daire|kare:■ Kare|elmas:◆ Elmas|yildiz:★ Yıldız|halka:○ Halka" },
-  { key: "trail", look: true, label: "Top izi", def: "normal", opts: "normal:Normal|uzun:Uzun|gokkusagi:Gökkuşağı|kapali:Kapalı" },
-  { key: "paddleStyle", look: true, label: "Raket", def: "yuvarlak", opts: "yuvarlak:Parlak|koseli:Köşeli|neon:Neon|gokkusagi:Gökkuşağı" },
-  { key: "brickStyle", look: true, label: "Tuğla stili", def: "parlak", opts: "parlak:Parlak|duz:Düz|yuvarlak:Yuvarlak|3d:3D|cam:Cam|neon:Neon" },
-  { key: "brickColor", look: true, label: "Tuğla rengi", def: "hp", opts: "hp:Dayanıklılığa göre|gokkusagi:Gökkuşağı" },
-  { key: "bgFx", look: true, label: "Arka plan", def: "yildiz", opts: "yildiz:Yıldızlar|kar:Kar|kabarcik:Kabarcık|matrix:Matrix|izgara:Synthwave ızgara|kapali:Kapalı" },
-  { key: "particles", look: true, label: "Parçacık", def: "normal", opts: "az:Az|normal:Normal|cok:Çok|asiri:Aşırı" },
-  { key: "autoTheme", look: true, label: "Otomatik tema", def: "kapali", opts: "kapali:Kapalı|bolum:Her bölümde yeni rastgele tema" },
-  { head: "Müzik" },
-  { key: "musicFx", label: "Müzik efektleri", def: "tam", opts: "kapali:Kapalı|hafif:Hafif|tam:Tam" },
-  { key: "songTheme", label: "Şarkıya özel tema", def: "kapali", opts: "kapali:Kapalı|acik:Açık" },
-  { note: "Arka plana müzik ya da sesli video koyunca efektler vuruşa ve frekanslara göre oynar. Her şarkı ilk 8 saniyede dinlenip karakterine göre (bas, hız, tiz, sakin, neon) kendi efekt setini ve adını alır; profil kaydedilir. \"Tam\" ayarında hafif vuruş flaşı da vardır, ışığa duyarlıysan \"Hafif\"i seç." },
+  { key: "difficulty", label: tr("Zorluk"), def: "normal", opts: "kolay:Kolay|normal:Normal|zor:Zor" },
+  { key: "hazards", label: tr("Lanetler"), def: "normal", opts: "kapali:Kapalı|az:Az|normal:Normal|kabus:Kâbus" },
+  { key: "pacts", label: tr("Lanet Paktı"), def: "acik", opts: "acik:Açık|kapali:Kapalı" },
+  { key: "director", label: tr("Dramaturg"), def: "acik", opts: "acik:Açık|kapali:Kapalı" },
+  { key: "ghost", label: tr("Hayalet koşu"), def: "acik", opts: "acik:Açık|kapali:Kapalı" },
+  { key: "hpDots", label: tr("HP noktacıkları"), def: false, opts: "false:Kapalı|true:Açık" },
+  { note: tr("Zorluk yalnızca yeni oyunda uygulanır. Lanetler oyun sırasında rastgele gelen engellerdir (görünmez raket, karanlık, rüzgar…); aktifken kırılan tuğlalar ×1.5 puan verir. Efekt sesi arka plan müziğini etkilemez.") },
+  { head: tr("Görünüm") },
+  { key: "ballShape", look: true, label: tr("Top şekli"), def: "daire", opts: "daire:● Daire|kare:■ Kare|elmas:◆ Elmas|yildiz:★ Yıldız|halka:○ Halka" },
+  { key: "trail", look: true, label: tr("Top izi"), def: "normal", opts: "normal:Normal|uzun:Uzun|gokkusagi:Gökkuşağı|kapali:Kapalı" },
+  { key: "paddleStyle", look: true, label: tr("Raket"), def: "yuvarlak", opts: "yuvarlak:Parlak|koseli:Köşeli|neon:Neon|gokkusagi:Gökkuşağı" },
+  { key: "brickStyle", look: true, label: tr("Tuğla stili"), def: "parlak", opts: "parlak:Parlak|duz:Düz|yuvarlak:Yuvarlak|3d:3D|cam:Cam|neon:Neon" },
+  { key: "brickColor", look: true, label: tr("Tuğla rengi"), def: "hp", opts: "hp:Dayanıklılığa göre|gokkusagi:Gökkuşağı" },
+  { key: "bgFx", look: true, label: tr("Arka plan"), def: "yildiz", opts: "yildiz:Yıldızlar|kar:Kar|kabarcik:Kabarcık|matrix:Matrix|izgara:Synthwave ızgara|kapali:Kapalı" },
+  { key: "particles", look: true, label: tr("Parçacık"), def: "normal", opts: "az:Az|normal:Normal|cok:Çok|asiri:Aşırı" },
+  { key: "autoTheme", look: true, label: tr("Otomatik tema"), def: "kapali", opts: "kapali:Kapalı|bolum:Her bölümde yeni rastgele tema" },
+  { head: tr("Müzik") },
+  { key: "musicFx", label: tr("Müzik efektleri"), def: "tam", opts: "kapali:Kapalı|hafif:Hafif|tam:Tam" },
+  { key: "songTheme", label: tr("Şarkıya özel tema"), def: "kapali", opts: "kapali:Kapalı|acik:Açık" },
+  { note: tr("Arka plana müzik ya da sesli video koyunca efektler vuruşa ve frekanslara göre oynar. Her şarkı ilk 8 saniyede dinlenip karakterine göre (bas, hız, tiz, sakin, neon) kendi efekt setini ve adını alır; profil kaydedilir. \"Tam\" ayarında hafif vuruş flaşı da vardır, ışığa duyarlıysan \"Hafif\"i seç.") },
 ];
 const settings = {}, OPT = {};
 for (const row of SETTING_ROWS) if (row.key) {

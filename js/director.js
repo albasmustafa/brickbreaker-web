@@ -12,13 +12,13 @@ function resetDirectorRun() {
 function makeDirectorChallenge(level) {
   const pool = [];
   if (state.boss) {
-    pool.push({ id: "boss", text: "Boss'u 30 sn içinde yen", target: 30, reward: 1500 });
+    pool.push({ id: "boss", text: tr("Boss'u 30 sn içinde yen"), target: 30, reward: 1500 });
   } else {
-    pool.push({ id: "bricks", text: (8 + level * 2) + " tuğla kır", target: 8 + level * 2, reward: 300 + level * 80 });
-    pool.push({ id: "noLose", text: "Bu bölümü can kaybetmeden bitir", target: 0, reward: 800 });
-    if (level >= 2) pool.push({ id: "combo", text: "Bir kez 8 combo yap", target: 8, reward: 500 });
-    if (bricks.some(b => b.gold)) pool.push({ id: "gold", text: "2 altın tuğla kır", target: 2, reward: 600 });
-    if (hazardLevel() !== "kapali") pool.push({ id: "curse", text: "Bir lanet atlat", target: 1, reward: 400 });
+    pool.push({ id: "bricks", text: tr("{n} tuğla kır", { n: 8 + level * 2 }), target: 8 + level * 2, reward: 300 + level * 80 });
+    pool.push({ id: "noLose", text: tr("Bu bölümü can kaybetmeden bitir"), target: 0, reward: 800 });
+    if (level >= 2) pool.push({ id: "combo", text: tr("Bir kez 8 combo yap"), target: 8, reward: 500 });
+    if (bricks.some(b => b.gold)) pool.push({ id: "gold", text: tr("2 altın tuğla kır"), target: 2, reward: 600 });
+    if (hazardLevel() !== "kapali") pool.push({ id: "curse", text: tr("Bir lanet atlat"), target: 1, reward: 400 });
   }
   const c = gpick(pool);
   return { ...c, startBricks: run.bricks, startGold: run.goldBricks || 0, startCurses: state.cursesSurvived,
@@ -44,10 +44,10 @@ function completeDirectorChallenge() {
   if (!c || c.done) return false;
   c.done = true;
   director.completed++;
-  director.story.push(c.text + " — TAMAM");
+  director.story.push(tr("{x} — TAMAM", { x: c.text }));
   addScore(c.reward);
   if (c.id !== "noLose") dropPowerupAt(paddle.x + paddle.w / 2, paddle.y - 150, true);
-  callout("🎬 " + c.text + " TAMAM! +" + c.reward, "#ffd166");
+  callout(tr("🎬 {x} TAMAM! +{n}", { x: c.text, n: c.reward }), "#ffd166");
   sfx("level");
   track("director");
   return true;
@@ -55,7 +55,7 @@ function completeDirectorChallenge() {
 function failDirectorChallenge() {
   const c = director.challenge;
   if (!c || c.done) return;
-  director.story.push(c.text + " — kaçtı");
+  director.story.push(tr("{x} — kaçtı", { x: c.text }));
 }
 function directorLevelEnd() {
   const c = director.challenge;
@@ -81,13 +81,13 @@ function updateDirector(dt) {
     director.lastMercy = state.time;
     state.shield = Math.max(state.shield, 1);
     dropPowerupAt(paddle.x + paddle.w / 2, paddle.y - 150, true);
-    callout("🎬 DRAMATURG: NEFES AL", "#64dfdf");
-    director.story.push("Zor anda bir nefes");
+    callout(tr("🎬 DRAMATURG: NEFES AL"), "#64dfdf");
+    director.story.push(tr("Zor anda bir nefes"));
   } else if (state.time - director.lastSpectacle > 40 && gameRandom() < 0.35) {
     director.lastSpectacle = state.time;
     spawnCoins(W / 2, 120, 24);
     dropPowerupAt(W / 2, 120, true);
-    callout("🎬 GÖSTERİ ZAMANI", "#ffd166");
-    director.story.push("Sahne ışıkları");
+    callout(tr("🎬 GÖSTERİ ZAMANI"), "#ffd166");
+    director.story.push(tr("Sahne ışıkları"));
   }
 }

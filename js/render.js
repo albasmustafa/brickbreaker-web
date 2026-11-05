@@ -315,7 +315,7 @@ function drawPaddle() {
   }
   if (fxOn("magnet")) fillRR(x + 6, y + 4, w - 12, 6, 3, "#b388eb");
   if (fxOn("laser")) { ctx.fillStyle = "#ff4d6d"; ctx.fillRect(x + 3, y - 7, 6, 9); ctx.fillRect(x + w - 9, y - 7, 6, 9); }
-  if (fxOn("reverse")) text("⇄ TERS ⇄", x + w / 2, y + h + 14, "bold 12px monospace", "#ff4d6d");
+  if (fxOn("reverse")) text("⇄ " + tr("TERS") + " ⇄", x + w / 2, y + h + 14, "bold 12px monospace", "#ff4d6d");
   if (paddle.flash > 0) { ctx.globalAlpha = paddle.flash * 0.7; fillRR(x, y, w, h, 6, "#ffffff"); ctx.globalAlpha = 1; }
   if (curseOn("yarik")) {       // YARIK RAKET: ortadaki boşluk (top buradan düşer)
     const gx = x + w * 0.375, gw = w * 0.25;
@@ -415,9 +415,9 @@ function drawBolts() {
 // --- HUD ---
 // Süreli efekt hapları: [zamanlayıcı, yazı, renk, toplam süre] — kalan süre hap içinde çubukla görünür
 const EFFECT_TAGS = [
-  ["fever", "ÇILGIN", "#ff5d8f", FEVER_TIME], ["wide", "GENİŞ", POWERS.W.color, WIDE_TIME], ["slow", "YAVAŞ", POWERS.S.color, SLOW_TIME],
-  ["fire", "ATEŞ", POWERS.F.color], ["laser", "LAZER", POWERS.L.color], ["magnet", "YAPIŞ", POWERS.Y.color], ["big", "DEV", POWERS.D.color],
-  ["reverse", "TERS", "#ff4d6d"], ["mini", "MİNİ", "#ff4d6d"], ["haste", "HIZ", "#ff4d6d"], ["stun", "SERSEM", "#ff4d6d"],
+  ["fever", tr("ÇILGIN"), "#ff5d8f", FEVER_TIME], ["wide", tr("GENİŞ"), POWERS.W.color, WIDE_TIME], ["slow", tr("YAVAŞ"), POWERS.S.color, SLOW_TIME],
+  ["fire", tr("ATEŞ"), POWERS.F.color], ["laser", tr("LAZER"), POWERS.L.color], ["magnet", tr("YAPIŞ"), POWERS.Y.color], ["big", tr("DEV"), POWERS.D.color],
+  ["reverse", tr("TERS"), "#ff4d6d"], ["mini", tr("MİNİ"), "#ff4d6d"], ["haste", tr("HIZ"), "#ff4d6d"], ["stun", tr("SERSEM"), "#ff4d6d"],
 ];
 function activeEffects() {
   const list = [];
@@ -426,10 +426,10 @@ function activeEffects() {
     if (left > 0) list.push({ text: label + " " + Math.ceil(left), color, frac: total ? clamp(left / total, 0, 1) : null });
   };
   for (const [k, label, color, total] of EFFECT_TAGS) add(k === "wide" ? paddle.wideUntil : state[k + "Until"], label, color, total || FX_TIME[k]);
-  if (state.shield > 0) list.push({ text: "KALKAN×" + state.shield, color: POWERS.K.color, frac: null });
+  if (state.shield > 0) list.push({ text: tr("KALKAN") + "×" + state.shield, color: POWERS.K.color, frac: null });
   const ac = activeCurses();
   for (const k of ac) add(state.curses[k], "⚠" + CURSES[k].short, CURSE_COLOR, curseDur(k));
-  if (ac.length) list.push({ text: "BONUS×1.5", color: CURSE_COLOR, frac: null });
+  if (ac.length) list.push({ text: tr("BONUS") + "×1.5", color: CURSE_COLOR, frac: null });
   return list;
 }
 function drawHeart(x, y, s, fill) {
@@ -456,17 +456,18 @@ function drawHUD() {
   if (state.score < hudScore) hudScore = state.score;            // yeni oyunda sayaç anında sıfırlanır
   else hudScore += (state.score - hudScore) * 0.25;              // yoksa gerçeğe doğru tık tık sayar
   if (state.score - hudScore < 1) hudScore = state.score;
-  text("SKOR", 20, 16, "bold 10px monospace", T().dim, "left");
+  text(tr("SKOR"), 20, 16, "bold 10px monospace", T().dim, "left", 130);
   text(String(Math.round(hudScore)), 20, 38, "bold 22px monospace", T().text, "left");
   const scoreW = ctx.measureText(String(Math.round(hudScore))).width;
-  text("REKOR " + state.high, 20, 55, "11px monospace", T().dim, "left");
+  const recTxt = tr("REKOR {n}", { n: state.high });
+  text(recTxt, 20, 55, "11px monospace", T().dim, "left", 200);
   if (ghost.play && ghost.best.rec.length) text("👻 " + ghost.scoreNow, W - 20, 56, "bold 11px monospace", "#9aa5b1", "right");
-  const colX = Math.max(160, 34 + Math.max(scoreW, ctx.measureText("REKOR " + state.high).width));
+  const colX = Math.max(160, 34 + Math.max(scoreW, ctx.measureText(recTxt).width));
   if (state.combo > comboSeen) { comboSeen = state.combo; comboPop = 1; }   // combo arttığı karede hap zıplar
   else if (state.combo < comboSeen) comboSeen = state.combo;
   comboPop = Math.max(0, comboPop - 0.06);
   if (state.combo >= 2) {
-    const ccol = isFever() ? hslHex(state.time * 400, 90, 62) : T().b2, txt = "COMBO ×" + state.combo;
+    const ccol = isFever() ? hslHex(state.time * 400, 90, 62) : T().b2, txt = tr("COMBO") + " ×" + state.combo;
     ctx.font = "bold 13px monospace";
     const pw = ctx.measureText(txt).width + 18;
     ctx.save();
@@ -489,7 +490,7 @@ function drawHUD() {
   const bo = state.boss;        // orta: boss can çubuğu ya da bölüm rozeti
   if (bo && !bo.dead) {
     const bx = W / 2 + 40;
-    text("☠ " + bo.name, bx, 20, "bold 13px monospace", "#ff4d6d");
+    text("☠ " + tr(bo.name), bx, 20, "bold 13px monospace", "#ff4d6d", "center", 300);
     fillRR(bx - 95, 27, 190, 10, 5, "rgba(0,0,0,0.5)");
     fillRR(bx - 95, 27, 190 * clamp(bo.hp / bo.maxHp, 0, 1), 10, 5, lgrad(bx - 95, 0, bx + 95, 0, bo.enraged ? ["#ff4d6d", "#c9184a"] : ["#ffd166", "#f48c06"]));
     ctx.strokeStyle = "rgba(255,255,255,0.35)";
@@ -497,8 +498,8 @@ function drawHUD() {
     rrPath(bx - 95, 27, 190, 10, 5);
     ctx.stroke();
   } else {
-    const txt = "BÖLÜM " + state.level;
-    ctx.font = "bold 14px monospace";
+    const txt = tr("BÖLÜM {n}", { n: state.level });
+    ctx.font = fitFont(txt, "bold 14px monospace", 220);
     const tw = ctx.measureText(txt).width + 26;
     fillRR(W / 2 - tw / 2, 12, tw, 26, 13, hexToRgba(T().board, 0.85));
     ctx.strokeStyle = T().accent;
@@ -514,12 +515,12 @@ function drawHUD() {
     circle(hx - s * 0.22, 15 + s * 0.28, s * 0.09, "rgba(255,255,255,0.6)");
   }
   const pn = pactNames();
-  if (pn) text("📜 " + pn, 20, H - 14, "bold 10px monospace", T().dim, "left");
+  if (pn) text("📜 " + pn, 20, H - 14, "bold 10px monospace", T().dim, "left", W / 2 - 30);
   const dc = director.challenge;
   if (dc) {
     const [v, target] = directorProgress(dc);
-    const label = dc.done ? "🎬 TAMAM! +" + dc.reward : "🎬 " + dc.text + (target ? " (" + v + "/" + target + ")" : "");
-    text(label, W - 20, H - 14, "bold 10px monospace", dc.done ? T().b2 : T().dim, "right");
+    const label = dc.done ? tr("🎬 TAMAM! +{n}", { n: dc.reward }) : "🎬 " + dc.text + (target ? " (" + v + "/" + target + ")" : "");
+    text(label, W - 20, H - 14, "bold 10px monospace", dc.done ? T().b2 : T().dim, "right", W / 2 - 30);
   }
   drawBattleHUD();
 }
@@ -538,7 +539,7 @@ function drawPowerups() {
       ctx.stroke();
       ctx.setLineDash([]);
     }
-    text(P.label, x + w / 2, y + 13, "bold 11px monospace", P.bad || dotColorFor(col) !== HP_DOT.dark ? "#ffffff" : "#16213e");
+    text(P.label, x + w / 2, y + 13, "bold 11px monospace", P.bad || dotColorFor(col) !== HP_DOT.dark ? "#ffffff" : "#16213e", "center", w - 6);
   }
 }
 
@@ -551,8 +552,8 @@ function drawCard(cx, cy, w, h) {
   ctx.stroke();
 }
 // Degrade dolgulu, hafif parlayan başlık
-function titleText(s, x, y, size, c1, c2) {
-  ctx.font = "bold " + size + "px monospace";
+function titleText(s, x, y, size, c1, c2, maxW = W - 40) {
+  ctx.font = fitFont(s, "bold " + size + "px monospace", maxW);
   ctx.textAlign = "center";
   const w = ctx.measureText(s).width;
   ctx.save();
@@ -563,8 +564,8 @@ function titleText(s, x, y, size, c1, c2) {
   ctx.restore();
 }
 // Kenarlıklı yazı (her zeminde okunur)
-function outlinedText(s, x, y, font, color) {
-  ctx.font = font;
+function outlinedText(s, x, y, font, color, maxW = W - 40) {
+  ctx.font = fitFont(s, font, maxW);
   ctx.lineWidth = 4;
   ctx.strokeStyle = "rgba(0,0,0,0.55)";
   ctx.strokeText(s, x, y);
@@ -575,8 +576,8 @@ function outlinedText(s, x, y, font, color) {
 const overlay = alpha => { ctx.fillStyle = hexToRgba(T().board, Math.min(1, alpha + 0.2)); ctx.fillRect(0, 0, W, H); };
 // Menü göstergesi: gerçek tuğla sprite'ları + duvar bölgesi renkleri
 const LEGEND = [
-  [{ hp: 1 }, "1 vuruş"], [{ hp: 2 }, "2 vuruş"], [{ hp: 3 }, "3 vuruş"], [{ unbreakable: true }, "kırılmaz"], [{ explosive: true }, "patlar"],
-  [{ electric: true }, "yıldırım"], [{ gold: true }, "altın"], [{ splitter: true }, "+top"], ["bumper", "tampon"], ["portal", "portal"],
+  [{ hp: 1 }, N_("1 vuruş")], [{ hp: 2 }, N_("2 vuruş")], [{ hp: 3 }, N_("3 vuruş")], [{ unbreakable: true }, N_("kırılmaz")], [{ explosive: true }, N_("patlar")],
+  [{ electric: true }, N_("yıldırım")], [{ gold: true }, N_("altın")], [{ splitter: true }, N_("+top")], ["bumper", N_("tampon")], ["portal", N_("portal")],
 ];
 function drawScreens() {
   const pulse = 0.65 + 0.35 * Math.sin(state.time * 4), m = state.mode;
@@ -591,30 +592,31 @@ function drawScreens() {
     const fy = Math.sin(state.time * 2) * 3;
     titleText("BRICK BREAKER", W / 2, H / 2 - 130 + fy, 46, T().ex, T().accent);
     titleText("AI", W / 2, H / 2 - 84 + fy, 40, T().b1, T().b3);
-    text("★ KAOS SÜRÜMÜ ★", W / 2, H / 2 - 52, "bold 14px monospace", "#ff5d8f");
+    text(tr("★ KAOS SÜRÜMÜ ★"), W / 2, H / 2 - 52, "bold 14px monospace", "#ff5d8f", "center", 600);
     ctx.globalAlpha = pulse;
-    text("▶  Yeni oyun için tıkla veya boşluk", W / 2, H / 2 - 12, "bold 20px monospace", T().text);
+    text("▶  " + tr("Yeni oyun için tıkla veya boşluk"), W / 2, H / 2 - 12, "bold 20px monospace", T().text, "center", 600);
     ctx.globalAlpha = 1;
-    text("← → / fare: raket • boşluk: fırlat • P/Esc: duraklat • T/R: tema • F: tam ekran", W / 2, H / 2 + 18, "13px monospace", T().dim);
-    text("Raketi hareket ettirerek vur: FALSO!   Uçtan vur: SMASH!", W / 2, H / 2 + 40, "14px monospace", T().dim);
+    text(tr("← → / fare: raket • boşluk: fırlat • P/Esc: duraklat • T/R: tema • F: tam ekran"), W / 2, H / 2 + 18, "13px monospace", T().dim, "center", 610);
+    text(tr("Raketi hareket ettirerek vur: FALSO!   Uçtan vur: SMASH!"), W / 2, H / 2 + 40, "14px monospace", T().dim, "center", 610);
     const tier = tierOf(career.lp);
-    text("🏆 REKOR " + state.high + "    " + tier.icon + " " + tier.name + " · " + career.lp + " LP", W / 2, H / 2 + 66, "bold 14px monospace", T().b2);
+    text("🏆 " + tr("REKOR {n}", { n: state.high }) + "    " + tier.icon + " " + tr(tier.name) + " · " + career.lp + " LP", W / 2, H / 2 + 66, "bold 14px monospace", T().b2, "center", 610);
     LEGEND.forEach(([what, label], i) => {
       const x = W / 2 - 272 + (i % 5) * 110, y = H / 2 + 92 + Math.floor(i / 5) * 28;
       if (typeof what === "string") fillRR(x, y + 1, 44, 12, 6, ZONE_STYLE[what]);
       else { const b = { row: 0, col: 0, hp: 1, ...what }; blitBrick(brickSprite(brickColor(b), brickKind(b)), x, y, 44 / BRICK.w); }
-      text(label, x + 50, y + 12, "12px monospace", T().text, "left");
+      text(tr(label), x + 50, y + 12, "12px monospace", T().text, "left", 58);
     });
-    if (settings.hazards !== "kapali") text("⚠ Lanetler seni durdurmaya çalışacak — yoğunluk: Ayarlar → Lanetler", W / 2, H / 2 + 175, "13px monospace", CURSE_COLOR);
+    if (settings.hazards !== "kapali") text(tr("⚠ Lanetler seni durdurmaya çalışacak — yoğunluk: Ayarlar → Lanetler"), W / 2, H / 2 + 175, "13px monospace", CURSE_COLOR, "center", 610);
+    ctx.restore();
   } else if (m === "serve" && battle.active && battle.countdown > 0) {
     drawCountdown();
   } else if (m === "serve") {
     ctx.globalAlpha = pulse;
-    outlinedText("topu fırlat: tıkla / boşluk", W / 2, H - 90, "bold 17px monospace", T().text);
+    outlinedText(tr("topu fırlat: tıkla / boşluk"), W / 2, H - 90, "bold 17px monospace", T().text);
     ctx.globalAlpha = 1;
-    if (pxWall.active) outlinedText("Topu tünele sok · sarı +3 ve turuncu x3 küpleri raketle yakala", W / 2, H - 66, "bold 13px monospace", "#9fd3ff");
+    if (pxWall.active) outlinedText(tr("Topu tünele sok · sarı +3 ve turuncu x3 küpleri raketle yakala"), W / 2, H - 66, "bold 13px monospace", "#9fd3ff");
   } else if (m === "playing" && balls.some(b => b.stuck)) {
-    outlinedText("YAPIŞ: bırakmak için tıkla / boşluk", W / 2, H - 90, "bold 15px monospace", POWERS.Y.color);
+    outlinedText(tr("YAPIŞ: bırakmak için tıkla / boşluk"), W / 2, H - 90, "bold 15px monospace", POWERS.Y.color);
   } else if (m === "levelclear" && pxWall.won) {
     cardIn();
     drawPixelWin();
@@ -622,15 +624,15 @@ function drawScreens() {
   } else if (m === "levelclear") {
     cardIn();
     drawCard(W / 2, H / 2, 440, 130);
-    titleText("BÖLÜM " + state.level + " TAMAM!", W / 2, H / 2 - 8, 32, T().b1, T().accent);
+    titleText(tr("BÖLÜM {n} TAMAM!", { n: state.level }), W / 2, H / 2 - 8, 32, T().b1, T().accent, 410);
     text("+500", W / 2, H / 2 + 32, "bold 20px monospace", T().b2);
     ctx.restore();
   } else if (m === "paused") {
     cardIn();
     overlay(0.35);
     drawCard(W / 2, H / 2, 380, 140);
-    titleText("DURAKLATILDI", W / 2, H / 2 - 8, 34, T().text, T().accent);
-    text("devam: P veya tıkla", W / 2, H / 2 + 32, "16px monospace", T().dim);
+    titleText(tr("DURAKLATILDI"), W / 2, H / 2 - 8, 34, T().text, T().accent, 350);
+    text(tr("devam: P veya tıkla"), W / 2, H / 2 + 32, "16px monospace", T().dim, "center", 350);
     ctx.restore();
   } else if (m === "gameover" && battle.active) {
     drawBattleResults();
@@ -638,21 +640,22 @@ function drawScreens() {
     cardIn();
     overlay(0.45);
     drawCard(W / 2, H / 2, 520, 400);
-    titleText("OYUN BİTTİ", W / 2, H / 2 - 148, 44, T().ex, "#ff4d6d");
-    text("Skor: " + Math.round(hudScore), W / 2, H / 2 - 96, "bold 24px monospace", T().text);
-    if (state.newRecord) { ctx.globalAlpha = pulse; text("🏆 YENİ REKOR!", W / 2, H / 2 - 62, "bold 22px monospace", T().b2); ctx.globalAlpha = 1; }
-    else text("Rekor: " + state.high, W / 2, H / 2 - 62, "18px monospace", T().dim);
-    text("Bölüm " + state.level + " · Süre " + fmtTime(Math.round(state.time)), W / 2, H / 2 - 28, "15px monospace", T().text);
-    text("Tuğla " + run.bricks + " · En iyi combo ×" + run.bestCombo, W / 2, H / 2, "15px monospace", T().text);
-    text("Kapsül " + run.powers + " · Lanet " + state.cursesSurvived + " · Boss " + run.bosses, W / 2, H / 2 + 28, "14px monospace", CURSE_COLOR);
-    if (run.pacts.length) text("📜 " + pactNames(), W / 2, H / 2 + 56, "bold 12px monospace", CURSE_COLOR);
+    const GW = 490;   // oyun sonu kartının iç genişliği
+    titleText(tr("OYUN BİTTİ"), W / 2, H / 2 - 148, 44, T().ex, "#ff4d6d", GW);
+    text(tr("Skor: {n}", { n: Math.round(hudScore) }), W / 2, H / 2 - 96, "bold 24px monospace", T().text, "center", GW);
+    if (state.newRecord) { ctx.globalAlpha = pulse; text(tr("🏆 YENİ REKOR!"), W / 2, H / 2 - 62, "bold 22px monospace", T().b2, "center", GW); ctx.globalAlpha = 1; }
+    else text(tr("Rekor: {n}", { n: state.high }), W / 2, H / 2 - 62, "18px monospace", T().dim, "center", GW);
+    text(tr("Bölüm {level} · Süre {time}", { level: state.level, time: fmtTime(Math.round(state.time)) }), W / 2, H / 2 - 28, "15px monospace", T().text, "center", GW);
+    text(tr("Tuğla {bricks} · En iyi combo ×{combo}", { bricks: run.bricks, combo: run.bestCombo }), W / 2, H / 2, "15px monospace", T().text, "center", GW);
+    text(tr("Kapsül {powers} · Lanet {curses} · Boss {bosses}", { powers: run.powers, curses: state.cursesSurvived, bosses: run.bosses }), W / 2, H / 2 + 28, "14px monospace", CURSE_COLOR, "center", GW);
+    if (run.pacts.length) text("📜 " + pactNames(), W / 2, H / 2 + 56, "bold 12px monospace", CURSE_COLOR, "center", GW);
     const pactY = run.pacts.length ? 34 : 0;
-    if (run.song && typeof songLevel !== "undefined") text("🎵 " + songLevel.name + " · " + Math.round(songLevel.bpm) + " BPM", W / 2, H / 2 + 56 + pactY, "bold 12px monospace", "#ffd166");
+    if (run.song && typeof songLevel !== "undefined") text("🎵 " + songLevel.name + " · " + Math.round(songLevel.bpm) + " BPM", W / 2, H / 2 + 56 + pactY, "bold 12px monospace", "#ffd166", "center", GW);
     const extraY = pactY + (run.song ? 26 : 0);
-    if (run.daily && typeof daily !== "undefined") text("GÜNLÜK · en iyi " + daily.best + " · seri " + daily.streak, W / 2, H / 2 + 62 + extraY, "bold 15px monospace", T().b2);
-    else if (run.practice) text("PRATİK — rekor ve kariyer sayılmadı", W / 2, H / 2 + 62 + extraY, "14px monospace", T().dim);
-    if (state.lbRank) text("Liderlik tablosu: #" + state.lbRank + " (" + vsCfg.name + ")", W / 2, H / 2 + 96 + extraY, "bold 15px monospace", T().b2);
-    text("menü için tıkla veya boşluk", W / 2, H / 2 + 158 + extraY, "15px monospace", T().dim);
+    if (run.daily && typeof daily !== "undefined") text(tr("GÜNLÜK · en iyi {best} · seri {n}", { best: daily.best, n: daily.streak }), W / 2, H / 2 + 62 + extraY, "bold 15px monospace", T().b2, "center", GW);
+    else if (run.practice) text(tr("PRATİK — rekor ve kariyer sayılmadı"), W / 2, H / 2 + 62 + extraY, "14px monospace", T().dim, "center", GW);
+    if (state.lbRank) text(tr("Liderlik tablosu: #{n} ({name})", { n: state.lbRank, name: vsCfg.name }), W / 2, H / 2 + 96 + extraY, "bold 15px monospace", T().b2, "center", GW);
+    text(tr("menü için tıkla veya boşluk"), W / 2, H / 2 + 158 + extraY, "15px monospace", T().dim, "center", GW);
     ctx.restore();
   }
 }
@@ -665,7 +668,7 @@ function drawCallout() {
   ctx.translate(W / 2, H / 2 - 80);
   ctx.scale(s, s);
   ctx.rotate(Math.sin(age * 20) * 0.03);
-  ctx.font = "bold 44px monospace";
+  ctx.font = fitFont(c.text, "bold 44px monospace", (W - 60) / 1.2);   // en büyük ölçekte bile ekrana sığar
   ctx.textAlign = "center";
   ctx.lineWidth = 6;
   ctx.strokeStyle = "rgba(0,0,0,0.6)";

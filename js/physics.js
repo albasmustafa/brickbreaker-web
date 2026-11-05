@@ -5,25 +5,25 @@
 // Kapsüller: w = düşme ağırlığı, bad = kaçınılması gereken (yakalayana +250),
 // timer = FX_TIME'daki süreli etki, fx = özel etki, sound = SFX adı
 const POWERS = {
-  W: { label: "GENİŞ",  color: "#90be6d", w: 12, sound: "power",  fx: () => (paddle.wideUntil = state.time + WIDE_TIME) },
-  M: { label: "ÇOKLU",  color: "#f38ba0", w: 12, sound: "multi",  fx: () => (balls.some(b => !b.stuck && !b.decoy) ? splitBalls() : (state.pendingMulti = true)) },
-  S: { label: "YAVAŞ",  color: "#4cc9f0", w: 8,  sound: "slow",   fx: () => (state.slowUntil = state.time + SLOW_TIME) },
-  F: { label: "ATEŞ",   color: "#ff6b35", w: 9,  sound: "fire",   timer: "fire" },
-  L: { label: "LAZER",  color: "#ff4d6d", w: 9,  sound: "power",  timer: "laser", fx: () => (state.laserCd = 0) },
-  Y: { label: "YAPIŞ",  color: "#b388eb", w: 7,  sound: "power",  timer: "magnet" },
-  D: { label: "DEV",    color: "#ffd166", w: 8,  sound: "power",  timer: "big" },
-  K: { label: "KALKAN", color: "#64dfdf", w: 7,  sound: "shield", fx: () => (state.shield = Math.min(state.shield + 3, 6)) },
-  O: { label: "DELİK",  color: "#9d4edd", w: 6,  fx: () => spawnHole() },
-  H: { label: "+CAN",   color: "#ff8fab", w: 2,  sound: "power",  fx: () => { state.lives = Math.min(state.lives + 1, MAX_LIVES); callout("+1 CAN", "#ff8fab"); } },
-  Q: { label: "KAOS?",  color: "#ffffff", w: 6,  fx: () => {          // rastgele herhangi bir kapsül
+  W: { label: tr("GENİŞ"),  color: "#90be6d", w: 12, sound: "power",  fx: () => (paddle.wideUntil = state.time + WIDE_TIME) },
+  M: { label: tr("ÇOKLU"),  color: "#f38ba0", w: 12, sound: "multi",  fx: () => (balls.some(b => !b.stuck && !b.decoy) ? splitBalls() : (state.pendingMulti = true)) },
+  S: { label: tr("YAVAŞ"),  color: "#4cc9f0", w: 8,  sound: "slow",   fx: () => (state.slowUntil = state.time + SLOW_TIME) },
+  F: { label: tr("ATEŞ"),   color: "#ff6b35", w: 9,  sound: "fire",   timer: "fire" },
+  L: { label: tr("LAZER"),  color: "#ff4d6d", w: 9,  sound: "power",  timer: "laser", fx: () => (state.laserCd = 0) },
+  Y: { label: tr("YAPIŞ"),  color: "#b388eb", w: 7,  sound: "power",  timer: "magnet" },
+  D: { label: tr("DEV"),    color: "#ffd166", w: 8,  sound: "power",  timer: "big" },
+  K: { label: tr("KALKAN"), color: "#64dfdf", w: 7,  sound: "shield", fx: () => (state.shield = Math.min(state.shield + 3, 6)) },
+  O: { label: tr("DELİK"),  color: "#9d4edd", w: 6,  fx: () => spawnHole() },
+  H: { label: tr("+CAN"),   color: "#ff8fab", w: 2,  sound: "power",  fx: () => { state.lives = Math.min(state.lives + 1, MAX_LIVES); callout(tr("+1 CAN"), "#ff8fab"); } },
+  Q: { label: tr("KAOS?"),  color: "#ffffff", w: 6,  fx: () => {          // rastgele herhangi bir kapsül
     const k = gpick(Object.keys(POWERS).filter(k => k !== "Q" && powerAllowed(k)));
-    callout("KAOS → " + POWERS[k].label, POWERS[k].bad ? "#ff4d6d" : "#ffffff");
+    callout(tr("KAOS → {x}", { x: POWERS[k].label }), POWERS[k].bad ? "#ff4d6d" : "#ffffff");
     applyPower(k);
   } },
-  R: { label: "TERS",   color: "#8b0000", w: 5, bad: true, sound: "bad", timer: "reverse" },
-  N: { label: "MİNİ",   color: "#8b0000", w: 5, bad: true, sound: "bad", timer: "mini" },
-  Z: { label: "HIZ",    color: "#8b0000", w: 5, bad: true, sound: "bad", timer: "haste" },
-  C: { label: "LANET",  color: "#5a189a", w: 5, bad: true, sound: "bad", fx: () => curseFromCapsule() },
+  R: { label: tr("TERS"),   color: "#8b0000", w: 5, bad: true, sound: "bad", timer: "reverse" },
+  N: { label: tr("MİNİ"),   color: "#8b0000", w: 5, bad: true, sound: "bad", timer: "mini" },
+  Z: { label: tr("HIZ"),    color: "#8b0000", w: 5, bad: true, sound: "bad", timer: "haste" },
+  C: { label: tr("LANET"),  color: "#5a189a", w: 5, bad: true, sound: "bad", fx: () => curseFromCapsule() },
 };
 // Can doluyken +CAN, lanetler kapalıyken LANET düşmez
 const powerAllowed = k => !(k === "H" && state.lives >= MAX_LIVES) && !(k === "C" && hazardLevel() === "kapali");
@@ -59,7 +59,7 @@ function damageBrick(b, dmg = 1, zapDepth = 0) {
   }
   checkLevelDone();
 }
-const COMBO_CALLS = { 5: "SÜPER!", 8: "MUHTEŞEM!", 15: "EFSANE!", 20: "TANRISAL!", 30: "BU NE BE?!" };
+const COMBO_CALLS = { 5: tr("SÜPER!"), 8: tr("MUHTEŞEM!"), 15: tr("EFSANE!"), 20: tr("TANRISAL!"), 30: tr("BU NE BE?!") };
 function destroyBrick(b) {
   if (b.dead) return;
   b.dead = true;
@@ -86,7 +86,7 @@ function destroyBrick(b) {
   // Combo duyuruları; 10'da ÇILGIN MOD
   if (state.combo === FEVER_COMBO && !isFever()) {
     state.feverUntil = state.time + FEVER_TIME;
-    callout("★ ÇILGIN MOD ★", "#ff5d8f");
+    callout(tr("★ ÇILGIN MOD ★"), "#ff5d8f");
     sfx("fever");
     track("fevers");
     battleCharge(5);
@@ -98,7 +98,7 @@ function spawnSplitBall(x, y) {
   if (state.mode !== "playing" || balls.length >= MAX_BALLS) return;
   const a = grnd(-0.6, 0.6);
   balls.push(Object.assign(newBall(false), { x, y, dx: mag() * Math.sin(a), dy: mag() * Math.cos(a) }));
-  addFloater(x, y + 10, "+TOP", "#06d6a0");
+  addFloater(x, y + 10, tr("+TOP"), "#06d6a0");
   sfx("multi");
 }
 // Patlayan tuğla: komşularını da kırar, patlayıcılar zincirlenir
@@ -161,13 +161,13 @@ function wallHit(b, side) {
     sfx("bumper");
     addShake(2.5);
     spawnParticles(wallX, b.y - 10, ZONE_STYLE.bumper, 12, 8, 20);
-    addFloater(floatX, b.y, "BOING!", ZONE_STYLE.bumper);
+    addFloater(floatX, b.y, tr("BOING!"), ZONE_STYLE.bumper);
   } else if (z && z.type === "spin") {
     b.spin = (gameRandom() < 0.5 ? -1 : 1) * SPIN_MAX * 1.4;
     z.flash = 1;
     sfx("spin");
     spawnParticles(wallX, b.y - 10, ZONE_STYLE.spin, 10, 8, 20);
-    addFloater(floatX, b.y, "FALSO!", ZONE_STYLE.spin);
+    addFloater(floatX, b.y, tr("FALSO!"), ZONE_STYLE.spin);
   } else {
     sfx("wall");
     spawnParticles(wallX, b.y - 4, T().ball, 3, 8, 8);
@@ -194,7 +194,7 @@ function sling(b, h, m) {
   Object.assign(b, { dx: Math.cos(a) * m, dy: Math.sin(a) * m, x: h.x + Math.cos(a) * 30, y: h.y + Math.sin(a) * 30, boost: 1.8, trail: [] });
   sfx("sling");
   spawnParticles(h.x - 15, h.y - 15, "#c77dff", 14, 30, 30);
-  addFloater(h.x, h.y - 30, "FIRLATMA!", "#c77dff");
+  addFloater(h.x, h.y - 30, tr("FIRLATMA!"), "#c77dff");
 }
 
 // --- Raket vuruşu: ortaya yakın dik, uçlara yakın 60°'ye kadar eğik; hareketliyken falso, uçtan SMASH ---
@@ -220,9 +220,9 @@ function paddleHit(b) {
     sfx("smash");
     addShake(2.5);
     spawnParticles(b.x - 12, paddle.y - 6, "#ffd166", 14, 24, 8);
-    addFloater(b.x, paddle.y - 18, "SMASH!", "#ffd166");
+    addFloater(b.x, paddle.y - 18, tr("SMASH!"), "#ffd166");
   }
-  if (Math.abs(b.spin) > 0.45) addFloater(b.x, paddle.y - 30, "FALSO", ZONE_STYLE.spin);
+  if (Math.abs(b.spin) > 0.45) addFloater(b.x, paddle.y - 30, tr("FALSO"), ZONE_STYLE.spin);
 }
 
 function moveBall(b, dt) {
@@ -448,7 +448,7 @@ function hitBoss(dmg, x, y) {
     bo.enraged = true;
     bo.vx *= 1.6;
     bo.shootEvery *= 0.65;
-    callout("ÖFKELENDİ!", "#ff4d6d");
+    callout(tr("ÖFKELENDİ!"), "#ff4d6d");
     sfx("bossRoar");
     addShake(6);
   }
@@ -475,7 +475,7 @@ function killBoss() {
   const bonus = 5000 * Math.ceil(state.level / 5);
   addScore(bonus);
   addFloater(cx, cy, "+" + bonus, "#ffd166");
-  callout(bo.name + " YENİLDİ!", "#ffd166");
+  callout(tr("{name} YENİLDİ!", { name: tr(bo.name) }), "#ffd166");
   codexBump("boss:" + bo.name);
   run.bosses++;
   track("bosses");
@@ -493,7 +493,7 @@ function updateBullets(dt) {
       sfx("stun");
       addShake(5);
       spawnParticles(u.x - 10, paddle.y - 5, "#ff4d6d", 14, 20, 10);
-      addFloater(paddle.x + paddle.w / 2, paddle.y - 20, "SERSEMLEDİN!", "#ff4d6d");
+      addFloater(paddle.x + paddle.w / 2, paddle.y - 20, tr("SERSEMLEDİN!"), "#ff4d6d");
       return false;
     }
     return true;

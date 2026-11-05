@@ -8,30 +8,30 @@ const HAZARD = {   // yoğunluk: ortalama aralık (sn), aynı anda en çok, böl
 const CURSE_WARN = 1.2;
 // group: aynı gruptan aynı anda tek lanet (Kâbus hariç) — oyun oynanmaz hale gelmesin
 const CURSES = {
-  gorunmez: { label: "GÖRÜNMEZ RAKET",     short: "GÖRÜNMEZ", dur: 8,  group: "gorus" },
-  hayalet:  { label: "HAYALET TOP",        short: "HAYALET",  dur: 7,  group: "gorus" },
-  karanlik: { label: "KARANLIK",           short: "KARANLIK", dur: 9,  group: "gorus" },
-  elektrik: { label: "ELEKTRİK KESİNTİSİ", short: "KESİNTİ",  dur: 8,  group: "gorus" },
-  sis:      { label: "SİS",                short: "SİS",      dur: 10, group: "gorus" },
-  ayna:     { label: "AYNA DÜNYA",         short: "AYNA",     dur: 8,  group: "kamera" },
-  sarhos:   { label: "SARHOŞ KAMERA",      short: "SARHOŞ",   dur: 8,  group: "kamera" },
-  ruzgar:   { label: "RÜZGAR",             short: "RÜZGAR",   dur: 9,  group: "fizik", start: () => (state.windDir = gameRandom() < 0.5 ? -1 : 1) },
-  agir:     { label: "AĞIR YERÇEKİMİ",     short: "AĞIR",     dur: 8,  group: "fizik" },
-  nabiz:    { label: "NABIZ",              short: "NABIZ",    dur: 8,  group: "fizik" },
-  buz:      { label: "BUZLU RAKET",        short: "BUZ",      dur: 9,  group: "raket", start: () => { paddle.iceV = 0; paddle.aimX = null; }, end: () => (paddle.iceV = 0) },
-  yarik:    { label: "YARIK RAKET",        short: "YARIK",    dur: 8,  group: "raket" },
-  sahte:    { label: "SAHTE TOPLAR",       short: "SAHTE",    dur: 8,  start: () => spawnDecoys(), end: () => popDecoys() },
-  meteor:   { label: "METEOR YAĞMURU",     short: "METEOR",   dur: 8,  start: () => (state.meteorCd = 0) },
-  daralan:  { label: "DARALAN DUVARLAR",   short: "DUVAR",    dur: 10 },
-  bariyer:  { label: "GEZGİN BARİYERLER",  short: "BARİYER",  dur: 12, start: () => spawnBarriers(),
+  gorunmez: { label: tr("GÖRÜNMEZ RAKET"),     short: tr("GÖRÜNMEZ"), dur: 8,  group: "gorus" },
+  hayalet:  { label: tr("HAYALET TOP"),        short: tr("HAYALET"),  dur: 7,  group: "gorus" },
+  karanlik: { label: tr("KARANLIK"),           short: tr("KARANLIK"), dur: 9,  group: "gorus" },
+  elektrik: { label: tr("ELEKTRİK KESİNTİSİ"), short: tr("KESİNTİ"),  dur: 8,  group: "gorus" },
+  sis:      { label: tr("SİS"),                short: tr("SİS"),      dur: 10, group: "gorus" },
+  ayna:     { label: tr("AYNA DÜNYA"),         short: tr("AYNA"),     dur: 8,  group: "kamera" },
+  sarhos:   { label: tr("SARHOŞ KAMERA"),      short: tr("SARHOŞ"),   dur: 8,  group: "kamera" },
+  ruzgar:   { label: tr("RÜZGAR"),             short: tr("RÜZGAR"),   dur: 9,  group: "fizik", start: () => (state.windDir = gameRandom() < 0.5 ? -1 : 1) },
+  agir:     { label: tr("AĞIR YERÇEKİMİ"),     short: tr("AĞIR"),     dur: 8,  group: "fizik" },
+  nabiz:    { label: tr("NABIZ"),              short: tr("NABIZ"),    dur: 8,  group: "fizik" },
+  buz:      { label: tr("BUZLU RAKET"),        short: tr("BUZ"),      dur: 9,  group: "raket", start: () => { paddle.iceV = 0; paddle.aimX = null; }, end: () => (paddle.iceV = 0) },
+  yarik:    { label: tr("YARIK RAKET"),        short: tr("YARIK"),    dur: 8,  group: "raket" },
+  sahte:    { label: tr("SAHTE TOPLAR"),       short: tr("SAHTE"),    dur: 8,  start: () => spawnDecoys(), end: () => popDecoys() },
+  meteor:   { label: tr("METEOR YAĞMURU"),     short: tr("METEOR"),   dur: 8,  start: () => (state.meteorCd = 0) },
+  daralan:  { label: tr("DARALAN DUVARLAR"),   short: tr("DUVAR"),    dur: 10 },
+  bariyer:  { label: tr("GEZGİN BARİYERLER"),  short: tr("BARİYER"),  dur: 12, start: () => spawnBarriers(),
               end: () => { for (const o of obstacles) spawnParticles(o.x, o.y, "#ffd166", 10, o.w, o.h); obstacles = []; } },
-  inis:     { label: "TAVAN ÇÖKÜYOR", ok: () => !state.boss && lowestBrick() + BRICK.h + BRICK.gap < 400, start: () => {
+  inis:     { label: tr("TAVAN ÇÖKÜYOR"), ok: () => !state.boss && lowestBrick() + BRICK.h + BRICK.gap < 400, start: () => {
               for (const b of bricks) if (!b.dead) b.ty = (b.ty ?? b.y) + BRICK.h + BRICK.gap;   // tuğlalar bir sıra iner
-              addFloater(W / 2, 200, "TUĞLALAR İNİYOR!", CURSE_COLOR);
+              addFloater(W / 2, 200, tr("TUĞLALAR İNİYOR!"), CURSE_COLOR);
             } },
-  dirilis:  { label: "DİRİLİŞ",   ok: () => !state.boss && bricks.some(b => b.dead && !b.unbreakable), start: () => reviveBricks() },
-  zirh:     { label: "ZIRHLANMA", ok: () => bricks.some(b => !b.dead && !b.unbreakable && !b.explosive && b.hp < 3), start: () => armorBricks() },
-  ufo:      { label: "UFO BASKINI", ok: () => !state.ufo, start: () => spawnUfo() },
+  dirilis:  { label: tr("DİRİLİŞ"),   ok: () => !state.boss && bricks.some(b => b.dead && !b.unbreakable), start: () => reviveBricks() },
+  zirh:     { label: tr("ZIRHLANMA"), ok: () => bricks.some(b => !b.dead && !b.unbreakable && !b.explosive && b.hp < 3), start: () => armorBricks() },
+  ufo:      { label: tr("UFO BASKINI"), ok: () => !state.ufo, start: () => spawnUfo() },
 };
 let obstacles = [];
 const curseOn = k => (state.curses[k] || 0) > state.time;
@@ -72,7 +72,7 @@ function startCurse(id) {
 const survivedCurse = id => { state.cursesSurvived++; track("curses"); if (id) codexBump("curse:" + id); };
 function endCurse(id) {
   survivedCurse(id);
-  addFloater(W / 2, H / 2 + 60, CURSES[id].label + " BİTTİ", CURSE_COLOR);
+  addFloater(W / 2, H / 2 + 60, tr("{x} BİTTİ", { x: CURSES[id].label }), CURSE_COLOR);
   if (CURSES[id].end) CURSES[id].end();
 }
 function updateCurses(dt) {
@@ -153,7 +153,7 @@ function hitUfo() {
   spawnParticles(u.x, u.y, "#80ffdb", 30, u.w, u.h);
   spawnCoins(u.x + u.w / 2, u.y, 20);
   addScore(750);
-  addFloater(u.x + u.w / 2, u.y - 10, "UFO DÜŞTÜ! +750", "#80ffdb");
+  addFloater(u.x + u.w / 2, u.y - 10, tr("UFO DÜŞTÜ! +750"), "#80ffdb");
   dropPowerupAt(u.x + u.w / 2, u.y + u.h, true);
 }
 // DİRİLİŞ: kırılmış 3 tuğla geri gelir (içinde top olanlar hariç)
@@ -230,7 +230,7 @@ function drawWind() {
     ctx.lineTo(x - 40 * d, y);
   }
   ctx.stroke();
-  text(d > 0 ? "≫ RÜZGAR ≫" : "≪ RÜZGAR ≪", W / 2, 96, "bold 16px monospace", hexToRgba(T().text, 0.5));
+  text(d > 0 ? "≫ " + tr("RÜZGAR") + " ≫" : "≪ " + tr("RÜZGAR") + " ≪", W / 2, 96, "bold 16px monospace", hexToRgba(T().text, 0.5));
 }
 function drawFog() {
   if (!curseOn("sis")) return;

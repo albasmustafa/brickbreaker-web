@@ -9,7 +9,7 @@ const toolBtn = (label, title, onclick) => toolbar.appendChild(el("button", { te
 const panels = [];
 function setupPanel(panel, title) {
   panel.prepend(el("div", { className: "panel-head" }, el("strong", { textContent: title }),
-    el("button", { className: "panel-x", textContent: "✕", title: "Kapat (Esc)", onclick: closePanels })));
+    el("button", { className: "panel-x", textContent: "✕", title: tr("Kapat (Esc)"), onclick: closePanels })));
   panels.push(panel);
 }
 function closePanels() { for (const p of panels) p.hidden = true; backdrop.hidden = true; }
@@ -54,34 +54,39 @@ const refreshRows = (container, target) => {
 };
 
 // --- Araç çubuğu ---
-const muteBtn = toolBtn("", "Tüm oyun sesleri (arka plan medyası ayrı sürgüyle)", () => {
+const muteBtn = toolBtn("", tr("Tüm oyun sesleri (arka plan medyası ayrı sürgüyle)"), () => {
   muted = !muted;
   store.set("bb_muted", muted ? 1 : 0);
   applyFxVolume();
   refreshMuteButton();
 });
 function refreshMuteButton() {
-  muteBtn.textContent = muted ? "🔇 Sesler kapalı" : "🔊 Sesler açık";
+  muteBtn.textContent = muted ? tr("🔇 Sesler kapalı") : tr("🔊 Sesler açık");
   muteBtn.classList.toggle("muted", muted);
 }
-const themeBtn = toolBtn("", "Sıradaki tema (T)", () => { pauseGame(); cycleTheme(); });
-const refreshThemeButton = () => { themeBtn.textContent = "🎨 " + T().name; };
-toolBtn("🎲 Tema", "Sonsuz rastgele tema (R)", () => { pauseGame(); randomTheme(); });
-const studioBtn = toolBtn("🖌️ Tema stüdyosu", "Temaları gez, düzenle, kaydet, paylaş", () => togglePanel(themePanel, refreshThemeUI));
-const settingsBtn = toolBtn("⚙️ Ayarlar", "Ses, zorluk, lanetler, görünüm, müzik", () => togglePanel(settingsPanel));
-toolBtn("🖥️", "Tam ekran (F)", () => toggleFullscreen());
+const themeBtn = toolBtn("", tr("Sıradaki tema (T)"), () => { pauseGame(); cycleTheme(); });
+const refreshThemeButton = () => { themeBtn.textContent = "🎨 " + themeName(T()); };
+toolBtn(tr("🎲 Tema"), tr("Sonsuz rastgele tema (R)"), () => { pauseGame(); randomTheme(); });
+const studioBtn = toolBtn(tr("🖌️ Tema stüdyosu"), tr("Temaları gez, düzenle, kaydet, paylaş"), () => togglePanel(themePanel, refreshThemeUI));
+const settingsBtn = toolBtn(tr("⚙️ Ayarlar"), tr("Ses, zorluk, lanetler, görünüm, müzik"), () => togglePanel(settingsPanel));
+toolBtn("🖥️", tr("Tam ekran (F)"), () => toggleFullscreen());
 refreshMuteButton();
 refreshThemeButton();
 
 // --- Ayarlar paneli: SETTING_ROWS tablosundan üretilir ---
-setupPanel(settingsPanel, "⚙️ Ayarlar");
+setupPanel(settingsPanel, tr("⚙️ Ayarlar"));
+// Dil seçimi: değişince sayfa seçilen dilde yeniden yüklenir
+settingsPanel.append(el("div", { className: "setrow" },
+  el("span", { className: "label", textContent: "🌐 " + tr("Dil") + (LANG === "en" ? "" : " · Language") }),
+  el("select", { id: "langsel", onchange: e => setLang(e.target.value) },
+    ...LANGS.map(l => el("option", { value: l.code, textContent: l.name, selected: l.code === LANG, lang: l.code, dir: l.rtl ? "rtl" : "ltr" })))));
 buildRows(settingsPanel, SETTING_ROWS, settings, row => {
   saveSettings();
   if (row.key === "fxVol") applyFxVolume();
   if (row.key === "bgFx") initStars();
   if (row.preview) playPaddleSound();   // raket sesi önizlemesi
 });
-settingsPanel.append(el("div", { className: "setrow" }, el("button", { id: "resetlooks", textContent: "Görünümü varsayılana döndür", onclick: () => {
+settingsPanel.append(el("div", { className: "setrow" }, el("button", { id: "resetlooks", textContent: tr("Görünümü varsayılana döndür"), onclick: () => {
   for (const k in LOOKS) settings[k] = LOOKS[k][0];
   saveSettings();
   refreshRows(settingsPanel, settings);
@@ -89,16 +94,16 @@ settingsPanel.append(el("div", { className: "setrow" }, el("button", { id: "rese
 } })));
 
 // --- Tema stüdyosu: galeri, rastgele öneriler, renk düzenleyici, kaydet/sil, paylaşım kodu ---
-setupPanel(themePanel, "🖌️ Tema stüdyosu");
+setupPanel(themePanel, tr("🖌️ Tema stüdyosu"));
 const themeGrid = $("themegrid"), suggestGrid = $("suggestgrid"), thColors = $("th-colors"), thName = $("th-name"), thCode = $("th-code"), thMsg = $("th-msg"), thDelete = $("th-delete");
 let suggestions = [];
 const rollSuggestions = () => { suggestions = Array.from({ length: 8 }, () => genTheme((Math.random() * 1e9) | 0)); };
 const saveCustomThemes = () => store.set("bb_custom_themes", customThemes);
 const themeMsg = m => { thMsg.textContent = m || ""; };
 const makeSwatch = t => el("button", {
-  className: "swatch" + (t.id === theme.id ? " active" : ""), title: t.name, onclick: () => { themeMsg(""); setTheme(t); },
+  className: "swatch" + (t.id === theme.id ? " active" : ""), title: themeName(t), onclick: () => { themeMsg(""); setTheme(t); },
   style: { background: t.board, color: t.text, borderColor: t.id === theme.id ? t.accent : t.un },
-}, el("span", { className: "swname", textContent: t.name }), el("span", { className: "bars" }, ...["b1", "b2", "b3", "ex"].map(k => el("span", { style: { background: t[k] } }))));
+}, el("span", { className: "swname", textContent: themeName(t) }), el("span", { className: "bars" }, ...["b1", "b2", "b3", "ex"].map(k => el("span", { style: { background: t[k] } }))));
 // Renk seçiciler bir kez kurulur, sonra yalnızca değerleri güncellenir
 for (const k of THEME_KEYS) {
   thColors.append(el("label", {}, el("input", { type: "color", dataset: { key: k }, oninput: e => {
@@ -113,7 +118,7 @@ function refreshThemeUI() {
   themeGrid.replaceChildren(...THEMES.concat(customThemes).map(makeSwatch));
   suggestGrid.replaceChildren(...suggestions.map(makeSwatch));
   for (const inp of thColors.querySelectorAll("input")) inp.value = theme[inp.dataset.key];
-  if (document.activeElement !== thName) thName.value = theme.name;
+  if (document.activeElement !== thName) thName.value = themeName(theme);
   thDelete.disabled = !(theme.id && theme.id[0] === "c");
 }
 rollSuggestions();
@@ -122,11 +127,11 @@ onClick("th-reroll", () => { rollSuggestions(); refreshThemeUI(); });
 onClick("th-save", () => {
   const name = (thName.value.trim() || theme.name).slice(0, 30), ix = customThemes.findIndex(t => t.id === theme.id);
   if (ix >= 0) customThemes[ix] = { ...theme, name };       // kayıtlı temayı güncelle
-  else if (customThemes.length >= MAX_CUSTOM_THEMES) return themeMsg("En fazla " + MAX_CUSTOM_THEMES + " tema kaydedilebilir, önce birini sil.");
+  else if (customThemes.length >= MAX_CUSTOM_THEMES) return themeMsg(tr("En fazla {n} tema kaydedilebilir, önce birini sil.", { n: MAX_CUSTOM_THEMES }));
   else customThemes.push({ ...theme, name, id: "c" + Date.now() });
   saveCustomThemes();
   setTheme(customThemes[ix >= 0 ? ix : customThemes.length - 1]);
-  themeMsg("💾 \"" + name + "\" kaydedildi.");
+  themeMsg(tr("💾 \"{name}\" kaydedildi.", { name }));
 });
 thDelete.addEventListener("click", () => {
   const ix = customThemes.findIndex(t => t.id === theme.id);
@@ -134,7 +139,7 @@ thDelete.addEventListener("click", () => {
   const [gone] = customThemes.splice(ix, 1);
   saveCustomThemes();
   setTheme(THEMES[0]);
-  themeMsg("🗑 \"" + gone.name + "\" silindi.");
+  themeMsg(tr("🗑 \"{name}\" silindi.", { name: gone.name }));
 });
 thName.addEventListener("input", () => { theme.name = thName.value.slice(0, 30) || theme.name; applyTheme(); refreshThemeButton(); });
 // Paylaşım kodu: "BB1:" + base64(JSON) — Türkçe karakterler için UTF-8 kodlanır
@@ -143,8 +148,8 @@ onClick("th-export", () => {
   for (const k of THEME_KEYS) data[k] = theme[k];
   thCode.value = "BB1:" + btoa(unescape(encodeURIComponent(JSON.stringify(data))));
   thCode.select();
-  if (navigator.clipboard) navigator.clipboard.writeText(thCode.value).then(() => themeMsg("📋 Kod panoya kopyalandı."), () => themeMsg("Kodu kutudan kopyala."));
-  else themeMsg("Kodu kutudan kopyala.");
+  if (navigator.clipboard) navigator.clipboard.writeText(thCode.value).then(() => themeMsg(tr("📋 Kod panoya kopyalandı.")), () => themeMsg(tr("Kodu kutudan kopyala.")));
+  else themeMsg(tr("Kodu kutudan kopyala."));
 });
 onClick("th-import", () => {
   try {
@@ -155,8 +160,8 @@ onClick("th-import", () => {
     const clean = { id: "e", name: t.name.slice(0, 30) };
     for (const k of THEME_KEYS) clean[k] = t[k];
     setTheme(clean);
-    themeMsg("📥 \"" + clean.name + "\" yüklendi — kalıcı olsun istersen Kaydet.");
-  } catch (err) { themeMsg("⚠️ Geçersiz tema kodu."); }
+    themeMsg(tr("📥 \"{name}\" yüklendi — kalıcı olsun istersen Kaydet.", { name: clean.name }));
+  } catch (err) { themeMsg(tr("⚠️ Geçersiz tema kodu.")); }
 });
 
 // --- Girdi: klavye, fare, dokunma ---

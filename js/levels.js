@@ -36,7 +36,7 @@ const LEVELS = [
     "X22222222X",
     "XX.3333.XX",
   ],
-  { boss: { name: "TUĞLA KRAL", hp: 40, speed: 110, shootEvery: 2.2 },            // 5: BOSS
+  { boss: { name: N_("TUĞLA KRAL"), hp: 40, speed: 110, shootEvery: 2.2 },            // 5: BOSS
     map: [...BOSS_ROOM, "2.+.22.+.2", "..X....X.."] },
   [ // 6: dama + kırılmaz bariyer
     "3.3.3.3.3.",
@@ -68,7 +68,7 @@ const LEVELS = [
     "X22.EE.22X",
     "XXX....XXX",
   ],
-  { boss: { name: "DEMİR İMPARATOR", hp: 70, speed: 150, shootEvery: 1.7 },       // 10: BOSS — Kral'ın öfkeli abisi
+  { boss: { name: N_("DEMİR İMPARATOR"), hp: 70, speed: 150, shootEvery: 1.7 },       // 10: BOSS — Kral'ın öfkeli abisi
     map: [...BOSS_ROOM, "X.Z2EE2Z.X", "...+..+...>"] },
   [ // 11: siber labirent — yıldırım, altın ve patlayıcılar kırılmaz duvarların arasında
     "Z222XX222Z",

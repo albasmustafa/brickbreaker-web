@@ -9,23 +9,23 @@ const CURSE_ICONS = {
   daralan: "🧱", bariyer: "🚧", inis: "⬇️", dirilis: "🧟", zirh: "🛡️", ufo: "🛸",
 };
 const BRICK_CARDS = [
-  { key: "1", name: "Tek Vuruş", icon: "🧱", desc: "En temel tuğla: bir vuruşta kırılır.", hint: "Bir tuğla kır." },
-  { key: "2", name: "İki Vuruş", icon: "🧱", desc: "İki vuruş ister; ilk vuruşta çatlar.", hint: "Dayanıklı bir tuğla kır." },
-  { key: "3", name: "Üç Vuruş", icon: "🧱", desc: "Üç vuruş ister; en sert normal tuğla.", hint: "En sert tuğlayı kır." },
-  { key: "X", name: "Kırılmaz", icon: "🔩", desc: "Kırılmaz; bölümü bitirmek için şart değil.", hint: "Kırılmaz bir tuğlaya çarp." },
-  { key: "E", name: "Patlayıcı", icon: "💣", desc: "Kırılınca komşularını da patlatır.", hint: "Patlayıcı bir tuğla kır." },
-  { key: "Z", name: "Elektrikli", icon: "⚡", desc: "Her vuruşta en yakın 3 tuğlaya yıldırım atar.", hint: "Elektrikli bir tuğla kır." },
-  { key: "$", name: "Altın", icon: "💰", desc: "×10 puan, altın yağmuru ve kesin iyi kapsül.", hint: "Altın bir tuğla kır." },
-  { key: "+", name: "Çoğaltan", icon: "➕", desc: "Kırılınca aşağı doğru yeni bir top çıkar.", hint: "Çoğaltan bir tuğla kır." },
+  { key: "1", name: tr("Tek Vuruş"), icon: "🧱", desc: tr("En temel tuğla: bir vuruşta kırılır."), hint: tr("Bir tuğla kır.") },
+  { key: "2", name: tr("İki Vuruş"), icon: "🧱", desc: tr("İki vuruş ister; ilk vuruşta çatlar."), hint: tr("Dayanıklı bir tuğla kır.") },
+  { key: "3", name: tr("Üç Vuruş"), icon: "🧱", desc: tr("Üç vuruş ister; en sert normal tuğla."), hint: tr("En sert tuğlayı kır.") },
+  { key: "X", name: tr("Kırılmaz"), icon: "🔩", desc: tr("Kırılmaz; bölümü bitirmek için şart değil."), hint: tr("Kırılmaz bir tuğlaya çarp.") },
+  { key: "E", name: tr("Patlayıcı"), icon: "💣", desc: tr("Kırılınca komşularını da patlatır."), hint: tr("Patlayıcı bir tuğla kır.") },
+  { key: "Z", name: tr("Elektrikli"), icon: "⚡", desc: tr("Her vuruşta en yakın 3 tuğlaya yıldırım atar."), hint: tr("Elektrikli bir tuğla kır.") },
+  { key: "$", name: tr("Altın"), icon: "💰", desc: tr("×10 puan, altın yağmuru ve kesin iyi kapsül."), hint: tr("Altın bir tuğla kır.") },
+  { key: "+", name: tr("Çoğaltan"), icon: "➕", desc: tr("Kırılınca aşağı doğru yeni bir top çıkar."), hint: tr("Çoğaltan bir tuğla kır.") },
 ];
 const CODEX_CURSES = Object.keys(CURSES).map(id => ({
   id: "curse:" + id, type: "curse", key: id, name: CURSES[id].label, icon: CURSE_ICONS[id] || "🔮",
-  desc: CURSES[id].dur ? "Süreli lanet · " + CURSES[id].dur + " sn" : "Anlık lanet", hint: "Bir lanet atlat.",
+  desc: CURSES[id].dur ? tr("Süreli lanet · {n} sn", { n: CURSES[id].dur }) : tr("Anlık lanet"), hint: tr("Bir lanet atlat."),
 }));
 const CODEX_BRICKS = BRICK_CARDS.map(c => ({ id: "brick:" + c.key, type: "brick", key: c.key, name: c.name, icon: c.icon, desc: c.desc, hint: c.hint }));
 const CODEX_BOSSES = LEVELS.filter(l => l.boss).map(l => ({
-  id: "boss:" + l.boss.name, type: "boss", key: l.boss.name, name: l.boss.name, icon: "👹",
-  desc: "Bölüm " + (LEVELS.indexOf(l) + 1) + " bossu · " + l.boss.hp + " can", hint: "Boss'u yen.",
+  id: "boss:" + l.boss.name, type: "boss", key: l.boss.name, name: tr(l.boss.name), icon: "👹",
+  desc: tr("Bölüm {n} bossu · {hp} can", { n: LEVELS.indexOf(l) + 1, hp: l.boss.hp }), hint: tr("Boss'u yen."),
 }));
 const CODEX_CARDS = [...CODEX_CURSES, ...CODEX_BRICKS, ...CODEX_BOSSES];
 const CODEX_BY_ID = Object.fromEntries(CODEX_CARDS.map(c => [c.id, c]));
@@ -55,8 +55,8 @@ function codexBump(id) {
   const after = cardLevel(id);
   if (after > before || rec.count === 1) {
     saveCodex();
-    if (after > before) callout("📖 " + card.name + " · SEVİYE " + after, "#c77dff");
-    else addFloater(W / 2, 132, "📖 YENİ KART: " + card.name, "#c77dff");
+    if (after > before) callout("📖 " + tr("{name} · SEVİYE {n}", { name: card.name, n: after }), "#c77dff");
+    else addFloater(W / 2, 132, "📖 " + tr("YENİ KART: {name}", { name: card.name }), "#c77dff");
   }
 }
 const brickCodexKey = b => b.unbreakable ? "X" : b.explosive ? "E" : b.electric ? "Z" : b.gold ? "$" : b.splitter ? "+" : String(b.maxHp);
@@ -64,20 +64,20 @@ const brickCodexKey = b => b.unbreakable ? "X" : b.explosive ? "E" : b.electric 
 // --- Koleksiyon paneli ---
 const codexPanel = $("codexpanel"), codexGrid = $("codex-grid"), codexProgress = $("codex-progress"), codexNote = $("codex-note");
 let codexTab = "curse";
-setupPanel(codexPanel, "📖 Koleksiyon");
+setupPanel(codexPanel, tr("📖 Koleksiyon"));
 onClick("open-codex", () => togglePanel(codexPanel, renderCodex));
 function renderCodex() {
   const list = CODEX_CARDS.filter(c => c.type === codexTab), found = list.filter(c => codexCard(c.id).count > 0).length;
-  codexProgress.textContent = found + "/" + list.length + " keşfedildi · toplam " + codexDiscovered() + "/" + CODEX_CARDS.length;
+  codexProgress.textContent = tr("{a}/{b} keşfedildi · toplam {c}/{d}", { a: found, b: list.length, c: codexDiscovered(), d: CODEX_CARDS.length });
   codexNote.textContent = codexTab === "curse"
-    ? "Bir laneti ne kadar çok atlatırsan kartı o kadar yükselir; her seviye o lanetin süresini %10 kısaltır."
-    : "Kartlar yalnızca bu cihazda saklanır. Seviye eşikleri: 1, 5 ve 15."
+    ? tr("Bir laneti ne kadar çok atlatırsan kartı o kadar yükselir; her seviye o lanetin süresini %10 kısaltır.")
+    : tr("Kartlar yalnızca bu cihazda saklanır. Seviye eşikleri: 1, 5 ve 15.")
   codexGrid.replaceChildren(...list.map(c => {
     const st = codexCard(c.id), lvl = cardLevel(c.id), seen = st.count > 0;
     return el("div", { className: "codex-card" + (seen ? " got" : ""), title: seen ? c.desc : c.hint },
       el("span", { className: "codex-icon", textContent: seen ? c.icon : "❔" }),
       el("strong", { textContent: seen ? c.name : "???" }),
-      el("span", { className: "codex-count", textContent: seen ? st.count + " kez · Sv." + lvl + (lvl === 3 ? " ★" : "") : "Keşfedilmedi" }),
+      el("span", { className: "codex-count", textContent: seen ? tr("{n} kez · Sv.{lvl}", { n: st.count, lvl }) + (lvl === 3 ? " ★" : "") : tr("Keşfedilmedi") }),
       el("span", { className: "codex-desc", textContent: seen ? c.desc : c.hint }));
   }));
   for (const b of codexPanel.querySelectorAll("[data-codex]")) b.classList.toggle("active", b.dataset.codex === codexTab);
@@ -85,10 +85,10 @@ function renderCodex() {
 for (const b of codexPanel.querySelectorAll("[data-codex]")) b.addEventListener("click", () => { codexTab = b.dataset.codex; renderCodex(); });
 onClick("codex-reset", e => {
   const b = e.currentTarget;
-  if (b.dataset.armed !== "1") { b.dataset.armed = "1"; b.textContent = "Emin misin? Tüm kartlar silinir — tekrar tıkla"; return; }
+  if (b.dataset.armed !== "1") { b.dataset.armed = "1"; b.textContent = tr("Emin misin? Tüm kartlar silinir — tekrar tıkla"); return; }
   codex.cards = {};
   saveCodex();
   b.dataset.armed = "";
-  b.textContent = "Koleksiyonu sıfırla";
+  b.textContent = tr("Koleksiyonu sıfırla");
   renderCodex();
 });
