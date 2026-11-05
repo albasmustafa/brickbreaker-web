@@ -259,6 +259,7 @@ function moveBall(b, dt) {
     b.dy += grav * sdt;
     if (holes.length || b.spin || wind || grav) setSpeed(b, m);
     if (wind || grav) fixAngle(b);
+    const ox = b.x, oy = b.y;
     b.x += b.dx * sdt;
     b.y += b.dy * sdt;
 
@@ -288,6 +289,7 @@ function moveBall(b, dt) {
         break;
       }
     }
+    if (pxWall.active) pxBall(b, ox, oy, sdt);         // TÜNEL FIRTINASI: piksel duvar ve tüneller
     for (const o of obstacles) {                        // gezgin bariyerler
       if (collideRect(b, o.x, o.y, o.w, o.h, true)) { sfx("clank"); spawnParticles(b.x - 4, b.y - 4, "#ffd166", 4, 8, 8); fixAngle(b); }
     }

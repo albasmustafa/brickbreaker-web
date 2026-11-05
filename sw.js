@@ -1,8 +1,8 @@
 // Servis çalışanı: oyunu uygulama olarak kurulabilir ve çevrim dışı oynanabilir yapar.
 // Önce ağ (güncel dosya), ağ yoksa önbellek. Yalnızca http/https üzerinden çalışır (npm start ya da bir web sunucusu).
-const CACHE = "brickbreaker-v4";
+const CACHE = "brickbreaker-v5";
 const FILES = ["./", "index.html", "css/style.css", "favicon.svg", "manifest.webmanifest",
-  ...["core", "themes", "settings", "audio", "levels", "state", "flow", "effects", "physics", "curses", "update", "render", "music", "ui", "career", "codex", "ghost", "weekly", "songlevel", "challenge", "director", "versus", "pacts", "lastchance", "main"].map(f => "js/" + f + ".js")];
+  ...["core", "themes", "settings", "audio", "levels", "state", "flow", "effects", "physics", "tunnel", "curses", "update", "render", "music", "ui", "career", "codex", "ghost", "weekly", "songlevel", "challenge", "director", "versus", "pacts", "lastchance", "main"].map(f => "js/" + f + ".js")];
 
 self.addEventListener("install", e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())));
 self.addEventListener("activate", e => e.waitUntil(

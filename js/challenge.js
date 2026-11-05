@@ -77,9 +77,9 @@ function unlockedLevel() {
 }
 
 // Pratik koşu: rekor, liderlik tablosu, kariyer sayaçları ve başarımlar sayılmaz
-function startPractice(level) {
+function startPractice(level, anyLevel) {
   level = Math.round(level);
-  if (!(level >= 1 && level <= unlockedLevel())) return false;
+  if (!(level >= 1 && level <= (anyLevel ? LEVELS.length : unlockedLevel()))) return false;
   closePanels();
   if (battle.active) closeBattle();
   startGame();
@@ -92,10 +92,10 @@ function startPractice(level) {
 function renderChallenge() {
   const max = unlockedLevel();
   levelGrid.replaceChildren(...LEVELS.map((def, i) => {
-    const n = i + 1, locked = n > max, boss = !Array.isArray(def);
+    const n = i + 1, locked = n > max, boss = !!def.boss;
     return el("button", {
       className: n === max ? "active" : "",
-      textContent: (boss ? "☠ " : "") + n,
+      textContent: (boss ? "☠ " : def.pixel ? "🌀 " : "") + n,
       title: locked ? "Önce klasik oyunda " + n + ". bölüme ulaş" : "Bölüm " + n + " pratiği",
       disabled: locked,
       onclick: () => startPractice(n),
@@ -123,4 +123,7 @@ const challengeBtn = el("button", {
 });
 toolbar.insertBefore(challengeBtn, careerBtn);
 onClick("daily-start", startDaily);
+// Tünel Fırtınası her zaman pratik olarak açık (klasik oyunda 12. bölüm)
+const TUNNEL_LEVEL = LEVELS.findIndex(l => l.pixel) + 1;
+onClick("tunnel-start", () => startPractice(TUNNEL_LEVEL, true));
 renderChallenge();

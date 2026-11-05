@@ -33,6 +33,7 @@ function update(dt) {
   if (state.mode === "serve" || state.mode === "playing") { updateBoss(dt); updateBalls(dt); updateGhost(dt); }
   if (state.mode === "playing") { updateLasers(dt); updateBullets(dt); updateHoles(dt); updateCurses(dt); updateDirector(dt); }
   if (state.mode === "levelclear" && state.time >= state.clearAt) nextLevel();
+  pxUpdate(dt);
   updateEffects(dt);
   updatePowerups(dt);
 }

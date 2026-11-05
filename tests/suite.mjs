@@ -46,7 +46,7 @@ test("Yükleme, arayüz ve özellik envanteri", async ({ p, expect }) => {
     musicFx: MUSIC_FX_ALL.length, skills: Object.keys(BOT_SKILL).join(","), types: Object.keys(BRICK_TYPES).join(""), rows: settingsPanel.querySelectorAll(".setrow").length,
     tiers: TIERS.map(t => t.name).join(), ach: ACHIEVEMENTS.length, stats: Object.keys(STATS).length, career: careerPanel.hidden && versusPanel.querySelector(".rank-card") !== null,
     codex: CODEX_CARDS.length, codexPanel: codexPanel.hidden, song: typeof generateSongLevels === "function" })`);
-  expect(r.mode === "menu" && r.bricks === 46 && r.levels === 11, "menü ve ilk bölüm: " + JSON.stringify(r));
+  expect(r.mode === "menu" && r.bricks === 46 && r.levels === 12, "menü ve ilk bölüm: " + JSON.stringify(r));
   expect(r.themes === 25, "25 hazır tema");
   expect(r.tools === 9, "araç çubuğunda 9 düğme (ses, tema, rastgele, stüdyo, rekabet, meydan, kariyer, ayarlar, tam ekran): " + r.tools);
   expect(r.tiers === "Bronz,Gümüş,Altın,Platin,Elmas,Usta,Efsane" && r.ach === 25 && r.stats === 19 && r.career, "7 lig, 25 başarım, 19 sayaç, rütbe kartı: " + JSON.stringify([r.tiers, r.ach, r.stats, r.career]));
@@ -423,6 +423,74 @@ test("Tuğla türleri: elektrik, patlayan, altın, çoğaltan, kırılmaz, kayan
   expect(r.cracks, "çatlaklar tuğla başına sabit");
 });
 
+test("Tünel Fırtınası: piksel duvar, çelik tüneller, zincir, küpler, 300 top, kazanma", async ({ p, expect, shots, sleep }) => {
+  const r = await p.eval(`(() => {
+    __start(12);
+    const P = pxWall, g = P.grid, count = t => g.reduce((s, v) => s + (v === t), 0);
+    const info = { active: P.active, level: state.level, total: P.total, steel: count(PX_STEEL), hollow: count(PX_HOLLOW),
+                   tunnels: P.tunnels.length, cubes: P.cubes.map(q => q.kind).join(), bricks: bricks.length, done: isLevelDone() };
+    const entr = P.tunnels.map(tn => g[pxCellAt(tn.segs[0].a[0], PX.y + PX.rows * PX.s - 3)]);
+    // L tüneline alttan top sok: boru gibi çıkışa taşınmalı, içeriden oyup zincir başlatmalı
+    const s0 = P.tunnels[0].segs[0], b = __ballAt(s0.a[0], PX.y + PX.rows * PX.s + 30, 0, -mag());
+    let guided = false, exited = false;
+    for (let i = 0; i < 900 && !exited; i++) { update(STEP); if (b.tun) guided = true; if (guided && !b.tun && b.tunnelUntil > state.time) exited = true; }
+    const fell = P.cubes.slice(0, 2).map(q => q.st).join();
+    for (let i = 0; i < 240; i++) { paddle.x = clamp(b.x - paddle.w / 2, 0, W - paddle.w); update(STEP); }
+    const carve = { exited, guided, chained: P.chained, broken: P.total - P.left, bricksStat: run.bricks };
+    // Küpleri raketle yakala: +3 → 4 top, x3 → 12 top
+    balls = [Object.assign(newBall(false), { x: 400, y: 450, dx: 0, dy: -mag() })];
+    const catchCube = kind => {
+      const q = P.cubes.find(q => q.kind === kind);
+      Object.assign(q, { st: "fall", x: paddle.x + paddle.w / 2, y: paddle.y - 20, vy: 100 });
+      for (let i = 0; i < 30; i++) update(STEP);
+      return [balls.length, q.st];
+    };
+    const plus = catchCube("plus"), mul = catchCube("mul");
+    for (let k = 0; k < 4; k++) pxCatch({ kind: "mul" });
+    const storm = { max: balls.length, storm: P.storm, maxed: P.maxed };
+    return { info, entr, fell, carve, plus, mul, storm };
+  })()`);
+  expect(r.info.active && r.info.level === 12 && r.info.bricks === 0 && !r.info.done, "12. bölüm piksel duvarı kurdu: " + JSON.stringify(r.info));
+  expect(r.info.total > 2500, "binlerce mavi piksel tuğla: " + r.info.total);
+  expect(r.info.steel > 300 && r.info.hollow > 500 && r.info.tunnels === 2, "çelik L ve sarmal tünel: " + JSON.stringify(r.info));
+  expect(r.info.cubes === "plus,mul,plus,mul", "her çıkışta +3 ve x3 küp: " + r.info.cubes);
+  expect(r.entr.every(t => t === 3), "tünel girişleri duvarın altına açık: " + r.entr);
+  expect(r.carve.guided && r.carve.exited, "top tünelde taşındı ve çıkıştan çıktı: " + JSON.stringify(r.carve));
+  expect(r.fell === "fall,fall", "çıkıştaki küpler topla düştü: " + r.fell);
+  expect(r.carve.chained && r.carve.broken > 60 && r.carve.bricksStat > 0, "içeriden oyma + zincir reaksiyon: " + JSON.stringify(r.carve));
+  expect(r.plus[0] === 4 && r.plus[1] === "wait", "+3 küpü üç top ekledi: " + r.plus);
+  expect(r.mul[0] === 12 && r.mul[1] === "wait", "x3 küpü topları üçe katladı: " + r.mul);
+  expect(r.storm.max === 300 && r.storm.storm && r.storm.maxed, "top fırtınası, en çok 300 top: " + JSON.stringify(r.storm));
+  if (shots) await p.shot(shots + "/tunnel-storm.png");
+  const w = await p.eval(`(() => {
+    const P = pxWall, g = P.grid, steelBefore = g.reduce((s, v) => s + (v === PX_STEEL), 0);
+    const t0 = performance.now(), bad = __sim(240, false), ms = performance.now() - t0;
+    const steelAfter = g.reduce((s, v) => s + (v === PX_STEEL), 0);
+    for (let i = 0; i < g.length; i++) pxBreak(i);
+    P.burns = [];
+    if (state.mode !== "playing") state.mode = "playing";
+    update(STEP);
+    const won = [state.mode, P.won]; draw();
+    return { bad, ms: Math.round(ms), steel: [steelBefore, steelAfter], won };
+  })()`);
+  expect(w.bad.length === 0, "300 topla 2 sn simülasyonda toplar geçerli: " + w.bad.slice(0, 3));
+  expect(w.steel[0] === w.steel[1] && w.steel[0] > 0, "çelik kırılmaz: " + w.steel);
+  expect(w.ms < 6000, "300 top akıcı (240 adım + 40 çizim): " + w.ms + " ms");
+  expect(w.won[0] === "levelclear" && w.won[1], "duvar bitince kazanma ekranı: " + w.won);
+  if (shots) { await sleep(1600); await p.shot(shots + "/tunnel-win.png"); }
+  const n = await p.eval(`(() => {
+    state.clearAt = state.time; update(STEP);
+    const next = [state.level, pxWall.active];
+    toMenu(); $("tunnel-start").click();
+    const practice = [state.level, run.practice, pxWall.active, state.mode];
+    toMenu();
+    return { next, practice, menu: pxWall.active, label: [...levelGrid.querySelectorAll("button")].pop().textContent };
+  })()`);
+  expect(n.next[0] === 13 && n.next[1] === false, "sonraki bölümde piksel duvar kapanır: " + n.next);
+  expect(n.practice.join() === "12,true,true,serve", "Meydan panelinden her zaman pratik: " + n.practice);
+  expect(n.menu === false && n.label === "🌀 12", "menüde kapalı, bölüm ızgarasında 🌀 12: " + JSON.stringify(n));
+});
+
 test("Boss: ateş, öfke, tuğla dikme, ölüm, döngüde güçlenme", async ({ p, expect }) => {
   const r = await p.eval(`(() => {
     __start(5);
@@ -435,7 +503,7 @@ test("Boss: ateş, öfke, tuğla dikme, ölüm, döngüde güçlenme", async ({ 
     balls[0].stuck = false; hitBoss(999, 400, 120); const kill = [state.mode, state.slowmo > 0];
     __sim(400); const after = state.level;
     __start(10); const boss2 = [state.boss.name, state.boss.hp];
-    __start(16); const cycleHp = state.boss.hp;
+    __start(LEVELS.length + 5); const cycleHp = state.boss.hp;   // ikinci turdaki 5. bölüm
     return { info, maxBullets, enraged, minions, kill, after, boss2, cycleHp };
   })()`);
   expect(r.info.name === "TUĞLA KRAL" && r.info.hp === 40, "5. bölüm boss'u");

@@ -118,7 +118,13 @@ const SFX = {
   attack:    [["sawtooth", 220, 880, 0.18, 0.13], ["n:highpass", 2500, 0, 0.1, 0.1]],
   achieve:   arp("triangle", [784, 988, 1175, 1568], 0.18, 0.13, 0.07),             // başarım açıldı
 };
+const sfxLast = {};
 function sfx(name, ...args) {
+  if (balls.length > 12) {      // top fırtınası: aynı ses 30 ms içinde bir kez (yüzlerce vuruş kulak tırmalamasın)
+    const now = performance.now();
+    if (now - (sfxLast[name] || 0) < 30) return;
+    sfxLast[name] = now;
+  }
   const s = SFX[name];
   if (typeof s === "function") return s(...args);
   for (const [wave, f, to, dur, vol, delay] of s) {
@@ -138,4 +144,9 @@ const PADDLE_SOUNDS = {
   pluck: () => tone("triangle", pick([523, 587, 659, 784, 880]) * (Math.random() < 0.5 ? 1 : 2), 0, 0.12, 0.25),
   "8bit": () => { const p = rnd(0.9, 1.15); tone("square", 660 * p, 0, 0.05, 0.12); tone("square", 990 * p, 0, 0.07, 0.12, 0.05); },
 };
-const playPaddleSound = () => PADDLE_SOUNDS[settings.paddleSound === "random" ? pick(Object.keys(PADDLE_SOUNDS)) : settings.paddleSound]();
+let paddleSoundAt = 0;
+function playPaddleSound() {
+  if (balls.length > 12 && performance.now() - paddleSoundAt < 40) return;   // top fırtınasında raket sesi seyrelir
+  paddleSoundAt = performance.now();
+  PADDLE_SOUNDS[settings.paddleSound === "random" ? pick(Object.keys(PADDLE_SOUNDS)) : settings.paddleSound]();
+}

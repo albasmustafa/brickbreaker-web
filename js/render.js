@@ -334,17 +334,18 @@ function drawPaddle() {
 }
 function drawBalls() {
   const fire = isFire(), ballCol = fire ? "#ff6b35" : T().ball, rainbow = settings.trail === "gokkusagi";
+  const crowd = balls.length > 40;                       // top fırtınası: iz, hale ve gölge çizilmez (akıcı kalsın)
   for (const b of balls) {
     // HAYALET TOP: rakete yaklaşana kadar yalnızca ara ara görünür
     const ghostA = curseOn("hayalet") && b.y < paddle.y - 80 ? ((state.time * 2.2 + b.x * 0.004) % 1 < 0.1 ? 0.6 : 0.04) : 1;
-    b.trail.forEach((t, i) => {
+    if (!crowd) b.trail.forEach((t, i) => {
       const f = i / b.trail.length;
       ctx.globalAlpha = f * (fire || rainbow ? 0.5 : 0.25) * ghostA;
       circle(t.x, t.y, b.r * (0.4 + 0.6 * f), fire ? (i % 2 ? "#ffd166" : "#ff6b35") : rainbow ? `hsl(${(i * 24 + state.time * 240) % 360},90%,62%)` : T().ball);
     });
-    if (b.boost > 1.1) { ctx.globalAlpha = clamp((b.boost - 1) * 0.8, 0, 0.6) * ghostA; circle(b.x, b.y, b.r + 6, "#ffffff"); }   // hız patlaması halesi
+    if (b.boost > 1.1 && !crowd) { ctx.globalAlpha = clamp((b.boost - 1) * 0.8, 0, 0.6) * ghostA; circle(b.x, b.y, b.r + 6, "#ffffff"); }   // hız patlaması halesi
     ctx.globalAlpha = 0.28 * ghostA;
-    circle(b.x + 3, b.y + 4, b.r, "#000000");          // zemine düşen gölge
+    if (!crowd) circle(b.x + 3, b.y + 4, b.r, "#000000");   // zemine düşen gölge
     ctx.globalAlpha = ghostA;
     drawBallShape(b, ballCol);
     if (Math.abs(b.spin) > 0.15) {                      // falso göstergesi: dönen çizgi
@@ -611,8 +612,13 @@ function drawScreens() {
     ctx.globalAlpha = pulse;
     outlinedText("topu fırlat: tıkla / boşluk", W / 2, H - 90, "bold 17px monospace", T().text);
     ctx.globalAlpha = 1;
+    if (pxWall.active) outlinedText("Topu tünele sok · sarı +3 ve turuncu x3 küpleri raketle yakala", W / 2, H - 66, "bold 13px monospace", "#9fd3ff");
   } else if (m === "playing" && balls.some(b => b.stuck)) {
     outlinedText("YAPIŞ: bırakmak için tıkla / boşluk", W / 2, H - 90, "bold 15px monospace", POWERS.Y.color);
+  } else if (m === "levelclear" && pxWall.won) {
+    cardIn();
+    drawPixelWin();
+    ctx.restore();
   } else if (m === "levelclear") {
     cardIn();
     drawCard(W / 2, H / 2, 440, 130);
@@ -686,7 +692,7 @@ function draw() {
   if (curseOn("ayna")) { ctx.translate(W, 0); ctx.scale(-1, 1); }
   if (isFever()) { ctx.fillStyle = `hsla(${(state.time * 300) % 360},90%,55%,0.10)`; ctx.fillRect(0, 0, W, H); }   // ÇILGIN MOD tonu
 
-  drawStars(); drawZones(); drawHoles(); drawMusicBack(); drawBricks(); drawGlints(); drawBoss();
+  drawStars(); drawZones(); drawHoles(); drawMusicBack(); drawPixelWall(); drawBricks(); drawGlints(); drawBoss();
   drawPowerups(); drawObstacles(); drawUfo(); drawWallPanels();
   for (const p of particles) { ctx.globalAlpha = clamp(p.life * 2.5, 0, 1); ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, p.size, p.size); }
   for (const f of fragments) {  // dönen tuğla parçaları

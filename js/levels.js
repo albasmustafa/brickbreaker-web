@@ -3,6 +3,7 @@
 //    1/2/3 = dayanıklılık · X = kırılmaz · E = patlayan · Z = elektrik (vurulunca yakındakilere yıldırım)
 //    $ = altın (2 vuruş, bol puan + kesin kapsül) · + = çoğaltan (kırılınca yeni top) · . = boş
 //    11. karakter '>' = o sıra sağa sola kayar. Boss bölümü: { boss, map } — ilk 5 sıra boss'a ayrılır.
+//    Piksel bölümü: { pixel, map: [] } — tuğlalar yerine tunnel.js'in piksel duvarı kurulur.
 // ======================================================================
 const BOSS_ROOM = Array(5).fill("..........");
 const LEVELS = [
@@ -76,4 +77,5 @@ const LEVELS = [
     "1111$$1111",
     ".E.1ZZ1.E.",
   ],
+  { pixel: "tunnel", map: [] },   // 12: TÜNEL FIRTINASI — binlerce piksel tuğla, çelik L ve sarmal tüneller (js/tunnel.js)
 ];

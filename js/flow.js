@@ -26,7 +26,7 @@ function brickColor(b) {
 function buildLevel(n) {
   const song = typeof songLevel !== "undefined" && songLevel.active && songLevel.levels[n - 1];
   const def = song || LEVELS[(n - 1) % LEVELS.length], cycle = song ? 0 : Math.floor((n - 1) / LEVELS.length);
-  const map = Array.isArray(def) ? def : def.map;
+  const map = Array.isArray(def) ? def : def.map || [];
   bricks = [];
   movingRows = [];
   map.forEach((line, r) => {
@@ -40,6 +40,7 @@ function buildLevel(n) {
     }
   });
   state.boss = def.boss ? makeBoss(def.boss, cycle) : null;
+  buildPixelWall(!song && def.pixel);   // TÜNEL FIRTINASI duvarı (diğer bölümlerde kapanır)
   buildZones(n);
   state.buildFade = 0;          // tuğlalar satır satır belirsin
 }
@@ -68,7 +69,7 @@ function buildZones(n) {
   }
   for (let i = 0; i < Math.min(Math.floor((n - 3) / 2), 3); i++) add(rand() < 0.5 ? "L" : "R", rand() < 0.6 ? "bumper" : "spin");
 }
-const isLevelDone = () => (state.boss ? state.boss.dead : bricks.every(b => b.dead || b.unbreakable));
+const isLevelDone = () => (state.boss ? state.boss.dead : bricks.every(b => b.dead || b.unbreakable) && pxDone());
 const checkLevelDone = () => { if (state.mode === "playing" && isLevelDone()) levelCleared(); };
 
 // Süreli efektleri, mermileri, delikleri, lanetleri temizler (can kaybı, bölüm geçişi, yeni oyun)
@@ -198,6 +199,7 @@ function levelCleared() {
   state.mode = "levelclear";
   state.clearAt = state.time + 1.8;
   state.slowmo = Math.max(state.slowmo, 1.1);   // son tuğla ağır çekimde dağılsın
+  if (pxWall.active) pxWin();                  // Congratulations You win! + 3 yıldız
   sfx("level");
   battleCharge(6);
 }
@@ -212,6 +214,7 @@ function nextLevel() {
   serveBall();
   if (settings.autoTheme === "bolum") randomTheme();
   if (state.boss) { callout("⚠ " + state.boss.name + " ⚠", "#ff4d6d"); sfx("bossRoar"); }
+  else if (pxWall.active) callout("🌀 TÜNEL FIRTINASI", "#4cc9f0");
   else callout("BÖLÜM " + state.level, T().accent);
 }
 
