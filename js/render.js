@@ -4,6 +4,7 @@
 // --- Tuğlalar: gövde + ikon renk/stil/tür başına bir kez sprite'a çizilir ---
 const SPRITE_PAD = 4;           // gölge payı
 const brickSprites = new Map();
+const ballSprites = new Map();  // parlak küre topu renk/yarıçap başına bir kez çizilir (fırtınada 300 degrade yerine 300 kopya)
 const easeOutBack = t => 1 + 2.7 * (t - 1) ** 3 + 1.7 * (t - 1) ** 2;
 // Cila durumları: HUD skoru gerçeğe yumuşak yaklaşır, combo artınca hap zıplar, kartlar mod değişince belirir
 let hudScore = 0, comboSeen = 0, comboPop = 0, modeSeen = "", modeAt = 0;
@@ -230,7 +231,7 @@ function drawBricks() {
       }
     }
     // HP noktacıkları: kalan dayanıklılık kadar, sağ üstten sola (çatlakların üstüne)
-    if (settings.hpDots && !b.unbreakable && !b.explosive) {
+    if ((settings.hpDots || cvdOn()) && !b.unbreakable && !b.explosive) {
       const dc = dotColorFor(col);
       ctx.strokeStyle = dc === HP_DOT.dark ? HP_DOT.light : HP_DOT.dark;
       ctx.lineWidth = 1;
@@ -264,7 +265,7 @@ function drawTwinLinks() {
 // Parıltılar: ara ara rastgele bir tuğlada beliren dört köşeli yıldız
 let glints = [], glintCd = 0;
 function updateGlints(dt) {
-  if ((glintCd -= dt) <= 0) {
+  if ((glintCd -= dt) <= 0 && !lowGfx()) {
     glintCd = rnd(0.2, 0.55);
     const alive = bricks.filter(b => !b.dead && revealOf(b) >= 1);
     if (alive.length) glints.push({ b: pick(alive), ox: rnd(8, BRICK.w - 8), oy: rnd(3, 8), life: 0.55 });
@@ -354,7 +355,7 @@ function drawZones() {
 function drawBoss() {
   const bo = state.boss;
   if (!bo || bo.dead) return;
-  const { x, y, w, h } = bo, rage = bo.enraged ? 0.5 + 0.5 * Math.sin(state.time * 12) : 0;
+  const { x, y, w, h } = bo, rage = bo.enraged ? 0.5 + 0.5 * Math.sin(state.time * (calmFx() ? 3 : 12)) : 0;
   fillRR(x, y, w, h, 12, bo.enraged ? `rgb(${200 + rage * 55 | 0},${30 + rage * 40 | 0},50)` : "#c9184a");
   fillRR(x, y + h - 12, w, 12, 6, "rgba(0,0,0,0.25)");
   ctx.fillStyle = "#ffd166";    // taç
@@ -409,7 +410,7 @@ function drawPaddle() {
   }
   // GÖRÜNMEZ RAKET: yalnızca vuruşta ve ara ara bir anlık belirir
   if (curseOn("gorunmez")) ctx.globalAlpha = Math.max(paddle.flash * 0.9, (state.time % 1.6) < 0.1 ? 0.45 : 0.03);
-  const blink = fxOn("stun") && Math.floor(state.time * 12) % 2, pcol = blink ? "#ff4d6d" : T().pad, ps = settings.paddleStyle;
+  const blink = fxOn("stun") && (calmFx() || Math.floor(state.time * 12) % 2), pcol = blink ? "#ff4d6d" : T().pad, ps = settings.paddleStyle;
   if (ps === "koseli") { ctx.fillStyle = pcol; ctx.fillRect(x, y, w, h); }
   else if (ps === "neon") {
     fillRR(x, y, w, h, 6, hexToRgba(pcol, 0.18));
@@ -446,7 +447,7 @@ function drawPaddle() {
 }
 function drawBalls() {
   const fire = isFire(), ballCol = fire ? "#ff6b35" : T().ball, rainbow = settings.trail === "gokkusagi";
-  const crowd = balls.length > 40;                       // top fırtınası: iz, hale ve gölge çizilmez (akıcı kalsın)
+  const crowd = balls.length > 40 || lowGfx();          // top fırtınası / düşük kalite: iz, hale ve gölge çizilmez
   const sb = !crowd && (state.mode === "serve" || state.mode === "playing") && balls.find(b => b.stuck);
   if (sb) {                                              // cila: fırlatma bekleyen topa genişleyip sönen hedef halkası
     const ph = (state.time * 1.4) % 1;
@@ -498,15 +499,33 @@ function drawBallShape(b, col) {
       ctx.arc(x, y, r * 0.75, 0, TAU);
       ctx.stroke();
       return;
-    default: {                  // parlak küre: üst-solda ışık lekesi
-      const g = ctx.createRadialGradient(x - r * 0.35, y - r * 0.35, r * 0.1, x, y, r);
-      [[0, shade(col, 0.7)], [0.6, col], [1, shade(col, -0.25)]].forEach(([o, c]) => g.addColorStop(o, c));
-      ctx.fillStyle = g;
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, TAU);
+    default: {                  // parlak küre: üst-solda ışık lekesi (önbellekteki sprite)
+      const s = ballSpriteSize(r);
+      ctx.drawImage(ballSprite(col, r), x - s / 2, y - s / 2, s, s);
+      return;
     }
   }
-  ctx.fill();
+  ctx.fill();                   // elmas / yıldız
+}
+const ballSpriteSize = r => Math.ceil(r * 2 + 2);
+function ballSprite(col, r) {
+  const key = col + "|" + r;
+  let c = ballSprites.get(key);
+  if (c) return c;
+  if (ballSprites.size > 64) ballSprites.clear();
+  const s = ballSpriteSize(r);
+  c = el("canvas", { width: Math.ceil(s * DPR), height: Math.ceil(s * DPR) });
+  const g = c.getContext("2d");
+  g.scale(DPR, DPR);
+  const x = s / 2, y = s / 2;
+  const gr = g.createRadialGradient(x - r * 0.35, y - r * 0.35, r * 0.1, x, y, r);
+  [[0, shade(col, 0.7)], [0.6, col], [1, shade(col, -0.25)]].forEach(([o, cc]) => gr.addColorStop(o, cc));
+  g.fillStyle = gr;
+  g.beginPath();
+  g.arc(x, y, r, 0, TAU);
+  g.fill();
+  ballSprites.set(key, c);
+  return c;
 }
 function drawLasersAndBullets() {
   ctx.fillStyle = "#ff4d6d";
@@ -721,7 +740,7 @@ function drawScreens() {
     titleText("AI", W / 2, H / 2 - 84 + fy, 40, T().b1, T().b3, W - 40, glow);
     text(tr("★ KAOS SÜRÜMÜ ★"), W / 2, H / 2 - 52, "bold 14px monospace", "#ff5d8f", "center", 600);
     ctx.globalAlpha = pulse;
-    text("▶  " + tr("Yeni oyun için tıkla veya boşluk"), W / 2, H / 2 - 12, "bold 20px monospace", T().text, "center", 600);
+    text("▶  " + (lastInputTouch ? tr("Yeni oyun için dokun") : tr("Yeni oyun için tıkla veya boşluk")), W / 2, H / 2 - 12, "bold 20px monospace", T().text, "center", 600);
     ctx.globalAlpha = 1;
     text(tr("← → / fare: raket • boşluk: fırlat • P/Esc: duraklat • T/R: tema • F: tam ekran"), W / 2, H / 2 + 18, "13px monospace", T().dim, "center", 610);
     text(tr("Raketi hareket ettirerek vur: FALSO!   Uçtan vur: SMASH!"), W / 2, H / 2 + 40, "14px monospace", T().dim, "center", 610);
@@ -745,7 +764,7 @@ function drawScreens() {
     drawCountdown();
   } else if (m === "serve") {
     ctx.globalAlpha = pulse;
-    outlinedText(tr("topu fırlat: tıkla / boşluk"), W / 2, H - 90, "bold 17px monospace", T().text);
+    outlinedText(lastInputTouch ? tr("topu fırlat: dokun") : tr("topu fırlat: tıkla / boşluk"), W / 2, H - 90, "bold 17px monospace", T().text);
     ctx.globalAlpha = 1;
     if (pxWall.active) outlinedText(tr("Topu tünele sok · sarı +3 ve turuncu x3 küpleri raketle yakala"), W / 2, H - 66, "bold 13px monospace", "#9fd3ff");
   } else if (m === "playing" && balls.some(b => b.stuck)) {
@@ -837,7 +856,8 @@ function draw() {
     ctx.translate(-W / 2 + Math.sin(t * 0.7) * 20, -H / 2);
   }
   if (curseOn("ayna")) { ctx.translate(W, 0); ctx.scale(-1, 1); }
-  if (isFever()) { ctx.fillStyle = `hsla(${(state.time * 300) % 360},90%,55%,0.10)`; ctx.fillRect(0, 0, W, H); }   // ÇILGIN MOD tonu
+  const feverHue = (state.time * (calmFx() ? 30 : 300)) % 360;   // parlama azaltılınca renkler yavaş döner
+  if (isFever()) { ctx.fillStyle = `hsla(${feverHue},90%,55%,0.10)`; ctx.fillRect(0, 0, W, H); }   // ÇILGIN MOD tonu
 
   drawStars(); drawZones(); drawHoles(); drawMusicBack(); drawPixelWall(); drawTwinLinks(); drawBricks(); drawGlints(); drawBoss();
   drawPowerups(); drawObstacles(); drawUfo(); drawWallPanels();
@@ -880,7 +900,7 @@ function draw() {
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, W, H);
   }
-  if (isFever()) { ctx.strokeStyle = `hsl(${(state.time * 300) % 360},90%,60%)`; ctx.lineWidth = 6; ctx.strokeRect(3, 3, W - 6, H - 6); }
+  if (isFever()) { ctx.strokeStyle = `hsl(${feverHue},90%,60%)`; ctx.lineWidth = 6; ctx.strokeRect(3, 3, W - 6, H - 6); }
   if (state.mode !== "menu") drawHUD();
   drawCallout();
   drawScreens();

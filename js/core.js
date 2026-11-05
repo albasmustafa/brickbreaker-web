@@ -5,9 +5,14 @@ const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 const W = canvas.width, H = canvas.height;
 // HiDPI: tuval ekranın piksel yoğunluğunda çizilir (mantıksal boyut 800×600 kalır)
-const DPR = Math.min(2, window.devicePixelRatio || 1);
-canvas.width = W * DPR;
-canvas.height = H * DPR;
+const NATIVE_DPR = Math.min(2, window.devicePixelRatio || 1);
+let DPR = NATIVE_DPR;            // düşük grafik kalitesinde 1'e iner (perf.js)
+function setRenderScale(d) {
+  DPR = d;
+  canvas.width = W * DPR;
+  canvas.height = H * DPR;
+}
+setRenderScale(DPR);
 
 const STEP = 1 / 120;                        // sabit fizik adımı (120 Hz)
 const BASE_SPEED = 340, MAX_SPEED = 640;     // topun bölüm başı ve en yüksek hızı (px/s)
@@ -111,4 +116,15 @@ function el(tag, props, ...kids) {
 }
 const onClick = (id, fn) => $(id).addEventListener("click", fn);
 // Tıklanan düğme odakta kalmasın: boşluk tuşu onu yeniden tetiklemesin
-document.addEventListener("click", e => { const b = e.target.closest && e.target.closest("button"); if (b) b.blur(); });
+// (klavyeyle basılan düğmede odak kalır: e.detail 0 → klavye kullanıcısı yerini kaybetmesin)
+document.addEventListener("click", e => { const b = e.target.closest && e.target.closest("button"); if (b && e.detail > 0) b.blur(); });
+// Ekran okuyucu duyurusu: callout'lar ve oyun sonu kibarca okunur (görünmez canlı bölge)
+let announceTimer = 0;
+function announce(msg) {
+  const live = document.getElementById("srlive");
+  if (!live || !msg) return;
+  live.textContent = "";        // aynı metin art arda gelse de yeniden okunsun
+  clearTimeout(announceTimer);  // yalnızca en son duyuru okunur
+  const text = String(msg).replace(/[⚠☠]/g, "").trim();
+  announceTimer = setTimeout(() => { live.textContent = text; }, 30);
+}

@@ -362,7 +362,7 @@ function drawPixelWall() {
   }
   ctx.stroke();
   // Tutuşan hücreler (zincir cephesi)
-  ctx.fillStyle = Math.sin(state.time * 40) > 0 ? "#ffd166" : "#ffffff";
+  ctx.fillStyle = calmFx() || Math.sin(state.time * 40) > 0 ? "#ffd166" : "#ffffff";   // 20 Hz titreme; parlama azaltılınca sabit
   for (const b of P.burns) if (P.grid[b.i] === PX_BURN) ctx.fillRect(PX.x + (b.i % PX.cols) * PX.s, PX.y + ((b.i / PX.cols) | 0) * PX.s, PX.s - 0.5, PX.s - 0.5);
   for (const q of P.cubes) {
     if (q.st === "idle") drawCube(q.hx, q.hy + Math.sin(state.time * 4 + q.ph) * 0.8, q.kind, 0, q.pop > 0 ? Math.max(0.01, easeOutBack(1 - q.pop)) : 1);

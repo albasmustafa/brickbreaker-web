@@ -746,5 +746,20 @@ const I18N_KEYS = [
 "Paletten tuğla seç, ızgaraya tıkla ya da sürükle; sağ tık siler. Sıra sonundaki ↔ o sırayı kaydırır, Ayna açıkken çizdiğin sağ yarıya yansır. Boss seçilirse ilk 5 sıra boss'a ayrılır. Test koşuları rekor ve kariyere sayılmaz. Bağlantıyla açılan bölüm doğrudan editöre yüklenir.", // 743
 "Bölüm editörü", // 744
 "BBL1:... bölüm kodunu ya da bağlantısını buraya yapıştır", // 745
+"⚡ Düşük grafik moduna geçildi", // 746
+"oyun takılıyordu · Ayarlar → Grafik kalitesi", // 747
+"Yeni oyun için dokun", // 748
+"topu fırlat: dokun", // 749
+"Grafik kalitesi", // 750
+"Dokunmatik", // 751
+"Otomatik grafik kalitesi oyun takılırsa kendiliğinden düşük kaliteye geçer (daha az parçacık, iz ve gölge yok). Dokunmatikte \"Kaydırarak\" seçilirse raket parmağın altına zıplamaz, parmağın kaydığı kadar gider: tuvalin her yerinden oynanır, parmak raketi örtmez.", // 752
+"Otomatik", // 753
+"Yüksek", // 754
+"Düşük (yavaş cihaz)", // 755
+"Parmağı izler", // 756
+"Kaydırarak", // 757
+"Renk körü dostu", // 758
+"Parlama ve yanıp sönme", // 759
+"Renk körü dostu: tuğla dayanıklılık renkleri renk körlüğünde de ayırt edilen bir paletle (açık mavi, sarı, kızıl) çizilir ve her tuğlada kalan vuruş noktacıkları görünür. Parlama azaltılınca müzik flaşı kapanır, ÇILGIN MOD renkleri yavaş döner, hızlı yanıp sönmeler sabit renge döner.", // 760
 ];
 const I18N_DATA = {};

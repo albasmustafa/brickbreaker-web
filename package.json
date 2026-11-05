@@ -8,6 +8,8 @@
     "start": "node tools/serve.mjs 8080",
     "build": "node tools/build.mjs",
     "test": "node tests/run.mjs",
+    "coverage": "node tests/run.mjs --coverage",
+    "test:visual": "node tests/visual.mjs",
     "test:dist": "node tests/run.mjs dist/index.html && node tests/run.mjs dist/brickbreaker.min.html",
     "release": "npm test && node tools/release.mjs"
   },

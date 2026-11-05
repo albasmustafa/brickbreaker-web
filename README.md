@@ -9,7 +9,7 @@ Tarayıcıda çalışan, kaotik bir tuğla kırma oyunu: lanetler, boss'lar, 15 
 | Oyna | `index.html`'i çift tıkla (ya da `xdg-open index.html`) — sunucu, internet, kurulum gerekmez |
 | Uygulama olarak kur / çevrim dışı oyna | `npm start` → <http://localhost:8080> → tarayıcıda "Uygulamayı yükle"; bir kez açıldıktan sonra internetsiz de çalışır |
 | Tek dosya üret | `npm run build` → `dist/index.html` (okunaklı) ve `dist/brickbreaker.min.html` (sıkıştırılmış, ~146 KB) |
-| Test et | `npm test` → 32 özellik testi başsız Chromium'da (Node 22+, Chromium/Chrome) |
+| Test et | `npm test` → 36 özellik testi başsız Chromium'da (Node 22+, Chromium/Chrome) |
 | Yayınla | `npm run release` → test + derleme + ana oyun dosyasını güncelleme |
 
 `npm start`, `npm test` ve okunaklı derleme hiçbir bağımlılık istemez. Yalnızca sıkıştırılmış derleme için bir kez `npm install` (esbuild) gerekir.
@@ -40,6 +40,7 @@ js/ui.js              araç çubuğu, paneller, tema stüdyosu, klavye/fare/doku
 js/career.js          kariyer: dereceli lig (Elo, rütbeler, terk cezası), sayaçlar, maç geçmişi, başarımlar, bildirimler
 js/pacts.js           lanet paktı: bölüm başında risk/ödül seçenekleri ve çarpanları
 js/lastchance.js      son top bahsi: tek seferlik devam + lanet bedeli
+js/perf.js            grafik kalitesi (Otomatik/Yüksek/Düşük), kare süresi izleyicisi
 js/editor.js          bölüm editörü: ızgara, palet, ayna, geri al, boss, şablon, kayıt, BBL1 kodu ve #bbl= bağlantısı, test koşusu
 js/director.js        dramaturg: bölüm görevleri, nefes/gösteri anları
 js/codex.js           koleksiyon: lanet/tuğla/boss kartları ve kart seviyeleri
@@ -79,6 +80,10 @@ Okunaklı tek dosyada her bölümün başında kaynak dosyanın adı yazar. Ana 
 - **Rekabet:** bot kapışması ve bot dengesi; iki sayfa arasında gerçek WebRTC bağlantısıyla çevrim içi kapışma (puanların paylaşılması ve iki tarafta puan güncellemesi dahil).
 - **Kariyer:** dereceli lig (lig sınırları, Elo, puana göre bot gücü, kazanınca/kaybedince puan, yarıda bırakma ve sayfa yenileme cezası); sayaçlar, anında açılan başarımlar, galibiyet serisi, kariyer paneli, sayfa yenilenince kalıcılık, sıfırlama.
 - **Tutundurma:** lanet paktı seçimi/çarpanları, son top bahsi, dramaturg görevleri, koleksiyon kartları ve lanet direnci, hayalet kaydı/oynatma/kodu, haftalık tohumun deterministik koşusu ve sonuç kodu, şarkıdan bölüm üreteci/kodu.
+- **Performans ve mobil:** fırtınada tek top sprite'ı ve çizim süresi sınırı, düşük kalitede 1× piksel ve önbellek yenileme, otomatik düşürmenin yalnızca oyun sırasında ve yavaşken devreye girmesi, göreli/mutlak dokunmatik (gerçek dokunma olaylarıyla).
+- **Erişilebilirlik:** renk körü paleti ve parlaklık farkı, parlama azaltma (flaş ve yanıp sönme yok), klavyeyle panel açma/Tab döngüsü/Esc ile odağın geri dönmesi, odaktaki düğmede boşluğun oyunu başlatmaması, 2 tuşuyla pakt seçimi, ekran okuyucu duyuruları.
+- **Arayüz uçtan uca:** editörün bütün düğmeleri gerçek tıklamayla, `#bbl=` bağlantısıyla sayfa açılışı; sentetik 120 BPM WAV dosyasının çözülüp analiz edilmesi, bozuk dosya reddi, şarkı kodu/yükle/başlat düğmeleri; hayalet kodu al/yükle/sil ve bozuk kod.
+- **Fuzz:** tohumlu (20261105) 40 rastgele editör bölümü (her tuğla türü, kayan sıralar, boss) × rastgele kapsül, lanet ve pakt; toplar geçerli kalır, tuğla canı, skor ve can sınırların içinde kalır.
 - **Bölüm editörü:** fareyle boyama, ayna, geri al, kayan sıra, boss kilidi, şablon, kaydet/sil, kod ve bağlantı gidiş-dönüşü, bozuk kod reddi, test koşusunun pratik sayılması, bitişte oyun sonu ve editöre dönüş.
 
 ```
@@ -86,7 +91,14 @@ npm test                                  # projeyi test et
 node tests/run.mjs dist/index.html        # derlenmiş tek dosyayı test et
 node tests/run.mjs --only "Lanet"         # adında "Lanet" geçen testler
 npm run test:dist                         # iki derlemeyi birden test et
+npm run coverage                          # testleri kod kapsamı ölçümüyle çalıştır (dosya başına satır %, eksik satırlar)
+npm run test:visual                       # görsel regresyon: 5 ekran × 3 dil (tr, ar, ja) kayıtlı görüntülerle
+npm run test:visual -- --update           # bilerek yapılan görsel değişiklikten sonra kayıtlı görüntüleri yenile
 ```
+
+**Görsel regresyon** (`tests/visual.mjs`): menü, servis, boss, 300 topluk fırtına ve oyun sonu ekranları sabit tohum ve sabit zamanla çizilir, `tests/visual/` içindeki PNG'lerle piksel piksel karşılaştırılır (kanal farkı 48'i aşan piksel oranı %0.5'i geçerse fark). Farkta yeni görüntü ve kırmızı işaretli fark görüntüsü `tests/visual/out/` içine yazılır. Yazı tipleri makineye göre değiştiği için kayıtlı görüntüler bu makineye özgüdür; CI'da çalışmaz.
+
+**Kod kapsamı** (`--coverage`): Chrome'un hassas kapsamıyla (Profiler) her test sayfasında çalışan baytlar toplanır; dil dosyaları hariç her `js/*.js` için satır kapsamı ve hiç çalışmamış satır aralıkları yazılır. Test sayfası yenilenmeden önce de toplanır. Son ölçüm (2026-11-06): **%92.3** (4441/4809 satır); en düşükler `versus.js` %74 (WebRTC bağlantı hataları), `songlevel.js` %78, `ui.js` %82.
 
 Chromium yolu farklıysa: `BB_CHROME=/yol/chrome npm test`.
 
@@ -298,6 +310,16 @@ Araç çubuğundaki **✏️ Editör** düğmesi kendi bölümünü çizdiğin p
 - **▶ Test et:** bölüm tek bölümlük **pratik koşu** olarak oynanır (rekor, liderlik, kariyer, pakt, hayalet ve son top bahsi kapalı). Bölüm bitince oyun sonu kartı çıkar; menüye dönünce editör yeniden açılır.
 - **💾 Kaydet / 🗑 Sil:** bu cihazda ada göre en çok 30 bölüm (`bb_mylevels`).
 - **Paylaş:** **📤 Kodu al** → `BBL1:` kodu (base64url JSON: ad, boss, satırlar); **🔗 Bağlantı** → oyunun adresi + `#bbl=…`. Bağlantıyla açılan oyun bölümü doğrudan editöre yükler ve adres çubuğundaki kodu temizler. Kodlar yüklenirken her satır doğrulanır (10 karakter, bilinen tuğla harfleri, en çok 12 sıra).
+
+## Erişilebilirlik ve performans (2026-11)
+
+- **Klavye:** menülerin tamamı klavyeyle gezilir. Odaktaki düğme 3 px vurgu çerçevesiyle görünür; Enter/boşluk düğmeye basar, oyunu başlatmaz. Panel açılınca odak panelin ilk denetimine geçer, **Tab** panelin içinde döner, **Esc** kapatınca odak paneli açan düğmeye döner. Lanet Paktı kartları **1 / 2 / 3** ile seçilir, **0** pakt yok. Son Top Bahsi açılınca odak "devam" düğmesindedir.
+- **Ekran okuyucu:** paneller `aria-modal`; görünmez bir `aria-live` bölgesi ekrandaki büyük duyuruları (bölüm, boss, ÇILGIN MOD, son top bahsi) ve oyun sonu skorunu okutur.
+- **Renk körü dostu** (⚙️ Ayarlar): tuğla dayanıklılık renkleri temadan bağımsız Okabe-Ito paletine geçer (açık mavi / sarı / kızıl; parlaklıkları da ayrık) ve her tuğlada kalan vuruş noktacıkları görünür.
+- **Parlama ve yanıp sönme: Azaltılmış** (`prefers-reduced-motion` açıksa varsayılan): müzik flaşı kapanır, ÇILGIN MOD renkleri 10 kat yavaş döner, sersemleme/boss öfkesi/tünel tutuşması gibi hızlı yanıp sönmeler sabit renk ya da yavaş nabız olur. Hareket azaltma tercihinde panel animasyonları ve CSS geçişleri de kapanır.
+- **Grafik kalitesi** (`js/perf.js`): Otomatik / Yüksek / Düşük. Düşükte tuval 1× piksel yoğunluğunda çizilir, top izi/gölgesi/halesi ve parıltılar kapanır, parçacıklar yarıya iner. Otomatikte oyun sırasında ~2.5 sn boyunca 45 FPS'nin altına düşülürse oyun bir kez düşük kaliteye geçer ve bildirir (geri dönmez, titreşmesin).
+- **Top sprite önbelleği:** parlak küre top her renk/yarıçap için bir kez çizilip kopyalanır. 300 topluk fırtınada top çizimi ~18 ms'den ~5 ms'ye, toplam kare çizimi ~27 ms'den ~13 ms'ye indi (başsız Chromium ölçümü).
+- **Dokunmatik:** "Parmağı izler" (varsayılan) ya da "Kaydırarak": raket parmağın altına zıplamaz, parmağın kaydığı kadar (×1.5) gider; tuvalin her yerinden oynanır, parmak raketi örtmez. Dokunmatikle oynarken ekrandaki ipuçları "dokun" olarak değişir.
 
 ## Sesler
 

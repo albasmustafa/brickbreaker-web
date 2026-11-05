@@ -11,6 +11,8 @@ function showLastChance() {
   state.mode = "lastchance";
   state.lives = 0;
   lastChanceEl.hidden = false;
+  $("last-continue").focus();       // klavyede Enter devam, Tab ile Bitir
+  announce(tr("💀 SON TOP BAHSİ"));
   return true;
 }
 const hideLastChance = () => (lastChanceEl.hidden = true);

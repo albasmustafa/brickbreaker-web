@@ -2,9 +2,9 @@
 // 8. EFEKTLER: parçacık, tuğla parçaları, çatlaklar, yıldırım, yazılar, sarsıntı
 // ======================================================================
 const addShake = p => { state.shake = Math.max(state.shake, p * SHAKE_SCALE[settings.shake]); };
-const particleCap = () => 400 * Math.max(1, PARTICLE_MUL[settings.particles]);
+const particleCap = () => 400 * Math.max(1, PARTICLE_MUL[settings.particles]) * (lowGfx() ? 0.5 : 1);
 // Parçacık yoğunluğu ayarına göre kaç tane üretileceği
-const scaled = n => Math.max(1, Math.round(n * PARTICLE_MUL[settings.particles]));
+const scaled = n => Math.max(1, Math.round(n * PARTICLE_MUL[settings.particles] * (lowGfx() ? 0.5 : 1)));
 
 function spawnParticles(x, y, color, count = 12, sw = BRICK.w, sh = BRICK.h) {
   for (let i = scaled(count); i > 0 && particles.length <= particleCap(); i--) {
@@ -32,7 +32,7 @@ function spawnConfetti(x, y, count) {
   }
 }
 // Ekran ortasında büyüyerek beliren dev yazı (combo, boss, ÇILGIN MOD, lanet)
-const callout = (text, color) => { state.callout = { text, color: color || T().b2, life: 1.3 }; };
+const callout = (text, color) => { state.callout = { text, color: color || T().b2, life: 1.3 }; announce(text); };
 
 // Zikzaklı yıldırım (iki nokta arası), kısa süre ekranda kalır
 function addBolt(x1, y1, x2, y2) {

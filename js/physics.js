@@ -60,7 +60,7 @@ function damageBrick(b, dmg = 1, zapDepth = 0, src) {
     return;
   }
   b.prevCol = brickColor(b); b.prevKind = brickKind(b); b.colFade = 1;   // renk geçişi: eski görünümden yenisine yumuşak
-  b.hp -= dmg;
+  b.hp = Math.max(0, b.hp - dmg);   // ateş topu 99 vurur: ölü tuğlanın canı negatife düşmesin
   if (b.regen) b.healAt = state.time + REGEN_TIME;      // yarım kalan yenilenen tuğla sayacı baştan başlar
   if (b.electric && zapDepth < 2) chainLightning(b, zapDepth + 1);
   if (b.hp <= 0) {

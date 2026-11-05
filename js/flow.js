@@ -242,6 +242,7 @@ function gameOver() {
   if (run.song) stopSongLevel();
   flushCodex();
   state.mode = "gameover";
+  announce(tr("OYUN BİTTİ") + ". " + tr("Skor: {n}", { n: state.score }));
   state.newRecord = !run.practice && !wasWeekly && !run.song && state.score > state.startHigh && state.score > 0;
   if (state.newRecord) spawnConfetti(W / 2, H / 2 - 60, 60);   // cila: yeni rekor konfetisi
   sfx("gameover");

@@ -8,6 +8,7 @@ let last = performance.now(), acc = 0;
 function frame(now) {
   const dt = Math.min((now - last) / 1000, 0.05);
   last = now;
+  perfSample(dt);               // takılma izleyicisi: gerekirse düşük grafik kalitesine geçer
   // An donması (patlama) ve ağır çekim (son tuğla, boss ölümü) gerçek saatle işler
   let scale = 1;
   if (state.hitstop > 0) { state.hitstop -= dt; scale = 0; }

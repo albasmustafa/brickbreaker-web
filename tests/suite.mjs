@@ -352,6 +352,232 @@ test("Bölüm editörü: boyama, ayna, geri al, boss, kayıt, kod, bağlantı, t
   expect(r.tpl, "boss şablonu");
 });
 
+test("Performans ve mobil: top sprite önbelleği, grafik kalitesi, otomatik düşürme, göreli dokunmatik", async ({ p, expect }) => {
+  const r = await p.eval(`(() => {
+    // Sprite önbelleği: 300 topta tek sprite, şekiller çizilir
+    startPractice(TUNNEL_LEVEL, true); launchBall(); state.curseAt = Infinity;
+    for (let k = 0; k < 6; k++) pxCatch({ kind: "mul" });
+    ballSprites.clear(); draw();
+    const sprites = ballSprites.size, nBalls = balls.length;
+    let t = performance.now(); for (let i = 0; i < 20; i++) drawBalls(); const ballMs = (performance.now() - t) / 20;
+    const shapes = ["kare", "elmas", "yildiz", "halka", "daire"].map(sh => { settings.ballShape = sh; drawBalls(); return sh; }).length;
+    // Grafik kalitesi: düşükte 1× piksel, önbellekler yenilenir; yükseğe dönünce doğal yoğunluk
+    settings.gfx = "dusuk"; applyGfx();
+    const low = { dpr: DPR, w: canvas.width, low: lowGfx(), sprites: brickSprites.size, crowdCap: particleCap(), native: NATIVE_DPR };
+    for (let i = 0; i < 60; i++) { update(STEP); if (i % 6 === 0) draw(); }
+    settings.gfx = "yuksek"; applyGfx();
+    const high = { dpr: DPR === NATIVE_DPR, w: canvas.width === W * NATIVE_DPR, low: lowGfx() };
+    // Otomatik: oyun akarken 2.5 sn yavaş kare → bir kez düşük kaliteye geçer ve haber verir
+    settings.gfx = "oto"; perf.auto = false; perf.ema = 1 / 60; applyGfx();
+    toMenu(); for (let i = 0; i < 200; i++) perfSample(0.05);
+    const menuIgnored = !perf.auto;
+    __start(1);
+    for (let i = 0; i < 30; i++) perfSample(1 / 60);
+    const fastStays = !perf.auto;
+    for (let i = 0; i < 120 && !perf.auto; i++) perfSample(0.04);
+    const autoOn = perf.auto && lowGfx() && DPR === 1 && document.querySelector("#toasts").textContent.includes("Düşük grafik");
+    perf.auto = false; applyGfx();
+    // Dokunmatik: göreli modda raket parmağın altına zıplamaz, kaydırma kadar gider
+    const rect = canvas.getBoundingClientRect(), k = W / rect.width;
+    const touch = (type, x) => canvas.dispatchEvent(new TouchEvent(type, { cancelable: true, bubbles: true,
+      touches: type === "touchend" ? [] : [new Touch({ identifier: 1, target: canvas, clientX: x, clientY: rect.top + rect.height * 0.8 })],
+      changedTouches: [new Touch({ identifier: 1, target: canvas, clientX: x, clientY: rect.top + rect.height * 0.8 })] }));
+    settings.touch = "goreli"; state.mode = "playing"; paddle.x = 300;
+    touch("touchstart", rect.left + 10);
+    const noJump = paddle.x === 300;
+    touch("touchmove", rect.left + 10 + 20 / k);
+    const moved = Math.round(paddle.x - 300);
+    touch("touchend", rect.left + 30);
+    settings.touch = "mutlak";
+    touch("touchstart", rect.left + rect.width / 2);
+    const absCenter = Math.round(paddle.x + paddle.w / 2);
+    touch("touchend", rect.left + rect.width / 2);
+    state.mode = "serve"; draw();
+    return { sprites, nBalls, ballMs, shapes, low, high, menuIgnored, fastStays, autoOn, noJump, moved, absCenter, touchHint: lastInputTouch };
+  })()`);
+  expect(r.nBalls >= 250 && r.sprites === 1, "fırtınada tek top sprite'ı: " + JSON.stringify([r.nBalls, r.sprites]));
+  expect(r.ballMs < 25, "300 top çizimi: " + r.ballMs.toFixed(2) + " ms");
+  expect(r.low.dpr === 1 && r.low.w === 800 && r.low.low && (r.low.native === 1 || r.low.sprites === 0), "düşük kalite 1× piksel ve önbellek yenileme: " + JSON.stringify(r.low));
+  expect(r.high.dpr && r.high.w && !r.high.low, "yüksek kalite doğal yoğunluk: " + JSON.stringify(r.high));
+  expect(r.menuIgnored && r.fastStays && r.autoOn, "otomatik düşürme yalnızca oyunda ve yavaşken: " + JSON.stringify([r.menuIgnored, r.fastStays, r.autoOn]));
+  expect(r.noJump && r.moved === 30, "göreli dokunmatik: zıplamaz, 20 px kaydırma = 30 px raket: " + JSON.stringify([r.noJump, r.moved]));
+  expect(r.absCenter === 400 && r.touchHint, "mutlak dokunmatik parmağı izler, ipucu dokunmaya döner: " + JSON.stringify([r.absCenter, r.touchHint]));
+});
+
+test("Erişilebilirlik: renk körü paleti, parlama azaltma, klavyeyle panel ve pakt, ekran okuyucu duyuruları", async ({ p, expect, sleep }) => {
+  const r = await p.eval(`(() => {
+    // Renk körü paleti: tema ne olursa olsun Okabe-Ito renkleri ve noktacıklar
+    __start(1);
+    settings.colorblind = "acik";
+    const cvd = [1, 2, 3].map(hpColor).join();
+    const lum = [1, 2, 3].map(h => relLum(hpColor(h)));
+    const distinct = Math.min(Math.abs(lum[0] - lum[1]), Math.abs(lum[1] - lum[2]), Math.abs(lum[0] - lum[2])) > 0.1;
+    draw();
+    settings.colorblind = "kapali";
+    const back = hpColor(2) === T().b2;
+    // Parlama azaltma: müzik flaşı çizilmez, ÇILGIN MOD tonu yavaş döner, sersemleme yanıp sönmez
+    settings.flashes = "azaltilmis";
+    music.flash = 0.3; ctx.clearRect(0, 0, W, H); drawMusicFlash();
+    const px = ctx.getImageData(5 * DPR, 5 * DPR, 1, 1).data[3];
+    state.feverUntil = state.time + 5; state.stunUntil = state.time + 5;
+    const blinks = new Set(); for (let i = 0; i < 12; i++) { state.time += 1 / 24; draw(); blinks.add(fxOn("stun") && (calmFx() || Math.floor(state.time * 12) % 2)); }
+    settings.flashes = "normal"; music.flash = 0;
+    // Klavye: Enter ile açılan panelde odak içeride, Tab panelde döner, Esc kapatınca odak düğmeye döner
+    toMenu();
+    const btn = [...toolbar.querySelectorAll("button")].find(b => b.textContent.includes("Ayarlar"));
+    btn.focus(); btn.click();
+    const inPanel = settingsPanel.contains(document.activeElement) && !document.activeElement.classList.contains("panel-x");
+    const f = focusables(settingsPanel);
+    f[f.length - 1].focus();
+    document.activeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true, cancelable: true }));
+    const wrapped = document.activeElement === f[0];
+    document.activeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    const restored = settingsPanel.hidden && document.activeElement === btn;
+    // Odaktaki düğmede boşluk oyunu başlatmaz
+    document.activeElement.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true, cancelable: true }));
+    const spaceSafe = state.mode === "menu";
+    btn.blur();
+    // Pakt: 2 tuşu ikinci kartı seçer
+    __start(1); run.pactOfferLevel = 0; settings.pacts = "acik"; state.mode = "serve";
+    const shown = showPactOffer();
+    const want = pactOffer && pactOffer[1].id;
+    document.body.dispatchEvent(new KeyboardEvent("keydown", { key: "2", bubbles: true }));
+    const picked = shown && run.pacts.includes(want) && pactbar.hidden;
+    // Ekran okuyucu: callout ve oyun sonu canlı bölgeye yazılır; panel aria-modal
+    callout("BÖLÜM 7");
+    return { cvd, distinct, back, px, blinks: [...blinks].join(), inPanel, wrapped, restored, spaceSafe, picked, modal: settingsPanel.getAttribute("aria-modal") };
+  })()`);
+  await sleep(400);
+  const live = await p.eval(`document.getElementById("srlive").textContent`);
+  await p.eval(`(() => { state.lives = 1; run.lastChanceUsed = true; loseLife(); return 1; })()`);
+  await sleep(400);
+  const over = await p.eval(`document.getElementById("srlive").textContent`);
+  expect(r.cvd === "#56b4e9,#f0e442,#d55e00" && r.distinct && r.back, "renk körü paleti ve parlaklık farkı: " + JSON.stringify(r));
+  expect(r.px === 0 && r.blinks === "true", "parlama azaltma: flaş yok, yanıp sönme yok: " + JSON.stringify([r.px, r.blinks]));
+  expect(r.inPanel && r.wrapped && r.restored && r.spaceSafe && r.modal === "true", "klavyeyle panel: " + JSON.stringify(r));
+  expect(r.picked, "pakt 2 tuşuyla seçildi");
+  expect(live === "BÖLÜM 7" && over.startsWith("OYUN BİTTİ"), "ekran okuyucu duyuruları: " + JSON.stringify([live, over]));
+});
+
+test("Fuzz: 40 rastgele editör bölümü × rastgele kapsül, lanet ve pakt kombinasyonları", async ({ p, expect }) => {
+  // Tohumlu rastgelelik: hata çıkarsa aynı tohumla tekrar üretilebilir (mesajda yazar)
+  const r = await p.eval(`(() => {
+    const rand = seeded(20261105), pickR = a => a[(rand() * a.length) | 0];
+    const chars = ".123XEZ$+HATIVS".split(""), powers = Object.keys(POWERS), curses = Object.keys(CURSES), pacts = PACT_POOL.map(x => x.id);
+    const fails = [];
+    let cleared = 0, steps = 0;
+    for (let run_ = 0; run_ < 40; run_++) {
+      // Rastgele bölüm: 1–12 sıra, yoğunluk değişken, ara sıra kayan sıra ve boss
+      const boss = rand() < 0.2 ? (rand() < 0.5 ? 0 : 1) : -1, rows = 1 + ((rand() * 12) | 0), dens = 0.2 + rand() * 0.8;
+      const m = [];
+      for (let r = 0; r < rows; r++) {
+        let line = "";
+        for (let c = 0; c < 10; c++) line += rand() < dens ? pickR(chars) : ".";
+        m.push(line + (rand() < 0.2 ? ">" : ""));
+      }
+      edLoad({ n: "fuzz" + run_, b: boss, m });
+      if (!edPlayable()) editor.rows[ED_ROWS - 1] = "1111111111";
+      if (!playEditorLevel()) { fails.push(run_ + ": başlamadı"); continue; }
+      settings.hazards = "normal";
+      if (rand() < 0.5) applyPact(pickR(pacts));
+      launchBall(); state.curseAt = Infinity;
+      for (let k = 0; k < 4; k++) {
+        if (rand() < 0.6) applyPower(pickR(powers));
+        const cid = pickR(curses);
+        if (rand() < 0.5 && (!CURSES[cid].ok || CURSES[cid].ok())) startCurse(cid);
+        const bad = __sim(240, true);
+        steps += 240;
+        if (bad.length) { fails.push(run_ + ": top " + bad[0] + " " + JSON.stringify(m)); break; }
+        // Değişmezler: tuğla canı sınırda, ölü tuğla çarpışmaz, skor sayı, can 0..9
+        const badBrick = bricks.find(b => !b.unbreakable && !(b.hp >= (b.dead ? 0 : 1) && b.hp <= Math.max(b.maxHp, 4)));
+        if (badBrick) { fails.push(run_ + ": tuğla canı " + badBrick.hp); break; }
+        if (!Number.isFinite(state.score) || state.lives < 0 || state.lives > MAX_LIVES) { fails.push(run_ + ": skor/can " + state.score + "/" + state.lives); break; }
+        if (state.mode === "gameover") break;
+      }
+      if (state.mode === "gameover" || state.mode === "levelclear") cleared++;
+      toMenu(); closePanels();
+    }
+    return { fails, cleared, steps };
+  })()`);
+  expect(r.fails.length === 0, "fuzz (tohum 20261105) hata: " + r.fails.slice(0, 3).join(" | "));
+  expect(r.steps >= 40 * 240, "fuzz adımları koştu: " + r.steps);
+});
+
+test("Arayüz uçtan uca: editör düğmeleri, şarkı dosyası analizi, hayalet ve şarkı kodu düğmeleri", async ({ p, expect, sleep }) => {
+  // Editör: tüm düğmeler gerçek tıklamayla
+  const e = await p.eval(`(() => {
+    localStorage.removeItem("bb_mylevels");
+    const click = id => $(id).click();
+    openEditor();
+    $("ed-palette").children[5].click();                        // E fırçası
+    const brushE = editor.brush === "E";
+    click("ed-mirror"); edPushUndo(); edSet(2, 0, editor.brush); const mir = editor.rows[2] === "E........E"; click("ed-mirror");
+    click("ed-random"); const rnd = editor.rows.some(l => /[^.]/.test(l));
+    click("ed-undo"); const und = editor.rows[2] === "E........E";
+    edSlides[2].click(); const slide = editor.slide[2]; edSlides[2].click();
+    $("ed-boss").children[2].click(); const boss = editor.boss === 1 && editor.rows[2] === ".........."; $("ed-boss").children[0].click();
+    click("ed-clear"); const cleared = editor.rows.every(l => l === "..........") && $("ed-play").disabled;
+    click("ed-save"); const saveEmpty = edMsg.textContent;
+    $("ed-templates").children[2].click(); const tpl = editor.rows[0] === "....EE....";
+    edName.value = "Piramit"; edName.dispatchEvent(new Event("input"));
+    click("ed-save"); const saved = edSaved().length === 1 && $("ed-saved").textContent.includes("Piramit");
+    click("ed-export"); const code = edCode.value;
+    click("ed-link"); const link = edCode.value;
+    click("ed-clear"); edCode.value = code; click("ed-import"); const imp = editor.rows[0] === "....EE....";
+    edCode.value = "çöp"; click("ed-import"); const bad = edMsg.textContent.startsWith("⚠️");
+    $("ed-saved").children[0].click(); const opened = edMsg.textContent.includes("Piramit");
+    click("ed-delete"); const del = edSaved().length === 0;
+    click("ed-delete"); const delNone = edMsg.textContent.startsWith("⚠️");
+    click("ed-play"); const playing = run.custom && state.mode === "serve";
+    toMenu(); closePanels();
+    return { brushE, mir, rnd, und, slide, boss, cleared, saveEmpty, tpl, saved, code: code.slice(0, 5), link: link.includes("#bbl="), imp, bad, opened, del, delNone, playing, link_: link };
+  })()`);
+  expect(e.brushE && e.mir && e.rnd && e.und && e.slide && e.boss && e.cleared, "editör araçları: " + JSON.stringify(e));
+  expect(e.saveEmpty.startsWith("⚠️") && e.tpl && e.saved && e.code === "BBL1:" && e.link && e.imp && e.bad, "kaydet/şablon/kod/bağlantı/yükle: " + JSON.stringify(e));
+  expect(e.opened && e.del && e.delNone && e.playing, "aç/sil/test et: " + JSON.stringify(e));
+  // Bağlantıyla açılış: #bbl= ile yüklenen sayfa bölümü editöre koyar ve adresi temizler
+  await p.eval(`(() => { location.hash = ${JSON.stringify("")} + ${JSON.stringify(e.link_.slice(e.link_.indexOf("#")))}; return 1; })()`);
+  await p.reload();
+  const h = await p.eval(`({ open: !edPanel.hidden, row: editor.rows[0], hash: location.hash, msg: edMsg.textContent })`);
+  expect(h.open && h.row === "....EE...." && h.hash === "" && h.msg.startsWith("🔗"), "bağlantıyla açılış: " + JSON.stringify(h));
+
+  // Şarkı dosyası: sentetik 120 BPM WAV → çözme, analiz, 3 bölüm; kod ve yükle düğmeleri
+  const s = await p.eval(`(async () => {
+    closePanels();
+    const sr = 22050, secs = 12, n = sr * secs, pcm = new Int16Array(n);
+    for (let i = 0; i < n; i++) { const t = i / sr, tb = t % 0.5; pcm[i] = Math.round(12000 * Math.sin(2 * Math.PI * (50 + 70 * Math.exp(-tb * 30)) * tb) * Math.exp(-tb * 9) + 2000 * Math.sin(2 * Math.PI * 440 * t) * (t > 8 ? 1 : 0.2)); }
+    const buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf), str = (o, x) => [...x].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+    str(0, "RIFF"); v.setUint32(4, 36 + n * 2, true); str(8, "WAVEfmt "); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); str(36, "data"); v.setUint32(40, n * 2, true);
+    new Int16Array(buf, 44).set(pcm);
+    const ok = await loadSongFile(new File([buf], "Deneme Ritim.wav", { type: "audio/wav" }));
+    const info = { ok, name: songLevel.name, bpm: songLevel.bpm, levels: songLevel.levels.length, card: songCard.textContent, msg: songMsg.textContent };
+    const bad = await loadSongFile(new File([new Uint8Array(64)], "bozuk.mp3")), badMsg = songMsg.textContent;
+    $("song-code").click(); const code = songCodeBox.value;
+    songLevel.levels = []; $("song-code").click(); const noSong = songMsg.textContent;
+    songCodeBox.value = code; $("song-import").click(); const imported = songLevel.levels.length === 3 && songMsg.textContent.startsWith("📥");
+    songCodeBox.value = "BBS1:xyz"; $("song-import").click(); const rejected = songMsg.textContent.startsWith("⚠️");
+    $("song-start").click(); const started = run.song && songLevel.active;
+    toMenu();
+    return { info, bad, badMsg, code: code.slice(0, 5), noSong, imported, rejected, started };
+  })()`);
+  expect(s.info.ok && s.info.name === "Deneme Ritim" && s.info.levels === 3 && s.info.bpm >= 100 && s.info.bpm <= 140, "WAV analizi: " + JSON.stringify(s.info));
+  expect(!s.bad && s.badMsg.startsWith("⚠️"), "bozuk dosya reddi: " + s.badMsg);
+  expect(s.code === "BBS1:" && s.noSong.startsWith("⚠️") && s.imported && s.rejected && s.started, "şarkı düğmeleri: " + JSON.stringify(s));
+
+  // Hayalet düğmeleri: kod al, yükle, bozuk kod, sil
+  const g = await p.eval(`(() => {
+    const rec = Array.from({ length: 40 }, (_, i) => [i * 0.4, 300 + i, 500, i * 10, 1]);
+    ghost.best = { rec, score: 999, level: 2, date: Date.now() };
+    $("ghost-export").click(); const code = $("ghost-code").value;
+    $("ghost-clear").click(); const cleared = !ghost.best.rec.length;
+    $("ghost-code").value = code; $("ghost-import").click(); const back = ghost.best.score === 999 && ghost.best.rec.length >= 2;
+    $("ghost-code").value = "BBG1:@@"; $("ghost-import").click(); const bad = $("ghost-msg").textContent;
+    return { code: code.slice(0, 5), cleared, back, bad };
+  })()`);
+  expect(g.code === "BBG1:" && g.cleared && g.back && g.bad.startsWith("⚠️"), "hayalet düğmeleri: " + JSON.stringify(g));
+});
+
 test("Koşu özeti: sayaçlar ve pratikte kayıt dışı", async ({ p, expect }) => {
   const r = await p.eval(`(() => {
     __start(1); __sim(900, true);

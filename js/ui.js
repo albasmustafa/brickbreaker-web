@@ -8,19 +8,37 @@ const toolBtn = (label, title, onclick) => toolbar.appendChild(el("button", { te
 // --- Paneller: ekranın ortasında açılır, aynı anda tek panel; Esc / dış tık / ✕ kapatır ---
 const panels = [];
 function setupPanel(panel, title) {
+  panel.setAttribute("aria-modal", "true");
   panel.prepend(el("div", { className: "panel-head" }, el("strong", { textContent: title }),
     el("button", { className: "panel-x", textContent: "✕", title: tr("Kapat (Esc)"), onclick: closePanels })));
   panels.push(panel);
 }
-function closePanels() { for (const p of panels) p.hidden = true; backdrop.hidden = true; }
+let panelOpener = null;          // paneli açan düğme: kapanınca odak oraya döner (klavye kullanıcısı)
+function closePanels() {
+  const wasOpen = panels.some(p => !p.hidden);
+  for (const p of panels) p.hidden = true;
+  backdrop.hidden = true;
+  if (wasOpen && panelOpener && document.body.contains(panelOpener) && document.activeElement && document.activeElement !== document.body) panelOpener.focus();
+  else if (wasOpen && document.activeElement && document.activeElement.closest && document.activeElement.closest(".panel")) document.activeElement.blur();
+  panelOpener = null;
+}
+const focusables = root => [...root.querySelectorAll("button:not([disabled]), input:not([type=hidden]), textarea, select, [tabindex]:not([tabindex='-1'])")]
+  .filter(e => !e.closest("[hidden]"));
 const panelOpen = () => panels.some(p => !p.hidden);
 function togglePanel(panel, onOpen) {
   const open = panel.hidden;
   closePanels();
   if (!open) return;
   pauseGame();                  // panel açıkken top öksüz kalmasın
+  const opener = document.activeElement;
   panel.hidden = backdrop.hidden = false;
   if (onOpen) onOpen();
+  // Klavyeyle açıldıysa odak panelin ilk denetimine geçer (✕ düğmesi değil, içerik)
+  if (opener && opener !== document.body && opener.matches && opener.matches("button")) {
+    panelOpener = opener;
+    const f = focusables(panel).filter(e => !e.classList.contains("panel-x"));
+    (f[0] || panel.querySelector(".panel-x")).focus();
+  }
 }
 backdrop.addEventListener("click", closePanels);
 
@@ -84,6 +102,7 @@ buildRows(settingsPanel, SETTING_ROWS, settings, row => {
   saveSettings();
   if (row.key === "fxVol") applyFxVolume();
   if (row.key === "bgFx") initStars();
+  if (row.key === "gfx" && typeof applyGfx === "function") applyGfx();
   if (row.preview) playPaddleSound();   // raket sesi önizlemesi
 });
 settingsPanel.append(el("div", { className: "setrow" }, el("button", { id: "resetlooks", textContent: tr("Görünümü varsayılana döndür"), onclick: () => {
@@ -181,6 +200,23 @@ const keyName = e => (e.key.length === 1 ? e.key.toLowerCase() : e.key);
 document.addEventListener("keydown", e => {
   if (e.target.matches && e.target.matches("input[type=text], textarea")) return;   // yazı yazarken oyun tuşları çalışmasın
   const k = keyName(e);
+  // Odaktaki düğmede boşluk/Enter düğmenin kendisidir (klavyeyle menü gezme); oyun eylemi tetiklenmez
+  if (e.target.matches && e.target.matches("button, select, a[href], input[type=range]") && (k === " " || k === "Enter")) return;
+  // Açık panelde Tab panelin içinde döner (odak arkadaki oyuna kaçmaz)
+  if (k === "Tab" && panelOpen()) {
+    const open = panels.find(p => !p.hidden), f = focusables(open);
+    if (f.length) {
+      const i = f.indexOf(document.activeElement);
+      if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (!e.shiftKey && (i === -1 || i === f.length - 1)) { e.preventDefault(); f[0].focus(); }
+    }
+    return;
+  }
+  // Lanet Paktı klavyeyle: 1/2/3 seç, 0 pakt yok
+  if (!pactBar.hidden && !panelOpen() && /^[0-3]$/.test(k)) {
+    if (k === "0") skipPact(); else { const c = pactCards.children[+k - 1]; if (c) c.click(); }
+    return;
+  }
   if (["ArrowLeft", "ArrowRight", " "].includes(e.key)) e.preventDefault();
   keys[k] = true;
   if (e.repeat) return;
@@ -195,9 +231,31 @@ document.addEventListener("keydown", e => {
 document.addEventListener("keyup", e => { keys[keyName(e)] = false; });
 canvas.addEventListener("mousemove", e => pointerAim(e.clientX));
 canvas.addEventListener("click", action);
-// Mobil: parmak raketi götürür, dokunuş aynı zamanda eylemdir
-canvas.addEventListener("touchstart", e => { e.preventDefault(); pointerAim(e.touches[0].clientX); action(); }, { passive: false });
-canvas.addEventListener("touchmove", e => { e.preventDefault(); pointerAim(e.touches[0].clientX); }, { passive: false });
+// Mobil: parmak raketi götürür (mutlak) ya da kaydırdığı kadar iter (göreli); dokunuş aynı zamanda eylemdir
+let touchX = null, lastInputTouch = false;
+function touchNudge(clientX) {
+  const rect = canvas.getBoundingClientRect();
+  let dx = (clientX - touchX) * (W / rect.width) * 1.5;   // küçük ekranda kısa kaydırma yetsin
+  touchX = clientX;
+  if (fxOn("reverse")) dx = -dx;
+  const base = curseOn("buz") && paddle.aimX != null ? paddle.aimX : paddle.x;
+  const px = clamp(base + dx, state.inset, W - state.inset - paddle.w);
+  if (curseOn("buz")) paddle.aimX = px; else paddle.x = px;
+}
+canvas.addEventListener("touchstart", e => {
+  e.preventDefault();
+  lastInputTouch = true;
+  touchX = e.touches[0].clientX;
+  if (settings.touch !== "goreli") pointerAim(touchX);
+  action();
+}, { passive: false });
+canvas.addEventListener("touchmove", e => {
+  e.preventDefault();
+  if (settings.touch === "goreli" && touchX != null) touchNudge(e.touches[0].clientX); else pointerAim(e.touches[0].clientX);
+}, { passive: false });
+canvas.addEventListener("touchend", e => { if (!e.touches.length) touchX = null; });
+canvas.addEventListener("mousedown", () => { lastInputTouch = false; });
+document.addEventListener("keydown", () => { lastInputTouch = false; });
 // Sekme değişince / pencere odağı gidince otomatik duraklat; basılı kalan tuşları unut
 function autoPause() {
   pauseGame();

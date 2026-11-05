@@ -278,7 +278,7 @@ function drawMusicMid() {
 }
 // Ekran düzleminde: vuruş flaşı (yalnızca "Tam" ayarında, düşük yoğunlukta)
 function drawMusicFlash() {
-  if (music.flash > 0.003) { ctx.fillStyle = `rgba(255,255,255,${music.flash})`; ctx.fillRect(0, 0, W, H); }
+  if (music.flash > 0.003 && !calmFx()) { ctx.fillStyle = `rgba(255,255,255,${music.flash})`; ctx.fillRect(0, 0, W, H); }
 }
 
 // --- Medya çubuğu ---

@@ -64,7 +64,7 @@ let theme = (() => {
   return validTheme(t) ? t : { ...THEMES[(parseInt(store.get("bb_theme", 0)) || 0) % THEMES.length] }; // eski sürüm: hazır tema sırası
 })();
 const T = () => theme;
-const hpColor = hp => (hp === 3 ? T().b3 : hp === 2 ? T().b2 : T().b1);
+const hpColor = hp => (cvdOn() ? CVD_HP[clamp(hp, 1, 3)] : hp === 3 ? T().b3 : hp === 2 ? T().b2 : T().b1);
 
 // Tema hem tuvali hem sayfa arayüzünü (CSS değişkenleri) boyar
 const themeColorMeta = document.querySelector('meta[name="theme-color"]');   // mobil tarayıcı çubuğu da temayla uyumlu olsun
