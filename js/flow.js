@@ -219,6 +219,7 @@ function loseLife() {
   run.lifeLost++;
   sfx("lose");
   addShake(6);
+  state.hurt = 1;                          // cila: kenarlarda sönen kırmızı vinyet
   state.combo = 0;
   clearEffects();
   state.speed = levelSpeed(state.level);   // hızlanmayı sıfırla
@@ -227,6 +228,7 @@ function loseLife() {
 function gameOver() {
   hidePactOffer();
   hideLastChance();
+  hudScore = state.score * 0.5;            // cila: karttaki skor sayacı görünür biçimde yukarı saysın
   failDirectorChallenge();
   finishGhostRun();
   const wasWeekly = weekly.active;
@@ -235,6 +237,7 @@ function gameOver() {
   flushCodex();
   state.mode = "gameover";
   state.newRecord = !run.practice && !wasWeekly && !run.song && state.score > state.startHigh && state.score > 0;
+  if (state.newRecord) spawnConfetti(W / 2, H / 2 - 60, 60);   // cila: yeni rekor konfetisi
   sfx("gameover");
   if (battle.active) battleEliminated();   // kapışmada elendin
   else if (run.practice || wasWeekly || run.song) state.lbRank = 0;
@@ -244,6 +247,7 @@ function gameOver() {
 function levelCleared() {
   if (state.mode !== "playing") return;    // aynı karede iki kez tetiklenmesin
   addScore(500);
+  spawnConfetti(W / 2, H / 2 - 40, 46);    // cila: konfeti yağmuru
   directorLevelEnd();
   state.mode = "levelclear";
   state.clearAt = state.time + 1.8;

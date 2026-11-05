@@ -136,6 +136,7 @@ GitHub Actions (`.github/workflows/ci.yml`) her push ve pull request'te Node 22 
 - **Kötü kapsüller** (kırmızı, kesikli çerçeve): **TERS** 6 sn kontroller ters · **MİNİ** 8 sn küçük raket · **HIZ** 6 sn top ×1.3 · **LANET** hemen bir lanet çağırır. Yakalamak cesaret ister: +250 puan.
 - **Ağır çekim:** son tuğla kırılınca ve boss ölünce zaman yavaşlar, ekran hafif yakınlaşır; büyük patlamalarda an donması.
 - **Efektler:** her isabette tuğla bir an parlar ve rengi yeni durumuna yumuşakça geçer; kırılmada parçacık + dönen parçalar; kenar vuruşu/patlama/kayıp ekranı sarsar; top izi. Müzik çalarken vuruşa denk gelen kırışlar **RİTİM! +15** bonusu verir.
+- **Cila:** bölüm açılışında tuğlalar çapraz dalga ile belirir; raket hızına göre eğilir, top değince squash yapar; fırlatma bekleyen topa genişleyen hedef halkası; duyuru yazılarının arkasında zemin hapı; bölüm sonunda ve yeni rekorde konfeti; can kaybında kenarlarda sönen kırmızı vinyet; oyun sonu kartında skor yukarı sayar; menü başlığı nabız gibi parlar ve gösterge yeni nesil tuğlaları tanıtır; pakt/koleksiyon/rakip kartları hover'da kalkar.
 - **Rekor:** `localStorage` (`bb_highscore`), oyun sonunda "YENİ REKOR" işareti.
 
 ## Tünel Fırtınası (12. bölüm)

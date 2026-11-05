@@ -152,7 +152,7 @@ function paintBrickIcon(g, kind, col) {
 function drawBricks() {
   const rounded = roundedStyle();
   for (const b of bricks) {
-    const a = clamp(state.buildFade - b.row, 0, 1);    // bölüm başında satır satır "pop" ile belirme
+    const a = clamp(state.buildFade - b.row - b.col * 0.18, 0, 1);   // bölüm başında çapraz dalga ile "pop"layarak belirme
     if (b.dead || a <= 0) continue;
     let jx = 0, jy = 0;                                 // kara deliğe yakın tuğlalar titrer
     for (const h of holes) if (Math.hypot(b.x + BRICK.w / 2 - h.x, b.y + BRICK.h / 2 - h.y) < 95) { jx = rnd(-1.5, 1.5); jy = rnd(-1.5, 1.5); }
@@ -266,7 +266,7 @@ let glints = [], glintCd = 0;
 function updateGlints(dt) {
   if ((glintCd -= dt) <= 0) {
     glintCd = rnd(0.2, 0.55);
-    const alive = bricks.filter(b => !b.dead && state.buildFade - b.row >= 1);
+    const alive = bricks.filter(b => !b.dead && state.buildFade - b.row - b.col * 0.18 >= 1);
     if (alive.length) glints.push({ b: pick(alive), ox: rnd(8, BRICK.w - 8), oy: rnd(3, 8), life: 0.55 });
   }
   for (const g of glints) g.life -= dt;
@@ -397,6 +397,16 @@ function drawHoles() {
 }
 function drawPaddle() {
   const { x, y, w, h } = paddle;
+  // Cila: raket hızına göre hafif eğilir, top değince squash yapar (canlı hissi)
+  const tilt = clamp(paddle.vx / 2600, -1, 1) * 0.07;
+  const squash = paddle.flash > 0 ? paddle.flash : 0;
+  ctx.save();
+  if (tilt || squash) {
+    ctx.translate(x + w / 2, y + h / 2);
+    ctx.rotate(tilt);
+    ctx.scale(1 + squash * 0.05, 1 - squash * 0.22);
+    ctx.translate(-(x + w / 2), -(y + h / 2));
+  }
   // GÖRÜNMEZ RAKET: yalnızca vuruşta ve ara ara bir anlık belirir
   if (curseOn("gorunmez")) ctx.globalAlpha = Math.max(paddle.flash * 0.9, (state.time % 1.6) < 0.1 ? 0.45 : 0.03);
   const blink = fxOn("stun") && Math.floor(state.time * 12) % 2, pcol = blink ? "#ff4d6d" : T().pad, ps = settings.paddleStyle;
@@ -426,6 +436,7 @@ function drawPaddle() {
     ctx.fillRect(gx + gw, y - 3, 2, h + 6);
   }
   ctx.globalAlpha = 1;
+  ctx.restore();                // raket eğim/squash dönüşümü sonu
   if (state.shield > 0) {       // kalkan çizgisi
     ctx.globalAlpha = 0.6 + 0.3 * Math.sin(state.time * 8);
     ctx.fillStyle = "#64dfdf";
@@ -436,6 +447,17 @@ function drawPaddle() {
 function drawBalls() {
   const fire = isFire(), ballCol = fire ? "#ff6b35" : T().ball, rainbow = settings.trail === "gokkusagi";
   const crowd = balls.length > 40;                       // top fırtınası: iz, hale ve gölge çizilmez (akıcı kalsın)
+  if (!crowd && balls.some(b => b.stuck) && (state.mode === "serve" || state.mode === "playing")) {
+    const sb = balls.find(b => b.stuck);                 // cila: fırlatma bekleyen topa genişleyip sönen hedef halkası
+    const ph = (state.time * 1.4) % 1;
+    ctx.globalAlpha = (1 - ph) * 0.55;
+    ctx.strokeStyle = T().accent;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(sb.x, sb.y, sb.r + 3 + ph * 16, 0, TAU);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
   for (const b of balls) {
     // HAYALET TOP: rakete yaklaşana kadar yalnızca ara ara görünür
     const ghostA = curseOn("hayalet") && b.y < paddle.y - 80 ? ((state.time * 2.2 + b.x * 0.004) % 1 < 0.1 ? 0.6 : 0.04) : 1;
@@ -652,14 +674,14 @@ function drawCard(cx, cy, w, h) {
   ctx.lineWidth = 2;
   ctx.stroke();
 }
-// Degrade dolgulu, hafif parlayan başlık
-function titleText(s, x, y, size, c1, c2, maxW = W - 40) {
+// Degrade dolgulu, hafif parlayan başlık (glow: isteğe göre nabızlı parlama)
+function titleText(s, x, y, size, c1, c2, maxW = W - 40, glow = 18) {
   ctx.font = fitFont(s, "bold " + size + "px monospace", maxW);
   ctx.textAlign = "center";
   const w = ctx.measureText(s).width;
   ctx.save();
   ctx.shadowColor = hexToRgba(c1, 0.55);
-  ctx.shadowBlur = 18;
+  ctx.shadowBlur = glow;
   ctx.fillStyle = lgrad(x - w / 2, 0, x + w / 2, 0, [c1, c2]);
   ctx.fillText(s, x, y);
   ctx.restore();
@@ -680,6 +702,10 @@ const LEGEND = [
   [{ hp: 1 }, N_("1 vuruş")], [{ hp: 2 }, N_("2 vuruş")], [{ hp: 3 }, N_("3 vuruş")], [{ unbreakable: true }, N_("kırılmaz")], [{ explosive: true }, N_("patlar")],
   [{ electric: true }, N_("yıldırım")], [{ gold: true }, N_("altın")], [{ splitter: true }, N_("+top")], ["bumper", N_("tampon")], ["portal", N_("portal")],
 ];
+// Menü göstergesinin ikinci satırı: yeni nesil tuğlalar (adlar mevcut çeviri anahtarlarını yeniden kullanır)
+const NEW_TYPES = [
+  ["H", N_("Yenilenen")], ["A", N_("Kalkanlı")], ["T", N_("İkiz")], ["I", N_("Buz")], ["V", N_("Virüs")], ["S", N_("Şifacı")],
+];
 function drawScreens() {
   const pulse = 0.65 + 0.35 * Math.sin(state.time * 4), m = state.mode;
   if (m !== modeSeen) { modeSeen = m; modeAt = performance.now(); }
@@ -690,9 +716,9 @@ function drawScreens() {
     cardIn();
     overlay(0.2);
     drawCard(W / 2, H / 2 + 5, 640, 420);
-    const fy = Math.sin(state.time * 2) * 3;
-    titleText("BRICK BREAKER", W / 2, H / 2 - 130 + fy, 46, T().ex, T().accent);
-    titleText("AI", W / 2, H / 2 - 84 + fy, 40, T().b1, T().b3);
+    const fy = Math.sin(state.time * 2) * 3, glow = 14 + 10 * (0.5 + 0.5 * Math.sin(state.time * 3));   // cila: nabız atan başlık parlaması
+    titleText("BRICK BREAKER", W / 2, H / 2 - 130 + fy, 46, T().ex, T().accent, W - 40, glow);
+    titleText("AI", W / 2, H / 2 - 84 + fy, 40, T().b1, T().b3, W - 40, glow);
     text(tr("★ KAOS SÜRÜMÜ ★"), W / 2, H / 2 - 52, "bold 14px monospace", "#ff5d8f", "center", 600);
     ctx.globalAlpha = pulse;
     text("▶  " + tr("Yeni oyun için tıkla veya boşluk"), W / 2, H / 2 - 12, "bold 20px monospace", T().text, "center", 600);
@@ -702,12 +728,20 @@ function drawScreens() {
     const tier = tierOf(career.lp);
     text("🏆 " + tr("REKOR {n}", { n: state.high }) + "    " + tier.icon + " " + tr(tier.name) + " · " + career.lp + " LP", W / 2, H / 2 + 66, "bold 14px monospace", T().b2, "center", 610);
     LEGEND.forEach(([what, label], i) => {
-      const x = W / 2 - 272 + (i % 5) * 110, y = H / 2 + 92 + Math.floor(i / 5) * 28;
+      const x = W / 2 - 272 + (i % 5) * 110, y = H / 2 + 84 + Math.floor(i / 5) * 26;
       if (typeof what === "string") fillRR(x, y + 1, 44, 12, 6, ZONE_STYLE[what]);
       else { const b = { row: 0, col: 0, hp: 1, ...what }; blitBrick(brickSprite(brickColor(b), brickKind(b)), x, y, 44 / BRICK.w); }
       text(tr(label), x + 50, y + 12, "12px monospace", T().text, "left", 58);
     });
-    if (settings.hazards !== "kapali") text(tr("⚠ Lanetler seni durdurmaya çalışacak — yoğunluk: Ayarlar → Lanetler"), W / 2, H / 2 + 175, "13px monospace", CURSE_COLOR, "center", 610);
+    NEW_TYPES.forEach(([ch, label], i) => {   // cila: yeni nesil türler menüde tanıtılır
+      const x = W / 2 - 258 + i * 103, y = H / 2 + 138;
+      const b = { row: 0, col: 0, hp: 1, ...BRICK_TYPES[ch] };
+      if (ch === "A") b.armorHp = 4;
+      if (ch === "T") b.wasTwin = true;
+      blitBrick(brickSprite(brickColor(b), brickKind(b)), x, y, 40 / BRICK.w);
+      text(tr(label), x + 46, y + 12, "11px monospace", T().text, "left", 54);
+    });
+    if (settings.hazards !== "kapali") text(tr("⚠ Lanetler seni durdurmaya çalışacak — yoğunluk: Ayarlar → Lanetler"), W / 2, H / 2 + 172, "13px monospace", CURSE_COLOR, "center", 610);
     ctx.restore();
   } else if (m === "serve" && battle.active && battle.countdown > 0) {
     drawCountdown();
@@ -771,11 +805,19 @@ function drawCallout() {
   ctx.rotate(Math.sin(age * 20) * 0.03);
   ctx.font = fitFont(c.text, "bold 44px monospace", (W - 60) / 1.2);   // en büyük ölçekte bile ekrana sığar
   ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  const tw = ctx.measureText(c.text).width;                            // cila: arkasında yarı saydam zemin hapı
+  fillRR(-tw / 2 - 16, -34, tw + 32, 68, 16, "rgba(0,0,0,0.38)");
+  ctx.strokeStyle = hexToRgba(c.color, 0.5);
+  ctx.lineWidth = 1.5;
+  rrPath(-tw / 2 - 16, -34, tw + 32, 68, 16);
+  ctx.stroke();
   ctx.lineWidth = 6;
   ctx.strokeStyle = "rgba(0,0,0,0.6)";
   ctx.strokeText(c.text, 0, 0);
   ctx.fillStyle = c.color;
   ctx.fillText(c.text, 0, 0);
+  ctx.textBaseline = "alphabetic";
   ctx.restore();
 }
 
@@ -830,6 +872,13 @@ function draw() {
   const camM = ctx.getTransform();
   ctx.restore();                // kamera alanı sonu
   drawDarkness(camM); drawMusicFlash(); drawBlackout();
+  if (state.hurt > 0) {           // cila: can kaybında kenarlarda sönen kırmızı vinyet
+    const g = ctx.createRadialGradient(W / 2, H / 2, H * 0.38, W / 2, H / 2, H * 0.82);
+    g.addColorStop(0, "rgba(255,60,80,0)");
+    g.addColorStop(1, "rgba(255,60,80," + (0.5 * state.hurt).toFixed(3) + ")");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+  }
   if (isFever()) { ctx.strokeStyle = `hsl(${(state.time * 300) % 360},90%,60%)`; ctx.lineWidth = 6; ctx.strokeRect(3, 3, W - 6, H - 6); }
   if (state.mode !== "menu") drawHUD();
   drawCallout();

@@ -11,6 +11,7 @@ const state = {
   slowUntil: 0, fireUntil: 0, laserUntil: 0, magnetUntil: 0, bigUntil: 0, reverseUntil: 0, miniUntil: 0, hasteUntil: 0,
   stunUntil: 0, feverUntil: 0, shield: 0, laserCd: 0,
   slowmo: 0, hitstop: 0,        // gerçek saniye: ağır çekim / an donması
+  hurt: 0,                     // can kaybı vinyeti (cila)
   callout: null,                // ekran ortasında büyük yazı { text, color, life }
   boss: null,
   // Lanetler
