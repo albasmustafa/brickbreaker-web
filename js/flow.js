@@ -69,7 +69,9 @@ function seedVirusBricks(n) {
 }
 
 function buildLevel(n) {
-  const song = typeof songLevel !== "undefined" && songLevel.active && songLevel.levels[n - 1];
+  // Şarkı bölümü ya da editörden test koşusu: hazır harita, döngü/tohum/piksel duvar yok
+  const song = (typeof songLevel !== "undefined" && songLevel.active && songLevel.levels[n - 1]) ||
+               (typeof editorPlayDef === "function" && editorPlayDef(n));
   const def = song || LEVELS[(n - 1) % LEVELS.length], cycle = song ? 0 : Math.floor((n - 1) / LEVELS.length);
   // Günlük/haftalık koşuda bölümler tohumdan üretilir: aynı tohum = aynı simetrik duvar
   const proc = !song && (run.daily || (typeof weekly !== "undefined" && weekly.active)) && Array.isArray(def);
@@ -144,16 +146,17 @@ function addScore(n) {
 function startGame() {
   if (typeof weekly !== "undefined" && !weekly.starting) stopWeekly();
   if (typeof songLevel !== "undefined" && !songLevel.starting) stopSongLevel();
+  if (typeof editor !== "undefined" && !editor.starting) stopEditorPlay();
   if (run.daily && typeof finishDaily === "function") finishDaily();
   resetRun();
   const diff = DIFFICULTY[settings.difficulty];
   Object.assign(state, { level: 1, score: 0, diffSpeed: diff.speedMul, lives: diff.lives, combo: 0, startHigh: state.high,
-                         newRecord: false, recordShown: false, time: 0, shake: 0, callout: null, cursesSurvived: 0, inset: 0 });
+                         newRecord: false, recordShown: false, time: 0, shake: 0, callout: null, cursesSurvived: 0, inset: 0, hurt: 0 });
   state.speed = levelSpeed(1);
   clearEffects();
   paddle.x = W / 2 - PADDLE_W / 2;
   paddle.w = paddle.targetW = PADDLE_W;
-  powerups = []; particles = []; fragments = []; floaters = [];
+  powerups = []; particles = []; fragments = []; floaters = []; confetti = [];
   buildLevel(1);
   resetDirectorRun();
   startDirectorChallenge(1);
@@ -162,6 +165,7 @@ function startGame() {
   callout(tr("BÖLÜM {n}", { n: 1 }), T().accent);
 }
 function toMenu() {
+  const backToEditor = run.custom;          // editör testinden dönünce editör yeniden açılır
   if (run.daily && typeof finishDaily === "function") finishDaily();
   run.daily = false;
   run.dailyFinished = false;
@@ -172,14 +176,17 @@ function toMenu() {
   stopGhost();
   stopWeekly();
   stopSongLevel();
+  if (typeof stopEditorPlay === "function") stopEditorPlay();
   flushCodex();
   state.mode = "menu";
   state.callout = null;
   state.inset = 0;
+  state.hurt = 0;
   clearEffects();
   buildLevel(1);
   powerups = []; particles = []; fragments = []; floaters = [];
   balls = [newBall(true)];
+  if (backToEditor && typeof openEditor === "function") openEditor();
 }
 function serveBall() {
   state.mode = "serve";
@@ -228,7 +235,6 @@ function loseLife() {
 function gameOver() {
   hidePactOffer();
   hideLastChance();
-  hudScore = state.score * 0.5;            // cila: karttaki skor sayacı görünür biçimde yukarı saysın
   failDirectorChallenge();
   finishGhostRun();
   const wasWeekly = weekly.active;
@@ -257,6 +263,7 @@ function levelCleared() {
   battleCharge(6);
 }
 function nextLevel() {
+  if (run.custom) { editorComplete(); return; }   // editör bölümü tek bölümdür
   if (typeof songLevel !== "undefined" && songLevel.active && state.level >= songLevel.levels.length) { songComplete(); return; }
   state.level++;
   trackBest("bestLevel", state.level);

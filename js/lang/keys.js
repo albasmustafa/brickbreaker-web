@@ -712,5 +712,39 @@ const I18N_KEYS = [
 "DONDU!", // 709
 "ENFEKTE!", // 710
 "ŞİFA", // 711
+"Silgi", // 712
+"Elektrik", // 713
+"Benim bölümüm", // 714
+"✏️ BÖLÜM TAMAM!", // 715
+"Bu sıra sağa sola kayar", // 716
+"{n} tuğla · {s} özel", // 717
+"en az bir kırılabilir tuğla koy", // 718
+"📂 {name} açıldı.", // 719
+"Henüz kayıtlı bölüm yok.", // 720
+"✏️ Bölüm Editörü", // 721
+"{n}. bölümü şablon olarak aç", // 722
+"⚠️ En az bir kırılabilir tuğla koy.", // 723
+"💾 {name} kaydedildi.", // 724
+"⚠️ Önce bölüme bir ad ver.", // 725
+"⚠️ En çok {n} bölüm kaydedilebilir; önce birini sil.", // 726
+"🗑 {name} silindi.", // 727
+"⚠️ Bu adla kayıtlı bölüm yok.", // 728
+"🔗 Bağlantı panoya kopyalandı.", // 729
+"📥 Bölüm yüklendi — test edebilirsin.", // 730
+"✏️ Editör", // 731
+"Kendi bölümünü çiz, test et ve paylaş", // 732
+"🔗 Paylaşılan bölüm yüklendi — ▶ Test et ile oyna.", // 733
+"Bölüm adı", // 734
+"🪞 Ayna", // 735
+"↶ Geri al", // 736
+"🧹 Temizle", // 737
+"Boss", // 738
+"Şablon", // 739
+"▶ Test et", // 740
+"Kayıtlı bölümlerim", // 741
+"🔗 Bağlantı", // 742
+"Paletten tuğla seç, ızgaraya tıkla ya da sürükle; sağ tık siler. Sıra sonundaki ↔ o sırayı kaydırır, Ayna açıkken çizdiğin sağ yarıya yansır. Boss seçilirse ilk 5 sıra boss'a ayrılır. Test koşuları rekor ve kariyere sayılmaz. Bağlantıyla açılan bölüm doğrudan editöre yüklenir.", // 743
+"Bölüm editörü", // 744
+"BBL1:... bölüm kodunu ya da bağlantısını buraya yapıştır", // 745
 ];
 const I18N_DATA = {};

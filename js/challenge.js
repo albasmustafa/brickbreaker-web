@@ -86,6 +86,7 @@ function startPractice(level, anyLevel) {
   if (battle.active) closeBattle();
   startGame();
   run.practice = true;
+  hidePactOffer();                  // startGame paktı pratik bayrağından önce açmıştı (pratikte pakt yok)
   stopGhost();
   if (level > 1) { state.level = level - 1; nextLevel(); }
   return true;

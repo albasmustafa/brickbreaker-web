@@ -25,9 +25,9 @@ function addFloater(x, y, text, color) {
 // Konfeti: tema renkleriyle yukarı fışkıran kutlama yağmuru (bölüm sonu, yeni rekor)
 function spawnConfetti(x, y, count) {
   const cols = [T().b1, T().b2, T().b3, T().accent, "#ffd166", "#ffffff"];
-  for (let i = scaled(count); i > 0 && particles.length <= particleCap(); i--) {
+  for (let i = scaled(count); i > 0 && confetti.length <= 160; i--) {
     const a = rnd(-Math.PI, 0), s = rnd(120, 420);
-    particles.push({ x: x + rnd(-60, 60), y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 120, size: rnd(2.5, 5.5),
+    confetti.push({ x: x + rnd(-60, 60), y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 120, size: rnd(2.5, 5.5),
                      life: rnd(0.7, 1.3), color: pick(cols) });
   }
 }
@@ -66,12 +66,14 @@ function age(list, dt, gravity, keep) {
 }
 function updateEffects(dt) {
   particles = age(particles, dt, 900, p => p.life > 0 && p.y < H + 20);
+  confetti = age(confetti, dt, 900, p => p.life > 0 && p.y < H + 20);
   fragments = age(fragments, dt, 1100, f => f.life > 0 && f.y < H + 40);
   for (const b of bricks) { b.flash = Math.max(0, b.flash - dt * 7); b.wob = Math.max(0, (b.wob || 0) - dt * 4); b.colFade = Math.max(0, (b.colFade || 0) - dt * 5); }
   updateGlints(dt);
   paddle.flash = Math.max(0, paddle.flash - dt * 6);
-  state.hurt = Math.max(0, (state.hurt || 0) - dt * 1.4);       // can kaybı kırmızı vinyeti söner
-  state.buildFade = Math.min(COLS + 2, state.buildFade + dt * 4);   // çapraz belirme dalgası her ekranda ilerler
+  state.hurt = Math.max(0, state.hurt - dt * 1.4);               // can kaybı kırmızı vinyeti söner
+  // Çapraz belirme dalgası her ekranda ilerler; top fırlatılınca hızlanır (görünmeyen tuğlaya çarpılmasın)
+  state.buildFade = Math.min(REVEAL_MAX, state.buildFade + dt * (state.mode === "playing" ? 16 : 4));
 
   // Arka plan parçacıkları süzülür (kar sallanır, kabarcık yükselir, matrix akar)
   const fx = settings.bgFx;

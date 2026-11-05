@@ -148,6 +148,23 @@
   <div class="setnote" id="ghost-msg"></div>
   <div class="setnote">Klasik koşunda en iyi skorun hayaleti kaydedilir; yeni koşuda yarı saydam rakip olarak aynı tempoyu gösterir. Kodla arkadaşına gönderebilirsin.</div>
 </section>
+<section id="editorpanel" class="panel" role="dialog" aria-label="Bölüm editörü" hidden>
+  <div class="setrow"><span class="label">Bölüm adı</span><input type="text" id="ed-name" maxlength="30" placeholder="Benim bölümüm"></div>
+  <div id="ed-palette"></div>
+  <div id="ed-grid"></div>
+  <div class="setnote" id="ed-info"></div>
+  <div class="setrow"><button id="ed-mirror">🪞 Ayna</button><button id="ed-undo">↶ Geri al</button><button id="ed-clear">🧹 Temizle</button><button id="ed-random">🎲 Rastgele</button></div>
+  <div class="setrow"><span class="label">Boss</span><div id="ed-boss"></div></div>
+  <div class="setrow"><span class="label">Şablon</span><div id="ed-templates"></div></div>
+  <div class="setrow"><button id="ed-play">▶ Test et</button><button id="ed-save">💾 Kaydet</button><button id="ed-delete">🗑 Sil</button></div>
+  <div class="sethead">Kayıtlı bölümlerim</div>
+  <div id="ed-saved"></div>
+  <div class="sethead">Paylaş</div>
+  <div class="setrow"><button id="ed-export">📤 Kodu al</button><button id="ed-link">🔗 Bağlantı</button><button id="ed-import">📥 Yükle</button></div>
+  <textarea id="ed-code" placeholder="BBL1:... bölüm kodunu ya da bağlantısını buraya yapıştır"></textarea>
+  <div class="setnote" id="ed-msg"></div>
+  <div class="setnote">Paletten tuğla seç, ızgaraya tıkla ya da sürükle; sağ tık siler. Sıra sonundaki ↔ o sırayı kaydırır, Ayna açıkken çizdiğin sağ yarıya yansır. Boss seçilirse ilk 5 sıra boss'a ayrılır. Test koşuları rekor ve kariyere sayılmaz. Bağlantıyla açılan bölüm doğrudan editöre yüklenir.</div>
+</section>
 <input type="file" id="vidfile" accept="video/*" hidden>
 <input type="file" id="audfile" accept="audio/*" hidden>
 <input type="file" id="songfile" accept="audio/*" hidden>
@@ -204,6 +221,7 @@
 <script src="js/versus.js"></script>
 <script src="js/pacts.js"></script>
 <script src="js/lastchance.js"></script>
+<script src="js/editor.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

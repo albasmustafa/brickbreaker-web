@@ -9,7 +9,7 @@ Tarayıcıda çalışan, kaotik bir tuğla kırma oyunu: lanetler, boss'lar, 15 
 | Oyna | `index.html`'i çift tıkla (ya da `xdg-open index.html`) — sunucu, internet, kurulum gerekmez |
 | Uygulama olarak kur / çevrim dışı oyna | `npm start` → <http://localhost:8080> → tarayıcıda "Uygulamayı yükle"; bir kez açıldıktan sonra internetsiz de çalışır |
 | Tek dosya üret | `npm run build` → `dist/index.html` (okunaklı) ve `dist/brickbreaker.min.html` (sıkıştırılmış, ~146 KB) |
-| Test et | `npm test` → 27 özellik testi başsız Chromium'da (Node 22+, Chromium/Chrome) |
+| Test et | `npm test` → 32 özellik testi başsız Chromium'da (Node 22+, Chromium/Chrome) |
 | Yayınla | `npm run release` → test + derleme + ana oyun dosyasını güncelleme |
 
 `npm start`, `npm test` ve okunaklı derleme hiçbir bağımlılık istemez. Yalnızca sıkıştırılmış derleme için bir kez `npm install` (esbuild) gerekir.
@@ -40,6 +40,7 @@ js/ui.js              araç çubuğu, paneller, tema stüdyosu, klavye/fare/doku
 js/career.js          kariyer: dereceli lig (Elo, rütbeler, terk cezası), sayaçlar, maç geçmişi, başarımlar, bildirimler
 js/pacts.js           lanet paktı: bölüm başında risk/ödül seçenekleri ve çarpanları
 js/lastchance.js      son top bahsi: tek seferlik devam + lanet bedeli
+js/editor.js          bölüm editörü: ızgara, palet, ayna, geri al, boss, şablon, kayıt, BBL1 kodu ve #bbl= bağlantısı, test koşusu
 js/director.js        dramaturg: bölüm görevleri, nefes/gösteri anları
 js/codex.js           koleksiyon: lanet/tuğla/boss kartları ve kart seviyeleri
 js/ghost.js           hayalet koşu: en iyi koşu kaydı, oynatma ve paylaşım kodu
@@ -78,6 +79,7 @@ Okunaklı tek dosyada her bölümün başında kaynak dosyanın adı yazar. Ana 
 - **Rekabet:** bot kapışması ve bot dengesi; iki sayfa arasında gerçek WebRTC bağlantısıyla çevrim içi kapışma (puanların paylaşılması ve iki tarafta puan güncellemesi dahil).
 - **Kariyer:** dereceli lig (lig sınırları, Elo, puana göre bot gücü, kazanınca/kaybedince puan, yarıda bırakma ve sayfa yenileme cezası); sayaçlar, anında açılan başarımlar, galibiyet serisi, kariyer paneli, sayfa yenilenince kalıcılık, sıfırlama.
 - **Tutundurma:** lanet paktı seçimi/çarpanları, son top bahsi, dramaturg görevleri, koleksiyon kartları ve lanet direnci, hayalet kaydı/oynatma/kodu, haftalık tohumun deterministik koşusu ve sonuç kodu, şarkıdan bölüm üreteci/kodu.
+- **Bölüm editörü:** fareyle boyama, ayna, geri al, kayan sıra, boss kilidi, şablon, kaydet/sil, kod ve bağlantı gidiş-dönüşü, bozuk kod reddi, test koşusunun pratik sayılması, bitişte oyun sonu ve editöre dönüş.
 
 ```
 npm test                                  # projeyi test et
@@ -107,7 +109,7 @@ GitHub Actions (`.github/workflows/ci.yml`) her push ve pull request'te Node 22 
 
 ## Kayıtlar (tarayıcıda, localStorage)
 
-`bb_settings` (ayarlar) · `bb_theme_cur` / `bb_custom_themes` (tema) · `bb_highscore` · `bb_muted` · `bb_song_profiles` (şarkı profilleri) · `bb_versus` (rekabet ayarları) · `bb_leaderboard` (liderlik tablosu) · `bb_career` (dereceli puan, sayaçlar, maç geçmişi, başarımlar) · `bb_daily` (günlük meydan okuma: bugünkü skor, en iyi, seri) · `bb_codex` (koleksiyon kartları) · `bb_ghost` (en iyi hayalet koşu) · `bb_weekly` (haftalık tohum: en iyi, sonuç, deneme).
+`bb_settings` (ayarlar) · `bb_theme_cur` / `bb_custom_themes` (tema) · `bb_highscore` · `bb_muted` · `bb_song_profiles` (şarkı profilleri) · `bb_versus` (rekabet ayarları) · `bb_leaderboard` (liderlik tablosu) · `bb_career` (dereceli puan, sayaçlar, maç geçmişi, başarımlar) · `bb_daily` (günlük meydan okuma: bugünkü skor, en iyi, seri) · `bb_codex` (koleksiyon kartları) · `bb_ghost` (en iyi hayalet koşu) · `bb_weekly` (haftalık tohum: en iyi, sonuç, deneme) · `bb_mylevels` (editörde kaydedilen bölümler).
 
 ## Kontroller
 
@@ -285,6 +287,17 @@ Araç çubuğundaki **🎯 Meydan** düğmesi iki şeyi bir arada açar:
 - **🌀 Tünel Fırtınası:** 12. bölüm kilitli olsa bile bu düğmeyle her zaman pratik olarak oynanır.
 
 **Koşu özeti:** oyun sonu ekranı skorun yanında bölüm, süre, kırılan tuğla, en iyi combo, toplanan kapsül, atlatılan lanet ve yenilen boss sayılarını gösterir. Günlük koşuda ayrıca günlük en iyi ve seri; pratik koşuda “PRATİK” etiketi görünür.
+
+## Bölüm editörü (✏️ Editör paneli)
+
+Araç çubuğundaki **✏️ Editör** düğmesi kendi bölümünü çizdiğin paneli açar (`js/editor.js`).
+
+- **Izgara:** oyundaki gibi 10 sütun, en çok 12 sıra. Paletten tuğla seç (1/2/3 vuruş, kırılmaz, patlayan, elektrik, altın, çoğaltan, yenilenen, kalkanlı, ikiz, buz, virüs, şifacı, silgi), tıkla ya da sürükle; sağ tık siler. Dokunmatikte parmakla sürüklenir.
+- **Araçlar:** **↔** sıra sonunda o sırayı kaydırır (`>` işareti) · **🪞 Ayna** çizileni sağ yarıya yansıtır · **↶ Geri al** (60 adım) · **🧹 Temizle** · **🎲 Rastgele** (yordamsal harita üreteciyle).
+- **Boss:** TUĞLA KRAL ya da DEMİR İMPARATOR seçilirse ilk 5 sıra boss'a ayrılır ve kilitlenir. **Şablon:** 1–11. bölümlerden biri düzenlenebilir kopya olarak açılır.
+- **▶ Test et:** bölüm tek bölümlük **pratik koşu** olarak oynanır (rekor, liderlik, kariyer, pakt, hayalet ve son top bahsi kapalı). Bölüm bitince oyun sonu kartı çıkar; menüye dönünce editör yeniden açılır.
+- **💾 Kaydet / 🗑 Sil:** bu cihazda ada göre en çok 30 bölüm (`bb_mylevels`).
+- **Paylaş:** **📤 Kodu al** → `BBL1:` kodu (base64url JSON: ad, boss, satırlar); **🔗 Bağlantı** → oyunun adresi + `#bbl=…`. Bağlantıyla açılan oyun bölümü doğrudan editöre yükler ve adres çubuğundaki kodu temizler. Kodlar yüklenirken her satır doğrulanır (10 karakter, bilinen tuğla harfleri, en çok 12 sıra).
 
 ## Sesler
 

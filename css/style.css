@@ -204,3 +204,20 @@ input[type="range"] { accent-color: var(--accent); }
 /* Dil seçici */
 select { font: inherit; font-size: 13px; color: var(--uitext); background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; cursor: pointer; }
 select:hover { border-color: var(--accent); }
+
+/* Bölüm editörü: 10 sütun + kaydırma düğmesi; tuğla oranı oyundakiyle aynı (70×22) */
+#editorpanel { width: min(680px, calc(100vw - 24px)); }
+#ed-palette { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 5px; margin: 6px 0; }
+#ed-palette .ed-brush { display: flex; align-items: center; gap: 6px; padding: 4px 7px; text-align: left; min-width: 0; }
+#ed-palette .ed-brush > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#ed-palette .ed-brush.active { background: var(--panel2); box-shadow: 0 0 0 2px var(--accent); color: var(--uitext); }
+.ed-sw { flex: none; width: 26px; height: 14px; border-radius: 4px; border: 1px solid var(--line); font: bold 10px/12px monospace; text-align: center; }
+#ed-grid { display: grid; grid-template-columns: repeat(10, 1fr) 26px; gap: 3px; padding: 8px; border-radius: 10px; background: var(--bg, #0b0f1e); border: 1px solid var(--line); touch-action: none; user-select: none; }
+#ed-grid .ed-cell { aspect-ratio: 70 / 22; min-width: 0; padding: 0; border: 1px dashed var(--line); border-radius: 4px; background: transparent; font: bold 11px monospace; cursor: crosshair; }
+#ed-grid .ed-cell[style*="background"] { border-style: solid; border-color: rgba(255,255,255,0.18); }
+#ed-grid .ed-cell.locked { opacity: 0.25; cursor: not-allowed; background: repeating-linear-gradient(45deg, transparent 0 4px, rgba(255,77,109,0.35) 4px 6px) !important; }
+#ed-grid .ed-slide { padding: 0; font-size: 11px; border-radius: 4px; min-width: 0; }
+#ed-grid .ed-slide.active { background: var(--accent); color: var(--accent-ink); }
+#ed-boss, #ed-templates, #ed-saved { display: flex; flex-wrap: wrap; gap: 5px; }
+#ed-code { width: 100%; min-height: 48px; }
+@media (max-width: 560px) { #ed-grid { gap: 2px; padding: 5px; grid-template-columns: repeat(10, 1fr) 20px; } #ed-grid .ed-cell { font-size: 9px; } }

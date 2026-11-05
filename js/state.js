@@ -27,7 +27,11 @@ const paddle = {
 
 let balls = [];                         // çoklu top: hepsi aynı anda yaşayabilir
 let bricks = [], powerups = [], particles = [], fragments = [], floaters = [], stars = [], matrixCols = [];
+let confetti = [];                      // kutlama konfetisi: kartların ÜSTÜNDE çizilir
 let zones = [], lasers = [], bullets = [], holes = [], bolts = [], movingRows = [];
+// Bölüm açılışında çapraz belirme dalgası: tuğlanın görünürlüğü 0..1 (çizim, parıltı ve sınır tek yerden)
+const REVEAL_COL = 0.18, REVEAL_MAX = 99;
+const revealOf = b => clamp(state.buildFade - b.row - b.col * REVEAL_COL, 0, 1);
 const fxOn = k => state[k + "Until"] > state.time;
 const isFever = () => fxOn("fever");
 const isFire = () => fxOn("fire") || isFever();

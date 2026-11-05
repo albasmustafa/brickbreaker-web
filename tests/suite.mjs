@@ -50,7 +50,7 @@ test("Yükleme, arayüz ve özellik envanteri", async ({ p, expect }) => {
     codex: CODEX_CARDS.length, codexPanel: codexPanel.hidden, song: typeof generateSongLevels === "function" })`);
   expect(r.mode === "menu" && r.bricks === 46 && r.levels === 12, "menü ve ilk bölüm: " + JSON.stringify(r));
   expect(r.themes === 25, "25 hazır tema");
-  expect(r.tools === 9, "araç çubuğunda 9 düğme (ses, tema, rastgele, stüdyo, rekabet, meydan, kariyer, ayarlar, tam ekran): " + r.tools);
+  expect(r.tools === 10, "araç çubuğunda 10 düğme (ses, tema, rastgele, stüdyo, rekabet, meydan, editör, kariyer, ayarlar, tam ekran): " + r.tools);
   expect(r.tiers === "Bronz,Gümüş,Altın,Platin,Elmas,Usta,Efsane" && r.ach === 27 && r.stats === 20 && r.career, "7 lig, 27 başarım, 20 sayaç, rütbe kartı: " + JSON.stringify([r.tiers, r.ach, r.stats, r.career]));
   expect(r.panels, "paneller kapalı başlar");
   expect(r.powers === "WMSFLYDKOHQRNZC", "15 kapsül: " + r.powers);
@@ -276,6 +276,80 @@ test("Şarkıdan Bölüm: üreteç, aynı şarkı aynı bölüm, kod, başlatma 
   expect(r.code === "BBS1:" && r.imported && r.importedBoss, "bölüm kodu: " + JSON.stringify([r.code, r.imported, r.importedBoss]));
   expect(r.started && r.runState.level === 1 && r.runState.active && r.runState.song && r.runState.bricks > 0 && r.runState.mode === "serve", "şarkı bölümü başladı: " + JSON.stringify(r.runState));
   expect(r.done.mode === "gameover" && !r.done.active && r.done.song && r.done.rank === 0, "şarkı bitince oyun sonu: " + JSON.stringify(r.done));
+});
+
+test("Bölüm editörü: boyama, ayna, geri al, boss, kayıt, kod, bağlantı, test koşusu ve dönüş", async ({ p, expect }) => {
+  const r = await p.eval(`(() => {
+    localStorage.removeItem("bb_mylevels");
+    openEditor();
+    const open = !edPanel.hidden, cells = edGrid.querySelectorAll(".ed-cell").length, brushes = $("ed-palette").children.length;
+    const emptyPlay = $("ed-play").disabled && !playEditorLevel();
+    // Boyama + ayna + geri al
+    editor.mirror = true; editor.brush = "E"; edPushUndo(); edSet(0, 1, "E");
+    const mirrored = editor.rows[0] === ".E......E.";
+    editor.mirror = false; editor.brush = "3"; edPushUndo(); edSet(1, 0, "3");
+    edUndo();
+    const undone = editor.rows[1] === ".........." && editor.rows[0] === ".E......E.";
+    editor.rows[2] = "1111111111"; editor.slide[2] = true; editor.rows[3] = "X$+HATIVSZ";
+    renderEditor();
+    const def = editorDef();
+    const defOk = Array.isArray(def) && def.length === 4 && def[2] === "1111111111>" && def[1] === "..........";
+    // Pointer ile boyama (gerçek DOM olayları)
+    editor.brush = "2";
+    const cell = edCells[5][4], rc = cell.getBoundingClientRect();
+    cell.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, clientX: rc.left + 3, clientY: rc.top + 3, button: 0, pointerId: 1 }));
+    document.dispatchEvent(new PointerEvent("pointerup", { bubbles: true }));
+    const painted = editor.rows[5][4] === "2" && cell.textContent === "2";
+    editor.rows[5] = "..........";
+    // Boss: ilk 5 sıra kilitlenir ve boşaltılır
+    edPushUndo(); editor.boss = 0; edClearBossRows(); renderEditor();
+    const bossDef = editorDef();
+    const bossOk = !!(bossDef.boss && bossDef.boss.name === "TUĞLA KRAL" && bossDef.map.slice(0, 5).every(l => l === "..........")) && edCells[0][0].classList.contains("locked");
+    edSet(0, 0, "3"); const lockedStays = editor.rows[0][0] === ".";
+    edUndo();
+    // Kod ve bağlantı
+    editor.name = "Deneme Ğ";
+    const code = encodeEditorLevel(), link = editorLink();
+    const saveNoName = (editor.name = "", saveEditorLevel());
+    editor.name = "Deneme Ğ";
+    const saved = saveEditorLevel(), list = edSaved().map(d => d.n);
+    const snapshot = JSON.stringify(editor.rows);
+    edLoad({ n: "", b: -1, m: [] });
+    const imported = importEditorLevel(code) && JSON.stringify(editor.rows) === snapshot && editor.name === "Deneme Ğ" && editor.slide[2];
+    edLoad({ n: "", b: -1, m: [] });
+    const fromLink = importEditorLevel(link) && JSON.stringify(editor.rows) === snapshot;
+    const bad = [importEditorLevel("BBL1:xxxx"), importEditorLevel("BBL1:" + b64url(JSON.stringify({ m: ["QQQQQQQQQQ"] }))), importEditorLevel("merhaba")].some(Boolean);
+    const deleted = deleteEditorLevel("Deneme Ğ") && edSaved().length === 0;
+    // Test koşusu: pratik, tek bölüm, bitince oyun sonu ve editöre dönüş
+    const highBefore = state.high;
+    const started = playEditorLevel();
+    const runState = { mode: state.mode, custom: run.custom, practice: run.practice, bricks: bricks.length, moving: movingRows.length, panel: edPanel.hidden, pact: pactbar.hidden };
+    launchBall(); state.curseAt = Infinity;
+    for (const b of bricks) if (!b.unbreakable) b.dead = true;
+    checkLevelDone();
+    for (let i = 0; i < 400 && state.mode === "levelclear"; i++) update(STEP);
+    const done = { mode: state.mode, rank: state.lbRank, high: state.high === highBefore };
+    draw();
+    action();
+    const back = { mode: state.mode, panel: !edPanel.hidden, playing: editor.playing };
+    closePanels();
+    // Şablon: 5. bölüm (boss) şablonu boss'u da getirir
+    $("ed-templates").children[4].click();
+    const tpl = editor.boss === 0 && editor.rows[5] === "2.+.22.+.2";
+    return { open, cells, brushes, emptyPlay, mirrored, undone, defOk, painted, bossOk, lockedStays, code: code.slice(0, 5), link: /#bbl=/.test(link),
+             saveNoName, saved, list, imported, fromLink, bad, deleted, started, runState, done, back, tpl };
+  })()`);
+  expect(r.open && r.cells === 120 && r.brushes === 15, "panel, 12×10 ızgara, 15 fırça: " + JSON.stringify([r.open, r.cells, r.brushes]));
+  expect(r.emptyPlay, "boş bölüm oynanamaz");
+  expect(r.mirrored && r.undone && r.painted, "ayna, geri al, fareyle boyama: " + JSON.stringify([r.mirrored, r.undone, r.painted]));
+  expect(r.defOk, "harita tanımı (kayan sıra, sondaki boşlar atılır)");
+  expect(r.bossOk && r.lockedStays, "boss ilk 5 sırayı kilitler: " + JSON.stringify([r.bossOk, r.lockedStays]));
+  expect(r.code === "BBL1:" && r.link && r.imported && r.fromLink && !r.bad, "kod/bağlantı gidiş-dönüş ve geçersiz kod reddi: " + JSON.stringify(r));
+  expect(r.saveNoName === "noname" && r.saved === "ok" && r.list.join() === "Deneme Ğ" && r.deleted, "kaydet/sil: " + JSON.stringify([r.saveNoName, r.saved, r.list, r.deleted]));
+  expect(r.started && r.runState.mode === "serve" && r.runState.custom && r.runState.practice && r.runState.bricks === 22 && r.runState.moving === 1 && r.runState.panel && r.runState.pact, "test koşusu: " + JSON.stringify(r.runState));
+  expect(r.done.mode === "gameover" && r.done.rank === 0 && r.done.high, "bitince oyun sonu, kayıt dışı: " + JSON.stringify(r.done));
+  expect(r.back.mode === "menu" && r.back.panel && !r.back.playing, "menüye dönünce editör yeniden açılır: " + JSON.stringify(r.back));
+  expect(r.tpl, "boss şablonu");
 });
 
 test("Koşu özeti: sayaçlar ve pratikte kayıt dışı", async ({ p, expect }) => {
@@ -655,8 +729,8 @@ test("Diller: 25 dil eksiksiz, yer tutucular, RTL, dil seçici, tüm ekranlar ta
         state.mode = "levelclear"; draw();
         state.mode = "playing"; run.daily = false; run.practice = true; state.lbRank = 3; state.newRecord = true; gameOver(); draw();
         __start(12); pxWin(); state.mode = "levelclear"; draw();
-        for (const panel of [settingsPanel, themePanel, versusPanel, careerPanel, codexPanel, challengePanel]) {
-          const render = { [themePanel.id]: refreshThemeUI, [versusPanel.id]: refreshVersusUI, [careerPanel.id]: renderCareer, [codexPanel.id]: renderCodex, [challengePanel.id]: renderChallenge }[panel.id];
+        for (const panel of [settingsPanel, themePanel, versusPanel, careerPanel, codexPanel, challengePanel, edPanel]) {
+          const render = { [themePanel.id]: refreshThemeUI, [versusPanel.id]: refreshVersusUI, [careerPanel.id]: renderCareer, [codexPanel.id]: renderCodex, [challengePanel.id]: renderChallenge, [edPanel.id]: renderEditor }[panel.id];
           togglePanel(panel, render); closePanels();
         }
       } finally { proto.fillText = orig; }

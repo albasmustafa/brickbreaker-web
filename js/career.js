@@ -93,10 +93,10 @@ function nextToast() {
 // --- Sayaçlar ve başarımlar: oyun içi olaylar sayaçları canlı artırır, başarım anında açılır ---
 const run = { lifeLost: 0, ended: false, practice: false, daily: false, dailyFinished: false, bricks: 0, goldBricks: 0, powers: 0, bosses: 0, bestCombo: 0,
               zapBricks: 0, twinBricks: 0, virusBricks: 0, specials: 0, beats: 0,
-              pacts: [], pactOfferLevel: 0, lastChanceUsed: false, song: false };
+              pacts: [], pactOfferLevel: 0, lastChanceUsed: false, song: false, custom: false };
 const resetRun = () => Object.assign(run, { lifeLost: 0, ended: false, practice: false, daily: false, dailyFinished: false, bricks: 0, goldBricks: 0, powers: 0, bosses: 0, bestCombo: 0,
               zapBricks: 0, twinBricks: 0, virusBricks: 0, specials: 0, beats: 0,
-              pacts: [], pactOfferLevel: 0, lastChanceUsed: false, song: false });
+              pacts: [], pactOfferLevel: 0, lastChanceUsed: false, song: false, custom: false });
 function track(key, n = 1) {
   if (run.practice) return;
   career.stats[key] += n;
