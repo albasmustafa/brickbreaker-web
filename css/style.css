@@ -9,10 +9,14 @@ html, body { margin: 0; min-height: 100%; background: #1a1a2e; }
 body {
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 16px;
   font-family: ui-monospace, "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace; color: var(--uitext);
+  user-select: none; -webkit-user-select: none;
 }
+input, textarea { user-select: text; -webkit-user-select: text; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 button {
   font: inherit; font-size: 13px; color: var(--uitext); background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
-  padding: 6px 12px; cursor: pointer; transition: transform 0.08s, border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  padding: 6px 12px; cursor: pointer; touch-action: manipulation;
+  transition: transform 0.08s, border-color 0.15s, background 0.15s, box-shadow 0.15s;
 }
 button:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 4px 12px -6px var(--accent); }
 button:active { transform: translateY(1px); }
@@ -77,6 +81,14 @@ canvas {
   max-height: calc(100vh - 32px); overflow: auto; display: flex; flex-direction: column; gap: 10px; padding: 0 18px 16px;
   background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
 }
+/* Açılış cila: karartma yumuşak iner, panel hafif büyüyerek yerleşir */
+.panel:not([hidden]) { animation: panelIn 0.18s ease-out; }
+#backdrop:not([hidden]) { animation: fadeIn 0.15s ease-out; }
+#lastchance:not([hidden]) { animation: fadeIn 0.15s ease-out; }
+#lastcard { animation: cardIn 0.24s cubic-bezier(0.34, 1.4, 0.64, 1); }
+@keyframes fadeIn { from { opacity: 0; } }
+@keyframes panelIn { from { opacity: 0; transform: translate(-50%, -50%) scale(0.96); } }
+@keyframes cardIn { from { opacity: 0; transform: scale(0.92); } }
 .panel-head { position: sticky; top: 0; z-index: 1; display: flex; justify-content: space-between; align-items: center; padding: 12px 0 8px; background: var(--panel); border-bottom: 1px solid var(--line); }
 .panel-head strong { font-size: 15px; letter-spacing: 0.04em; }
 .panel button { background: var(--panel2); font-size: 12px; padding: 5px 11px; }
@@ -179,3 +191,7 @@ canvas {
 .opp-feed { font-size: 11px; color: var(--uidim); background: var(--panel-soft); border: 1px solid var(--line); border-radius: 10px; padding: 6px 8px; display: flex; flex-direction: column; gap: 2px; }
 
 @media (pointer: coarse) { #toolbar button, #mediabar button { padding: 10px 14px; } }
+/* Hareket azaltma tercihi: arayüz animasyonları kısalır, geçişler anına iner */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}

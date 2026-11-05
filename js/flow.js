@@ -83,6 +83,12 @@ function clearEffects() {
 function addScore(n) {
   state.score += Math.round(n * pactScoreMul());
   if (!run.practice && state.score > state.high) store.set("bb_highscore", (state.high = state.score));
+  // Rekoru ilk geçtiğin an duyurulur (callout değil: combo/bölüm yazılarını ezmesin)
+  if (!run.practice && !state.recordShown && state.startHigh > 0 && state.score > state.startHigh) {
+    state.recordShown = true;
+    toast("🏆 Rekoru geçtin!", "eski rekor " + state.startHigh, T().b2);
+    sfx("achieve");
+  }
 }
 
 function startGame() {
@@ -92,7 +98,7 @@ function startGame() {
   resetRun();
   const diff = DIFFICULTY[settings.difficulty];
   Object.assign(state, { level: 1, score: 0, diffSpeed: diff.speedMul, lives: diff.lives, combo: 0, startHigh: state.high,
-                         newRecord: false, time: 0, shake: 0, callout: null, cursesSurvived: 0, inset: 0 });
+                         newRecord: false, recordShown: false, time: 0, shake: 0, callout: null, cursesSurvived: 0, inset: 0 });
   state.speed = levelSpeed(1);
   clearEffects();
   paddle.x = W / 2 - PADDLE_W / 2;

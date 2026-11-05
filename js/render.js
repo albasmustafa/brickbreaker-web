@@ -5,6 +5,8 @@
 const SPRITE_PAD = 4;           // gölge payı
 const brickSprites = new Map();
 const easeOutBack = t => 1 + 2.7 * (t - 1) ** 3 + 1.7 * (t - 1) ** 2;
+// Cila durumları: HUD skoru gerçeğe yumuşak yaklaşır, combo artınca hap zıplar, kartlar mod değişince belirir
+let hudScore = 0, comboSeen = 0, comboPop = 0, modeSeen = "", modeAt = 0;
 const brickKind = b => b.unbreakable ? "un" : b.explosive ? "ex" : b.electric ? "el" : b.gold ? "gold" : b.splitter ? "split" : "n";
 const roundedStyle = () => settings.brickStyle === "parlak" || settings.brickStyle === "yuvarlak";
 
@@ -450,17 +452,29 @@ function drawPill(x, y, w, h, color, frac) {
 function drawHUD() {
   ctx.fillStyle = lgrad(0, 0, 0, 72, [hexToRgba(T().bg, 0.8), hexToRgba(T().bg, 0)]);   // üstte yumuşak koyulaşma
   ctx.fillRect(0, 0, W, 72);
+  if (state.score < hudScore) hudScore = state.score;            // yeni oyunda sayaç anında sıfırlanır
+  else hudScore += (state.score - hudScore) * 0.25;              // yoksa gerçeğe doğru tık tık sayar
+  if (state.score - hudScore < 1) hudScore = state.score;
   text("SKOR", 20, 16, "bold 10px monospace", T().dim, "left");
-  text(String(state.score), 20, 38, "bold 22px monospace", T().text, "left");
-  const scoreW = ctx.measureText(String(state.score)).width;
+  text(String(Math.round(hudScore)), 20, 38, "bold 22px monospace", T().text, "left");
+  const scoreW = ctx.measureText(String(Math.round(hudScore))).width;
   text("REKOR " + state.high, 20, 55, "11px monospace", T().dim, "left");
   if (ghost.play && ghost.best.rec.length) text("👻 " + ghost.scoreNow, W - 20, 56, "bold 11px monospace", "#9aa5b1", "right");
   const colX = Math.max(160, 34 + Math.max(scoreW, ctx.measureText("REKOR " + state.high).width));
+  if (state.combo > comboSeen) { comboSeen = state.combo; comboPop = 1; }   // combo arttığı karede hap zıplar
+  else if (state.combo < comboSeen) comboSeen = state.combo;
+  comboPop = Math.max(0, comboPop - 0.06);
   if (state.combo >= 2) {
     const ccol = isFever() ? hslHex(state.time * 400, 90, 62) : T().b2, txt = "COMBO ×" + state.combo;
     ctx.font = "bold 13px monospace";
-    drawPill(colX, 14, ctx.measureText(txt).width + 18, 22, ccol, null);
-    text(txt, colX + 9, 30, ctx.font, ccol, "left");
+    const pw = ctx.measureText(txt).width + 18;
+    ctx.save();
+    ctx.translate(colX + pw / 2, 25);
+    const pcs = 1 + 0.35 * comboPop * comboPop;
+    ctx.scale(pcs, pcs);
+    drawPill(-pw / 2, -11, pw, 22, ccol, null);
+    text(txt, -pw / 2 + 9, 5, ctx.font, ccol, "left");
+    ctx.restore();
   }
   let ex = colX, ey = 41;       // efekt hapları (sığmazsa alt satıra)
   ctx.font = "bold 10px monospace";
@@ -565,8 +579,12 @@ const LEGEND = [
 ];
 function drawScreens() {
   const pulse = 0.65 + 0.35 * Math.sin(state.time * 4), m = state.mode;
+  if (m !== modeSeen) { modeSeen = m; modeAt = performance.now(); }
+  const cs = Math.max(0.01, easeOutBack(clamp((performance.now() - modeAt) / 300, 0, 1)));   // kartlar mod değişince büyüyerek belirir
+  const cardIn = () => { ctx.save(); ctx.translate(W / 2, H / 2); ctx.scale(cs, cs); ctx.translate(-W / 2, -H / 2); };
   ctx.textAlign = "center";
   if (m === "menu") {
+    cardIn();
     overlay(0.2);
     drawCard(W / 2, H / 2 + 5, 640, 420);
     const fy = Math.sin(state.time * 2) * 3;
@@ -596,21 +614,26 @@ function drawScreens() {
   } else if (m === "playing" && balls.some(b => b.stuck)) {
     outlinedText("YAPIŞ: bırakmak için tıkla / boşluk", W / 2, H - 90, "bold 15px monospace", POWERS.Y.color);
   } else if (m === "levelclear") {
+    cardIn();
     drawCard(W / 2, H / 2, 440, 130);
     titleText("BÖLÜM " + state.level + " TAMAM!", W / 2, H / 2 - 8, 32, T().b1, T().accent);
     text("+500", W / 2, H / 2 + 32, "bold 20px monospace", T().b2);
+    ctx.restore();
   } else if (m === "paused") {
+    cardIn();
     overlay(0.35);
     drawCard(W / 2, H / 2, 380, 140);
     titleText("DURAKLATILDI", W / 2, H / 2 - 8, 34, T().text, T().accent);
     text("devam: P veya tıkla", W / 2, H / 2 + 32, "16px monospace", T().dim);
+    ctx.restore();
   } else if (m === "gameover" && battle.active) {
     drawBattleResults();
   } else if (m === "gameover") {
+    cardIn();
     overlay(0.45);
     drawCard(W / 2, H / 2, 520, 400);
     titleText("OYUN BİTTİ", W / 2, H / 2 - 148, 44, T().ex, "#ff4d6d");
-    text("Skor: " + state.score, W / 2, H / 2 - 96, "bold 24px monospace", T().text);
+    text("Skor: " + Math.round(hudScore), W / 2, H / 2 - 96, "bold 24px monospace", T().text);
     if (state.newRecord) { ctx.globalAlpha = pulse; text("🏆 YENİ REKOR!", W / 2, H / 2 - 62, "bold 22px monospace", T().b2); ctx.globalAlpha = 1; }
     else text("Rekor: " + state.high, W / 2, H / 2 - 62, "18px monospace", T().dim);
     text("Bölüm " + state.level + " · Süre " + fmtTime(Math.round(state.time)), W / 2, H / 2 - 28, "15px monospace", T().text);
@@ -624,6 +647,7 @@ function drawScreens() {
     else if (run.practice) text("PRATİK — rekor ve kariyer sayılmadı", W / 2, H / 2 + 62 + extraY, "14px monospace", T().dim);
     if (state.lbRank) text("Liderlik tablosu: #" + state.lbRank + " (" + vsCfg.name + ")", W / 2, H / 2 + 96 + extraY, "bold 15px monospace", T().b2);
     text("menü için tıkla veya boşluk", W / 2, H / 2 + 158 + extraY, "15px monospace", T().dim);
+    ctx.restore();
   }
 }
 function drawCallout() {

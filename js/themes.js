@@ -52,9 +52,11 @@ const T = () => theme;
 const hpColor = hp => (hp === 3 ? T().b3 : hp === 2 ? T().b2 : T().b1);
 
 // Tema hem tuvali hem sayfa arayüzünü (CSS değişkenleri) boyar
+const themeColorMeta = document.querySelector('meta[name="theme-color"]');   // mobil tarayıcı çubuğu da temayla uyumlu olsun
 function applyTheme() {
   const t = theme, r = document.documentElement.style;
   document.body.style.background = r.background = t.bg;
+  if (themeColorMeta) themeColorMeta.content = t.bg;
   const vars = {
     "--board": hexToRgba(t.board, 0.8), "--boardvid": hexToRgba(t.board, 0.62), "--uitext": t.text, "--uidim": t.dim,
     "--accent": t.accent, "--accent-ink": relLum(t.accent) > 0.35 ? "#111111" : "#ffffff", "--panel": t.board,

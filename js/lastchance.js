@@ -1,5 +1,5 @@
 // ======================================================================
-// 22. SON TOP BAHsİ: son can da gidince bir kez devam şansı.
+// 22. SON TOP BAHSİ: son can da gidince bir kez devam şansı.
 //     Devam eden oyuncu 1 canla döner, karşılığında hemen bir lanet yer.
 //     Günlük, pratik ve kapışmada teklif edilmez.
 // ======================================================================
@@ -23,7 +23,7 @@ function lastContinue() {
   serveBall();                    // aynı bölümde pakt teklifi yeniden açılmaz
   const id = pickCurse();
   if (id) warnCurse(id);          // bedel: hemen bir lanet
-  callout("SON TOP BAHsİ: DEVAM", "#ff5d8f");
+  callout("SON TOP BAHSİ: DEVAM", "#ff5d8f");
   sfx("power");
 }
 function lastEnd() {
