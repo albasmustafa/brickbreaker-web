@@ -29,6 +29,9 @@ const CURSES = {
               for (const b of bricks) if (!b.dead) b.ty = (b.ty ?? b.y) + BRICK.h + BRICK.gap;   // tuğlalar bir sıra iner
               addFloater(W / 2, 200, tr("TUĞLALAR İNİYOR!"), CURSE_COLOR);
             } },
+  dusen:    { label: tr("DÜŞEN DUVAR"), short: tr("DÜŞEN"), dur: 12, group: "tavan",
+              ok: () => !state.boss && lowestBrick() + 2 * (BRICK.h + BRICK.gap) < 400,
+              start: () => (state.dusenNext = state.time + 3.5) },   // süre boyunca duvar ~4 sn'de bir sıra iner
   dirilis:  { label: tr("DİRİLİŞ"),   ok: () => !state.boss && bricks.some(b => b.dead && !b.unbreakable), start: () => reviveBricks() },
   zirh:     { label: tr("ZIRHLANMA"), ok: () => bricks.some(b => !b.dead && !b.unbreakable && !b.explosive && b.hp < 3), start: () => armorBricks() },
   ufo:      { label: tr("UFO BASKINI"), ok: () => !state.ufo, start: () => spawnUfo() },
@@ -77,6 +80,15 @@ function endCurse(id) {
 }
 function updateCurses(dt) {
   for (const k of Object.keys(state.curses)) if (state.curses[k] <= state.time) { delete state.curses[k]; endCurse(k); }
+  if (curseOn("dusen") && state.time >= (state.dusenNext || 0)) {   // DÜŞEN DUVAR: her nabızda bir sıra aşağı
+    state.dusenNext = state.time + 4;
+    if (lowestBrick() + BRICK.h + BRICK.gap < 400) {
+      for (const b of bricks) if (!b.dead) b.ty = (b.ty ?? b.y) + BRICK.h + BRICK.gap;
+      addFloater(W / 2, 200, tr("TUĞLALAR İNİYOR!"), CURSE_COLOR);
+      addShake(2.5);
+      sfx("clank");
+    }
+  }
   const pc = state.pendingCurse;
   if (pc && state.time >= pc.at) {
     state.pendingCurse = null;

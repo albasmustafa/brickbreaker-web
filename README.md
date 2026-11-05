@@ -32,7 +32,7 @@ js/flow.js            bölüm kurma, oyun başlatma, can/bölüm geçişleri, du
 js/effects.js         parçacık, parça, çatlak, yıldırım, yazılar, sarsıntı
 js/physics.js         kapsül tablosu, tuğla hasarı, duvar bölgeleri, top, lazer, kara delik, boss
 js/tunnel.js          Tünel Fırtınası: piksel duvar ızgarası, çelik tüneller, zincir reaksiyon, +3/x3 küpler, kazanma ekranı
-js/curses.js          20 lanet: zamanlayıcı, etkiler, çizimleri
+js/curses.js          21 lanet: zamanlayıcı, etkiler, çizimleri
 js/update.js          sabit adımlı (120 Hz) dünya güncellemesi
 js/render.js          tuğla sprite'ları, dünya, HUD, durum ekranları
 js/music.js           arka plan medyası, müzik analizi (vuruş/BPM), şarkıya özel efektler
@@ -71,7 +71,8 @@ Okunaklı tek dosyada her bölümün başında kaynak dosyanın adı yazar. Ana 
 `npm test` her testi temiz kayıtlı (boş localStorage) yeni bir sayfada çalıştırır; sayfadaki herhangi bir JS hatası testi düşürür. Kapsam:
 - **Oyun:** yükleme ve özellik envanteri; servis, oynanış, can, oyun sonu, duraklatma; koşu sayaçları ve pratikte kayıt dışı kalma; 15 kapsülün her biri; duvar bölgeleri, falso ve SMASH; tüm tuğla türleri; boss; kara delik, ÇILGIN MOD, lazer ve kalkan; 25 dil (her dil eksiksiz ve yer tutucuları uyumlu, html lang/dir ve RTL, dil seçici, tüm ekranlar ve panellerin her dilde hatasız ve tuvale sığarak çizilmesi, çevrilmemiş Türkçe metin kalmaması); Tünel Fırtınası (piksel duvar, tünelde taşınma, içeriden oyma ve zincir, +3/x3 küplerin raketle yakalanması, 300 top sınırı ve akıcılığı, kırılmaz çelik, kazanma ekranı, sonraki bölümde kapanma, panelden pratik).
 - **Meydan okuma:** bölüm kilidi, pratik başlatma, günlük tek deneme, günlük kurallar, seri/tarih hesabı, kalıcılık ve bozuk kayıt.
-- **Lanetler:** 20 lanetin her biri, ayrıntılı davranışlarıyla.
+- **Lanetler:** 21 lanetin her biri, ayrıntılı davranışlarıyla.
+- **Yeni nesil:** altı yeni tuğla türünün tümü (ikiz çift kırımı, kalkan aşınması, buz dondurması, virüs güçlendirmesi, şifa nabzı, yenilenme); günlük/haftalığa tohumdan simetrik yordamsal haritalar, SERT TUĞLALAR ve VİRÜS SALGINI paktları, Düşen Duvar laneti, ritm bonusu ve yeni dramaturg görevleri.
 - **Temalar ve görünüm:** üreteç, stüdyo, paylaşım kodu; 33 görünüm seçeneği ve sayfa yenilenince kalıcılık.
 - **Müzik:** sentetik şarkılarla vuruş, BPM ve profil.
 - **Rekabet:** bot kapışması ve bot dengesi; iki sayfa arasında gerçek WebRTC bağlantısıyla çevrim içi kapışma (puanların paylaşılması ve iki tarafta puan güncellemesi dahil).
@@ -125,15 +126,16 @@ GitHub Actions (`.github/workflows/ci.yml`) her push ve pull request'te Node 22 
 - **SMASH:** raketin en ucuyla (%20) vuruş topa geçici hız patlaması verir.
 - **Duvar bölgeleri:** yan duvarlarda parlayan şeritler, bölüm ilerledikçe çoğalır (bölüm numarasıyla tohumlanır, her oynayışta aynı): **tampon** (pembe, oklu: pinball gibi fırlatır, ×1.6 hız + rastgele sapma) · **falso** (yeşil: topa sert kavis verir) · **portal** (mor, 3. bölümden itibaren: soldan giren top sağ duvardaki eşinden aynı yönde çıkar).
 - **Yatay sekme koruması:** top hiçbir zaman yataya 16°'den fazla yaklaşmaz, duvarlar arasında sonsuza dek sekmez.
-- **Tuğla türleri:** 1–3 vuruş (mavi/sarı/kırmızı, hasar aldıkça çatlaklar), **X** kırılmaz (gri, bölüm bitirmek için kırılması gerekmez), **E** patlayıcı (turuncu; kırılınca çevresindeki tuğlaları da patlatır, zincirlenir), **Z** elektrik (mor, 2 vuruş; her vuruşta en yakın 3 tuğlaya yıldırım, yıldırım yiyen elektrikli tuğla bir kez daha zincirler), **$** altın (2 vuruş; ×10 puan, altın yağmuru, kesin iyi kapsül), **+** çoğaltan (yeşil; kırılınca aşağı doğru yeni top). Satırın 11. karakteri `>` ise o sıra sağa sola kayar.
-- **Combo:** rakete dokunmadan üst üste kırılan her tuğla çarpanı büyütür (x8) ve kırılma sesi perde perde incelir. Skor = 10 × dayanıklılık × çarpan. 5/8/15/20/30 combo'da ekranda dev yazı çıkar.
+- **Tuğla türleri:** 1–3 vuruş (mavi/sarı/kırmızı; hasar aldıkça renk yumuşar, çatlaklar ve kenarlardan kopuk parçalar belirir), **X** kırılmaz (gri, bölüm bitirmek için kırılması gerekmez), **E** patlayıcı (turuncu; kırılınca çevresindeki tuğlaları da patlatır, zincirlenir), **Z** elektrik (mor, 2 vuruş; her vuruşta en yakın 3 tuğlaya yıldırım, yıldırım yiyen elektrikli tuğla bir kez daha zincirler), **$** altın (2 vuruş; ×10 puan, altın yağmuru, kesin iyi kapsül), **+** çoğaltan (yeşil; kırılınca aşağı doğru yeni top). Satırın 11. karakteri `>` ise o sıra sağa sola kayar.
+- **Yeni nesil tuğlalar (2/6/9/11. bölümlerde):** **H** yenilenen (turkuaz; yarım kalırsa ~6 sn'de 1 canını geri kazanır), **A** kalkanlı (lacivert plaka; topu 4 vuruşta aşındırır, ateş ve lazer kalkanı hemen söker), **T** ikiz (pembe; aralarında nabızlı ışın vardır, biri kırılınca eşi de dağılır), **I** buz (açık mavi; kırılınca komşularını dondurur: +2 can ve buz kılıfı, ateşte anında erir), **V** virüs (limon yeşili; ~5 sn'de bir en zayıf komşusunu +1 can güçlendirir, erken yok edilmezse duvar sertleşir), **S** şifacı (mercan; boss varsa boss'u, yoksa yaralı komşusunu onarır). Yeni türden kırılan tuğlalar kariyerde **Yeni tür tuğla** sayacına ve koleksiyon kartlarına işler.
+- **Combo:** rakete dokunmadan üst üste kırılan her tuğla çarpanı büyütür (x8) ve kırılma sesi perde perde inceler (sert tuğlalar daha tok sesle kırılır). Skor = 10 × dayanıklılık × çarpan. 5/8/15/20/30 combo'da ekranda dev yazı çıkar. 3 vuruşluk tuğlalar son vuruşta mikro an-donması ve biraz daha güçlü sarsıntıyla dağılır.
 - **ÇILGIN MOD:** 10 combo'da 6 sn boyunca tüm toplar ateş topu olur, puanlar ×2, tahta gökkuşağına döner.
 - **Bölümler:** 12 bölüm `LEVELS` dizisinde (11 harita: satır = sıra, karakter = tuğla türü); 5. ve 10. bölüm boss, 11. bölüm *Siber Labirent*, 12. bölüm **Tünel Fırtınası** (aşağıda). Sonrası döngü, bölüm başına top hızı +%7, her turda boss canı +%50.
 - **Boss:** *Tuğla Kral* (40 can) ve *Demir İmparator* (70 can). Sağa sola gezer, gözleriyle topu izler, rakete nişanlı mermi atar (değerse raket 2.5 sn sersemler ve küçülür). Canı yarıya inince öfkelenir: hızlanır, üçlü yelpaze atar, altına yeni tuğlalar diker. Her 6 isabette iyi kapsül düşürür. Ölünce ağır çekim patlama + 5000 puan.
 - **Güç kapsülleri** (tuğla kırılınca %16 ihtimal): **GENİŞ** raket 10 sn · **ÇOKLU** her toptan 2 kopya (en çok 8 top) · **YAVAŞ** 8 sn · **ATEŞ** 6 sn top kırılabilir tuğlaları sekmeden deler · **LAZER** 8 sn raketten otomatik lazer (boss mermilerini de vurur) · **YAPIŞ** 10 sn top rakete yapışır, tıkla bırak (2.5 sn sonra kendisi kalkar) · **DEV** 10 sn kocaman top, 2 hasar · **KALKAN** alt kenarda 3 kurtarış · **DELİK** 7 sn topları büken kara delik; çok yaklaşan topu fırlatır, sonunda çöküp çevresindeki tuğlaları yutar · **+CAN** (en çok 9) · **KAOS?** rastgele herhangi biri.
 - **Kötü kapsüller** (kırmızı, kesikli çerçeve): **TERS** 6 sn kontroller ters · **MİNİ** 8 sn küçük raket · **HIZ** 6 sn top ×1.3 · **LANET** hemen bir lanet çağırır. Yakalamak cesaret ister: +250 puan.
 - **Ağır çekim:** son tuğla kırılınca ve boss ölünce zaman yavaşlar, ekran hafif yakınlaşır; büyük patlamalarda an donması.
-- **Efektler:** her isabette tuğla bir an parlar; kırılmada parçacık + dönen parçalar; kenar vuruşu/patlama/kayıp ekranı sarsar; top izi.
+- **Efektler:** her isabette tuğla bir an parlar ve rengi yeni durumuna yumuşakça geçer; kırılmada parçacık + dönen parçalar; kenar vuruşu/patlama/kayıp ekranı sarsar; top izi. Müzik çalarken vuruşa denk gelen kırışlar **RİTİM! +15** bonusu verir.
 - **Rekor:** `localStorage` (`bb_highscore`), oyun sonunda "YENİ REKOR" işareti.
 
 ## Tünel Fırtınası (12. bölüm)
@@ -170,12 +172,12 @@ Teknik notlar (i18n):
 
 ## Tutundurma paketi (2026-10)
 
-- **Lanet Paktı:** Klasik koşuda 1. ve her 5. bölümün başında 3 risk/ödül paktı sunulur (CAM TOP, KAN BEDELİ, BOSS AVCI, LANET MIKSI, ALTIN ATEŞİ, KALKAN USTASI, SIFIR NOKTA, SESSİZ GECE). Paktlar koşu boyunca sürer; seçmezsen hiçbiri uygulanmaz. Ayarlar → Lanet Paktı ile kapatılabilir.
+- **Lanet Paktı:** Klasik koşuda 1. ve her 5. bölümün başında 3 risk/ödül paktı sunulur (CAM TOP, KAN BEDELİ, BOSS AVCI, LANET MIKSI, ALTIN ATEŞİ, KALKAN USTASI, SIFIR NOKTA, SESSİZ GECE, SERT TUĞLALAR, VİRÜS SALGINI). Paktlar koşu boyunca sürer; seçmezsen hiçbiri uygulanmaz. Ayarlar → Lanet Paktı ile kapatılabilir.
 - **Son Top Bahsi:** Son can da gidince bir kez "1 canla devam et" teklifi gelir; devam eden oyuncu hemen bir lanet yer. Günlük, pratik, haftalık ve kapışmada yoktur.
 - **Dramaturg:** Her bölüme isteğe bağlı bir görev koyar (tuğla kır, combo yap, can kaybetmeden bitir, boss'u 30 sn'de yen…). Tamamlanınca puan + iyi kapsül verir; zor anda "nefes", uzun sessizlikte "gösteri" anı yaratır. Ayarlar → Dramaturg ile kapatılabilir.
-- **Koleksiyon:** 20 lanet + 8 tuğla + 2 boss = 30 kart. Kartlar oynadıkça keşfedilir, 1/5/15 eşiklerinde seviye atlar. Lanet kartı seviyesi o lanetin süresini %10 kısaltır. Kariyer panelindeki **📖 Koleksiyon** düğmesiyle açılır.
+- **Koleksiyon:** 21 lanet + 14 tuğla + 2 boss = 37 kart. Kartlar oynadıkça keşfedilir, 1/5/15 eşiklerinde seviye atlar. Lanet kartı seviyesi o lanetin süresini %10 kısaltır. Kariyer panelindeki **📖 Koleksiyon** düğmesiyle açılır.
 - **Hayalet Koşu:** En iyi klasik koşunun raket/top hareketi kaydedilir; yeni koşuda yarı saydam hayalet aynı tempoyu gösterir. 🎯 Meydan panelinden `BBG1:` kodu alınıp arkadaşla paylaşılabilir. Ayarlar → Hayalet koşu ile kapatılabilir.
-- **Haftalık Kaos Tohumu:** Her hafta (pazartesi) aynı tohum: aynı bölümler, aynı kapsül ve lanet sırası. Pakt, dramaturg, hayalet ve son top bahsi kapalıdır; skorlar aynı koşulda karşılaştırılır. 🎯 Meydan panelinden `BBW1:` sonuç kodu alınır.
+- **Haftalık Kaos Tohumu:** Her hafta (pazartesi) aynı tohum: aynı **tohumdan üretilmiş simetrik bölümler**, aynı kapsül ve lanet sırası. Pakt, dramaturg, hayalet ve son top bahsi kapalıdır; skorlar aynı koşulda karşılaştırılır. 🎯 Meydan panelinden `BBW1:` sonuç kodu alınır.
 - **Şarkıdan Bölüm:** Bir ses dosyası seçilir; BPM, bas ve tiz enerjisi analiz edilip 3 bölüm (+ güçlü finalde boss) üretilir. Aynı şarkı aynı bölümü verir; `BBS1:` kodu ile paylaşılır. Şarkı arka planda çalar ve mevcut müzik senkronuyla birleşir.
 
 ## Lanetler (engeller)
@@ -203,6 +205,7 @@ Oyun sırasında rastgele aralıklarla bir **lanet** gelir: ekranın ortasında 
 | Daralan duvarlar | 10 sn | Yan duvarlar 110 px içeri kapanır |
 | Gezgin bariyerler | 12 sn | Sahada kayan iki kırılmaz bariyer |
 | Tavan çöküyor | anlık | Tüm tuğlalar bir sıra aşağı iner |
+| Düşen duvar | 12 sn | Duvar ~4 sn'de bir sıra iner; bitirmeden düşersek raket tehlikede |
 | Diriliş | anlık | Kırılmış 3 tuğla geri gelir |
 | Zırhlanma | anlık | Tuğlalar +1 dayanıklılık kazanır (en çok 3) |
 | UFO baskını | anlık | Geçen UFO kötü kapsül bırakır; 2 vuruşta düşer, +750 ve iyi kapsül |
@@ -276,7 +279,7 @@ Araç çubuğundaki **🏅 Kariyer** (ya da Rekabet panelindeki **📊 Kariyer v
 
 Araç çubuğundaki **🎯 Meydan** düğmesi iki şeyi bir arada açar:
 
-- **Günlük meydan okuma:** her gün **tek deneme**. Koşu **1 can**, **Kabus** lanet yoğunluğu ve **+%15 top hızı** ile başlar. Deneme başladığı anda kullanılmış sayılır; sayfayı yenilemek yeni deneme açmaz. Bugünkü skor, günlük en iyi ve üst üste oynanan gün serisi `bb_daily` içinde saklanır. Seri, dün de oynandıysa artar; bir gün atlanırsa 1'e döner. Yerel tarih kullanılır.
+- **Günlük meydan okuma:** her gün **tek deneme**, o güne özel **tohumdan üretilmiş simetrik haritalarla**. Koşu **1 can**, **Kabus** lanet yoğunluğu ve **+%15 top hızı** ile başlar. Deneme başladığı anda kullanılmış sayılır; sayfayı yenilemek yeni deneme açmaz. Bugünkü skor, günlük en iyi ve üst üste oynanan gün serisi `bb_daily` içinde saklanır. Seri, dün de oynandıysa artar; bir gün atlanırsa 1'e döner. Yerel tarih kullanılır.
 - **Bölüm seçimi (pratik):** klasik oyunda ulaştığın en ileri bölüme kadar (1 her zaman açık) bölüm seçebilirsin. Seçilen bölüm **pratik koşu** olarak başlar; rekor, liderlik tablosu, kariyer sayaçları ve başarımlar sayılmaz.
 - **🌀 Tünel Fırtınası:** 12. bölüm kilitli olsa bile bu düğmeyle her zaman pratik olarak oynanır.
 

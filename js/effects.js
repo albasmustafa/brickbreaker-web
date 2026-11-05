@@ -58,7 +58,7 @@ function age(list, dt, gravity, keep) {
 function updateEffects(dt) {
   particles = age(particles, dt, 900, p => p.life > 0 && p.y < H + 20);
   fragments = age(fragments, dt, 1100, f => f.life > 0 && f.y < H + 40);
-  for (const b of bricks) { b.flash = Math.max(0, b.flash - dt * 7); b.wob = Math.max(0, (b.wob || 0) - dt * 4); }
+  for (const b of bricks) { b.flash = Math.max(0, b.flash - dt * 7); b.wob = Math.max(0, (b.wob || 0) - dt * 4); b.colFade = Math.max(0, (b.colFade || 0) - dt * 5); }
   updateGlints(dt);
   paddle.flash = Math.max(0, paddle.flash - dt * 6);
   state.buildFade = Math.min(COLS, state.buildFade + dt * 4);   // belirme animasyonu her ekranda ilerler

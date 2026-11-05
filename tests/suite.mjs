@@ -51,15 +51,15 @@ test("Yükleme, arayüz ve özellik envanteri", async ({ p, expect }) => {
   expect(r.mode === "menu" && r.bricks === 46 && r.levels === 12, "menü ve ilk bölüm: " + JSON.stringify(r));
   expect(r.themes === 25, "25 hazır tema");
   expect(r.tools === 9, "araç çubuğunda 9 düğme (ses, tema, rastgele, stüdyo, rekabet, meydan, kariyer, ayarlar, tam ekran): " + r.tools);
-  expect(r.tiers === "Bronz,Gümüş,Altın,Platin,Elmas,Usta,Efsane" && r.ach === 25 && r.stats === 19 && r.career, "7 lig, 25 başarım, 19 sayaç, rütbe kartı: " + JSON.stringify([r.tiers, r.ach, r.stats, r.career]));
+  expect(r.tiers === "Bronz,Gümüş,Altın,Platin,Elmas,Usta,Efsane" && r.ach === 27 && r.stats === 20 && r.career, "7 lig, 27 başarım, 20 sayaç, rütbe kartı: " + JSON.stringify([r.tiers, r.ach, r.stats, r.career]));
   expect(r.panels, "paneller kapalı başlar");
   expect(r.powers === "WMSFLYDKOHQRNZC", "15 kapsül: " + r.powers);
-  expect(r.curses === 20, "20 lanet");
+  expect(r.curses === 21, "21 lanet: " + r.curses);
   expect(r.bosses === "TUĞLA KRAL,DEMİR İMPARATOR", "2 boss");
   expect(r.looks === 8 && r.paddle === 9 && r.arch === 5 && r.musicFx === 12, "görünüm/raket sesi/müzik tabloları");
   expect(r.sfx >= 36, "ses tablosu: " + r.sfx);
-  expect(r.skills === "caylak,usta,efsane" && r.types === "XEZ$+", "bot seviyeleri ve tuğla türleri");
-  expect(r.codex === 30 && r.codexPanel, "30 koleksiyon kartı, panel kapalı: " + JSON.stringify([r.codex, r.codexPanel]));
+  expect(r.skills === "caylak,usta,efsane" && r.types === "XEZ$+HATIVS", "bot seviyeleri ve tuğla türleri: " + r.types);
+  expect(r.codex === 37 && r.codexPanel, "37 koleksiyon kartı, panel kapalı: " + JSON.stringify([r.codex, r.codexPanel]));
   expect(r.song, "şarkıdan bölüm üreteci yüklü");
   expect(r.rows >= 18, "ayarlar paneli satırları üretildi: " + r.rows);
 });
@@ -188,7 +188,7 @@ test("Koleksiyon: kartlar, seviye, lanet direnci, kalıcılık ve sıfırlama", 
              progress: codexProgress.textContent, count: codexCard("curse:gorunmez").count };
   })()`);
   expect(r.lvl === 2 && Math.abs(r.resist - 0.8) < 1e-9 && r.discovered === 3 && r.count === 5, "kart seviyesi ve direnç: " + JSON.stringify(r));
-  expect(r.cards === 20 && r.got === 1 && r.open && r.progress.includes("1/20"), "koleksiyon paneli: " + JSON.stringify(r));
+  expect(r.cards === 21 && r.got === 1 && r.open && r.progress.includes("1/21"), "koleksiyon paneli: " + JSON.stringify(r));
   expect(Math.abs(r.dur - 6.4) < 1e-9, "lanet kartı süreyi kısaltır: " + r.dur);
   const saved = await p.eval("JSON.stringify([cardLevel('curse:gorunmez'), codexDiscovered()])");
   await p.reload();
@@ -425,6 +425,138 @@ test("Tuğla türleri: elektrik, patlayan, altın, çoğaltan, kırılmaz, kayan
   expect(r.cracks, "çatlaklar tuğla başına sabit");
 });
 
+test("Yeni tuğla türleri: yenilenen, kalkanlı, ikiz, buz, virüs, şifacı", async ({ p, expect }) => {
+  const r = await p.eval(`(() => {
+    __start(2);
+    // İKİZ: birini kır → ikisi de dağılır, ikisine de sayaç yazılır
+    const twins = bricks.filter(b => b.wasTwin);
+    const t = twins[0], pair = t.twin;
+    const twin0 = run.twinBricks;
+    damageBrick(t, 1);
+    const twin = { paired: !!pair, both: t.dead && pair.dead, count: run.twinBricks - twin0 };
+    // YENİLENEN: yarım kalınca zamanla canını geri kazanır
+    const h = bricks.find(b => b.regen && !b.dead);
+    damageBrick(h, 1);
+    const wounded = h.hp;
+    h.healAt = state.time + 0.01; state.time += 0.02; updateSpecialBricks(0);
+    const regen = { wounded, healed: h.hp };
+    __start(6);
+    // KALKANLI: top yalnız kalkanı aşındırır; 4 vuruşta kalkan iner; lazer kalkanı tanımaz
+    const a = bricks.find(b => b.armorHp > 0);
+    damageBrick(a, 1);
+    const chip = { hp: a.hp, armor: a.armorHp };
+    damageBrick(a, 1); damageBrick(a, 1); damageBrick(a, 1);
+    const stripped = a.armorHp === 0 && a.hp === 1 && !a.dead;
+    const a2 = bricks.find(b => b.armorHp > 0 && b !== a && !b.dead);
+    damageBrick(a2, 1, 0, "laser");
+    const lasered = a2.dead;
+    // BUZ: kırılınca komşuları donar (+2 can)
+    __start(9);
+    const ice = bricks.find(b => b.ice && !b.dead);
+    const nb = bricks.find(o => !o.dead && o !== ice && !o.unbreakable && !o.explosive && !(o.armorHp > 0) &&
+                                (o.col - ice.col) ** 2 + (o.row - ice.row) ** 2 <= 2);
+    const hp0 = nb.hp;
+    destroyBrick(ice);
+    const froze = { frozen: !!nb.frozen, gain: nb.hp - hp0 };
+    // VİRÜS: nabızda en zayıf komşusunu güçlendirir; kırılınca sayaç işler
+    const v = bricks.find(b => b.virus && !b.dead);
+    const near = bricks.filter(o => !o.dead && !o.unbreakable && o !== v && !o.virus && !(o.armorHp > 0) && !o.explosive &&
+                                   o.hp < 3 && (o.col - v.col) ** 2 + (o.row - v.row) ** 2 <= 2);
+    const before = near.reduce((s2, o) => s2 + o.hp, 0);
+    v.spreadAt = state.time + 0.01; state.time += 0.02; updateSpecialBricks(0);
+    const spread = near.reduce((s2, o) => s2 + o.hp, 0) - before;
+    const v2 = bricks.find(b => b.virus && !b.dead);
+    const kills0 = run.virusBricks;
+    destroyBrick(v2);
+    const vkilled = run.virusBricks - kills0;
+    // ŞİFACI: önce yaralı komşuyu, boss varsa boss'u onarır
+    __start(6);
+    const doc = bricks.find(b => b.healer && !b.dead);
+    const patient = bricks.find(o => !o.dead && o !== doc && !o.unbreakable && (o.col - doc.col) ** 2 + (o.row - doc.row) ** 2 <= 2);
+    patient.hp = 1;
+    doc.healPulseAt = state.time + 0.01; state.time += 0.02; updateSpecialBricks(0);
+    const healedNeighbor = patient.hp === 2;
+    state.boss = makeBoss({ name: "TEST", hp: 30, speed: 100, shootEvery: 2 }, 0);
+    state.boss.hp = 10;
+    doc.healPulseAt = state.time + 0.01; state.time += 0.02; updateSpecialBricks(0);
+    const bossHeal = state.boss.hp === 12;
+    state.boss = null;
+    return { twin, regen, chip, stripped, lasered, froze, spread, vkilled, healedNeighbor, bossHeal };
+  })()`);
+  expect(r.twin.paired && r.twin.both && r.twin.count === 2, "ikiz çift kırılır ve iki tuğla sayılır: " + JSON.stringify(r.twin));
+  expect(r.regen.wounded === 1 && r.regen.healed === 2, "yenilenen canını geri kazanır: " + JSON.stringify(r.regen));
+  expect(r.chip.hp === 1 && r.chip.armor === 3 && r.stripped, "kalkan vuruşları aşındırır, canına dokunmaz: " + JSON.stringify([r.chip, r.stripped]));
+  expect(r.lasered, "lazer kalkanı tanımaz");
+  expect(r.froze.frozen && r.froze.gain === 2, "buz komşularını dondurur (+2 can): " + JSON.stringify(r.froze));
+  expect(r.spread >= 1 && r.vkilled === 1, "virüs komşusunu güçlendirir, kırılınca sayılır: " + JSON.stringify([r.spread, r.vkilled]));
+  expect(r.healedNeighbor && r.bossHeal, "şifacı komşuyu ve boss'u onarır: " + JSON.stringify([r.healedNeighbor, r.bossHeal]));
+});
+
+test("Yordamsal haritalar, SERT TUĞLALAR ve VİRÜS SALGINI paktları, DÜŞEN DUVAR, ritm bonusu", async ({ p, expect }) => {
+  const r = await p.eval(`(() => {
+    // GÜNLÜK: tohumdan simetrik duvar; ikinci kurulum birebir aynı
+    const sig = () => bricks.map(b => b.row + ":" + b.col + ":" + b.maxHp + (b.virus ? "V" : "")).join(",");
+    __start(1);
+    const fixed = sig();
+    run.daily = true; buildLevel(1);
+    // kesin ayna denetimi: her tuğlanın karşılığı da dolu ve aynı türde
+    const kind = b => b.virus ? "V" : b.ice ? "I" : b.armored ? "A" : b.wasTwin ? "T" : b.regen ? "H" : b.hp;
+    const grid = new Map(bricks.map(b => [b.row + ":" + b.col, kind(b)]));
+    const mirrored = bricks.length >= 20 && bricks.every(b => grid.get(b.row + ":" + (9 - b.col)) === kind(b));
+    const map1 = sig();
+    buildLevel(1);
+    const map2 = sig();
+    run.daily = false;
+    const sameDaily = map1 === map2 && map2.length > 0 && map1 !== fixed;
+    // HAFTALIK: kendi tohumuyla deterministik, günlükten farklı duvar
+    startWeekly();
+    const wmap1 = sig();
+    toMenu();
+    startWeekly();
+    const wmap2 = sig();
+    toMenu();
+    const sameWeekly = wmap1 === wmap2 && wmap1 !== map1;
+    // SERT TUĞLALAR paktı: sıradan tuğlalar +1 can
+    startGame(); launchBall();
+    run.pacts = ["tugla"]; buildLevel(2);
+    const isPlain = b => !b.unbreakable && !b.explosive && !b.electric && !b.gold && !b.splitter && !b.regen && !b.armored && !b.twin && !b.ice && !b.virus && !b.healer;
+    const plains = bricks.filter(isPlain);
+    const hardened = plains.length > 0 && plains.every(b => b.maxHp >= 2 && b.hp === b.maxHp);
+    // VİRÜS SALGINI paktı: her bölümde 2 virüs tuğla
+    run.pacts = ["salgin"]; buildLevel(3);
+    const virused = bricks.filter(b => b.virus).length;
+    run.pacts = [];
+    // DÜŞEN DUVAR: aktifken duvar ~4 sn'de bir iner
+    __start(1);
+    const y0 = bricks[0].y;
+    startCurse("dusen");
+    state.dusenNext = state.time + 0.01; state.time += 0.02;
+    updateCurses(0.05);
+    const descended = bricks[0].ty > y0 && curseOn("dusen");
+    // RİTİM BONUSU: vuruşa denk gelen kırış +15 verir ve sayaç tutar
+    const target = bricks.find(b => !b.dead && !b.unbreakable);
+    music.on = true; music.beat = 1;
+    const s0 = state.score, beats0 = run.beats;
+    destroyBrick(target);
+    const beat = { extra: state.score - s0 > 15, beats: run.beats - beats0 };
+    music.on = false; music.beat = 0;
+    // Dramaturg: yeni görev tipleri ilerler
+    __start(7);
+    director.challenge = { id: "zap", text: "3 elektrik tuğlası kır", target: 3, reward: 700, startZap: run.zapBricks, done: false };
+    for (let i = 0; i < 3; i++) destroyBrick(bricks.find(b => b.electric && !b.dead));
+    const zap = directorProgress(director.challenge).join();
+    return { mirrored, sameDaily, sameWeekly, hardened, virused, descended, beat, zap };
+  })()`);
+  expect(r.mirrored, "günlük duvarı simetriktir");
+  expect(r.sameDaily, "aynı gün aynı yordamsal duvar");
+  expect(r.sameWeekly, "haftalık kendi tohumuyla deterministik ve günlükten farklı");
+  expect(r.hardened, "SERT TUĞLALAR: sıradan tuğlalar +1 can");
+  expect(r.virused === 2, "VİRÜS SALGINI: 2 virüs tuğla: " + r.virused);
+  expect(r.descended, "DÜŞEN DUVAR duvarı indirir ve süreli kalır");
+  expect(r.beat.extra && r.beat.beats === 1, "ritm bonusu: " + JSON.stringify(r.beat));
+  expect(r.zap === "3,3", "dramaturg elektrik görevi ilerler: " + r.zap);
+});
+
 test("Tünel Fırtınası: piksel duvar, çelik tüneller, zincir, küpler, 300 top, kazanma", async ({ p, expect, shots, sleep }) => {
   const r = await p.eval(`(() => {
     __start(12);
@@ -592,7 +724,7 @@ test("Kara delik, ÇILGIN MOD, lazer, kalkan, kombo yazıları", async ({ p, exp
   expect(r.shield[0] === 0 && r.shield[1], "kalkan topu bir kez kurtarır");
 });
 
-test("Lanetler: 20 lanetin her biri güvenle çalışır", async ({ p, expect }) => {
+test("Lanetler: 21 lanetin her biri güvenle çalışır", async ({ p, expect }) => {
   const ids = await p.eval("Object.keys(CURSES)");
   for (const id of ids) {
     const r = await p.eval(`(() => { __start(1); bricks.slice(0, 3).forEach(b => (b.dead = true)); const ok = !CURSES.${id}.ok || CURSES.${id}.ok(); startCurse("${id}"); const on = curseOn("${id}");
@@ -878,7 +1010,7 @@ test("Kariyer: sayaçlar, başarımlar, seri, panel, kalıcılık, sıfırlama",
          "galibiyet serisi ve maç başarımları (8 kişilik, efsane bot, son can): " + JSON.stringify(r.streak));
   expect(r.loss.streak === 0 && r.loss.best === 3 && r.loss.attacks >= 1 && r.loss.blocked === 1 && r.loss.hist === 4 && r.loss.mode === "dostluk",
          "yenilgi seriyi bozar; saldırı ve kalkan sayılır; geçmiş: " + JSON.stringify(r.loss));
-  expect(r.panel.open && r.panel.stats === 19 && r.panel.ach === 25 && r.panel.achGot === r.panel.got && r.panel.rows === 5 && r.panel.head.includes(r.panel.got + "/25") && r.panel.card,
+  expect(r.panel.open && r.panel.stats === 20 && r.panel.ach === 27 && r.panel.achGot === r.panel.got && r.panel.rows === 5 && r.panel.head.includes(r.panel.got + "/27") && r.panel.card,
          "kariyer paneli: " + JSON.stringify(r.panel));
   const saved = await p.eval("JSON.stringify([career.stats.matches, career.stats.bricks, Object.keys(career.ach).length, career.history.length])");
   await p.reload();

@@ -675,5 +675,42 @@ const I18N_KEYS = [
 "BBS1:... bölüm kodunu buraya yapıştır", // 672
 "BBG1:... hayalet kodunu buraya yapıştır", // 673
 "Brick Breaker AI — kaos, lanetler, boss'lar, sonsuz temalar, müzikle senkron efektler ve çevrim içi kapışma.", // 674
+"Yeni tür tuğla", // 675
+"Yeni Nesil", // 676
+"Yeni türden bir tuğla kır", // 677
+"Çeşitlilik Ustası", // 678
+"Yeni türlerden toplam 100 tuğla kır", // 679
+"Yenilenen", // 680
+"Yarım kalan tuğla zamanla 1 canını geri kazanır.", // 681
+"Yenilenen bir tuğlayı kır.", // 682
+"Kalkanlı", // 683
+"Kalkanını top yavaşça aşındırır; ateş ve lazer hemen söker.", // 684
+"Kalkanlı bir tuğla kır.", // 685
+"İkiz", // 686
+"Biri kırılınca eşi de dağılır.", // 687
+"İkiz tuğlaları kır.", // 688
+"Kırılınca komşularını dondurur (+2 can); ateşte anında erir.", // 689
+"Buz tuğlasını kır.", // 690
+"Virüs", // 691
+"Komşularını sürekli güçlendirir; hızla yok et.", // 692
+"Virüs tuğlasını kır.", // 693
+"Şifacı", // 694
+"Boss'u ve komşularını onarır; önce onu vur.", // 695
+"Şifacı tuğlayı kır.", // 696
+"DÜŞEN DUVAR", // 697
+"DÜŞEN", // 698
+"3 elektrik tuğlası kır", // 699
+"2 ikiz tuğla kır", // 700
+"Virüs tuğlalarını temizle", // 701
+"SERT TUĞLALAR", // 702
+"Sıradan tuğlalar +1 can, puan ×1.35", // 703
+"VİRÜS SALGINI", // 704
+"Her bölümde 2 virüs tuğla, puan ×1.3", // 705
+"KALKAN KIRILDI!", // 706
+"RİTİM!", // 707
+"İKİZ!", // 708
+"DONDU!", // 709
+"ENFEKTE!", // 710
+"ŞİFA", // 711
 ];
 const I18N_DATA = {};

@@ -44,18 +44,31 @@ function applyPower(type) {
 }
 
 // --- Tuğlalar: tüm hasar kaynakları (top, ateş, lazer, yıldırım) buradan geçer ---
-function damageBrick(b, dmg = 1, zapDepth = 0) {
+// src: "fire" (ateş topu) · "laser" · yok = top/yıldırım. Kalkanlı tuğla yalnız ateş ve lazeri içeri alır.
+const REGEN_TIME = 6, VIRUS_EVERY = 5, HEAL_EVERY = 4;   // yeni nesil tuğlaların nabız aralıkları (sn)
+function damageBrick(b, dmg = 1, zapDepth = 0, src) {
   if (b.dead) return;
   b.flash = b.wob = 1;          // anlık parlama + esneme
   if (b.unbreakable) { sfx("clank"); spawnParticles(b.x, b.y, T().un, 4); return; }
+  if (b.armorHp > 0 && src !== "laser" && src !== "fire") {   // KALKANLI: kalkan dururken vuruş yalnız kalkanı aşındırır
+    if (--b.armorHp <= 0) {
+      b.armorHp = 0;
+      addFloater(b.x + BRICK.w / 2, b.y, tr("KALKAN KIRILDI!"), "#4361ee");
+      spawnParticles(b.x, b.y, "#4361ee", 10);
+    } else spawnParticles(b.x, b.y, "#8b9dc3", 3);
+    sfx("clank");
+    return;
+  }
+  b.prevCol = brickColor(b); b.prevKind = brickKind(b); b.colFade = 1;   // renk geçişi: eski görünümden yenisine yumuşak
   b.hp -= dmg;
+  if (b.regen) b.healAt = state.time + REGEN_TIME;      // yarım kalan yenilenen tuğla sayacı baştan başlar
   if (b.electric && zapDepth < 2) chainLightning(b, zapDepth + 1);
   if (b.hp <= 0) {
     destroyBrick(b);
     if (b.explosive) explode(b);
   } else {
     b.cracks = makeCracks(b);
-    sfx("clack");
+    sfx("clack", b.hp);              // kalan can arttıkça tok (kalın) ses
   }
   checkLevelDone();
 }
@@ -66,22 +79,39 @@ function destroyBrick(b) {
   state.combo++;
   run.bricks++;
   if (b.gold) run.goldBricks++;
+  if (b.electric) run.zapBricks++;
+  if (b.wasTwin) run.twinBricks++;
+  if (b.virus) run.virusBricks++;
+  if (b.regen || b.armored || b.wasTwin || b.ice || b.virus || b.healer) { run.specials++; track("specials"); }
   codexBump("brick:" + brickCodexKey(b));
   track("bricks");
   run.bestCombo = Math.max(run.bestCombo, state.combo);
   trackBest("bestCombo", state.combo);
   const pts = Math.round(10 * b.maxHp * Math.min(state.combo, 8) * (b.gold ? 10 * pactGoldMul() : 1) * (isFever() ? 2 : 1) * curseBonus());
   addScore(pts);
-  const col = b.explosive || b.electric || b.gold || b.splitter ? brickColor(b) : undefined;
+  const col = b.explosive || b.electric || b.gold || b.splitter || b.regen || b.armored || b.twin || b.ice || b.virus || b.healer ? brickColor(b) : undefined;
   const cx = b.x + BRICK.w / 2;
   spawnParticles(b.x, b.y, col);
   spawnFragments(b, col);
   addFloater(cx, b.y, "+" + pts, isFever() ? T().b2 : T().text);
-  sfx("brick", state.combo);
-  addShake(2.5);
+  sfx("brick", state.combo, b.maxHp);
+  if (b.maxHp >= 3) { state.hitstop = Math.max(state.hitstop, 0.03); addShake(3.5); }   // sert tuğla: mikro donma + biraz daha sarsıntı
+  else addShake(2.5);
+  if (music.on && music.beat > 0.55) {   // RİTİM BONUSU: vuruşa denk gelen kırışta küçük ödül
+    run.beats++;
+    addScore(15);
+    addFloater(cx, b.y - 14, tr("RİTİM!") + " +15", "#ffd166");
+  }
   if (b.gold) { spawnCoins(cx, b.y + BRICK.h / 2, 26); sfx("coin"); dropPowerupAt(cx, b.y, true); }   // altın: kesin iyi kapsül
   else if (gameRandom() < 0.16) dropPowerupAt(cx, b.y);
   if (b.splitter) spawnSplitBall(cx, b.y + BRICK.h + 10);
+  if (b.ice) freezeNeighbors(b);          // BUZ: kırılınca komşuları donar
+  const mate = b.twin;
+  if (mate && typeof mate === "object" && !mate.dead) {   // İKİZ: eşiyle birlikte dağılır
+    mate.twin = null;
+    addFloater(mate.x + BRICK.w / 2, mate.y, tr("İKİZ!"), "#f72585");
+    destroyBrick(mate);
+  }
   battleCharge(state.combo >= 5 ? 2 : 1);
   // Combo duyuruları; 10'da ÇILGIN MOD
   if (state.combo === FEVER_COMBO && !isFever()) {
@@ -92,6 +122,78 @@ function destroyBrick(b) {
     battleCharge(5);
     addShake(6);
   } else if (COMBO_CALLS[state.combo]) callout(COMBO_CALLS[state.combo] + " x" + state.combo);
+}
+// BUZ tuğlası kırılınca yakınındaki tuğlalar donar: +2 can ve buz görünümü (ateş anında eritir)
+function freezeNeighbors(src) {
+  sfx("freeze");
+  addFloater(src.x + BRICK.w / 2, src.y, tr("DONDU!"), "#90e0ef");
+  for (const o of bricks) {
+    if (o.dead || o.unbreakable || o.frozen || o.armorHp > 0 || o.explosive) continue;
+    if ((o.col - src.col) ** 2 + (o.row - src.row) ** 2 > 2) continue;
+    o.frozen = true;
+    o.hp += 2;
+    o.maxHp = Math.max(o.maxHp, o.hp);
+    o.cracks = makeCracks(o);
+    o.flash = 1;
+    spawnParticles(o.x, o.y, "#caf0f8", 5);
+  }
+}
+// Yeni nesil tuğlaların nabzı: yenilenen canını geri kazanır, virüs komşusunu güçlendirir, şifacı onarır
+function updateSpecialBricks(dt) {
+  for (const b of bricks) {
+    if (b.dead) continue;
+    if (b.infFlash) b.infFlash = Math.max(0, b.infFlash - dt * 2);
+    if (b.regen && b.hp < b.maxHp && state.time >= (b.healAt || 0)) {
+      b.hp++;
+      b.healAt = state.time + REGEN_TIME;
+      b.cracks = b.hp < b.maxHp ? makeCracks(b) : null;
+      b.flash = 0.6;
+      spawnParticles(b.x, b.y, "#43aa8b", 4);
+      sfx("heal");
+    }
+    if (b.virus && state.mode === "playing") {
+      if (!b.spreadAt) b.spreadAt = state.time + VIRUS_EVERY;
+      else if (state.time >= b.spreadAt) {
+        b.spreadAt = state.time + VIRUS_EVERY;
+        const t = bricks.filter(o => !o.dead && !o.unbreakable && o !== b && !o.virus && !(o.armorHp > 0) && !o.explosive &&
+                                     o.hp < 3 && (o.col - b.col) ** 2 + (o.row - b.row) ** 2 <= 2)
+                        .sort((x, y) => x.hp - y.hp)[0];
+        if (t) {
+          t.hp = Math.min(3, t.hp + 1);
+          t.maxHp = Math.max(t.maxHp, t.hp);
+          t.cracks = t.hp < t.maxHp ? makeCracks(t) : null;
+          t.infFlash = 1;
+          addFloater(t.x + BRICK.w / 2, t.y, tr("ENFEKTE!"), "#a3e635");
+          sfx("vir");
+          spawnParticles(b.x, b.y, "#a3e635", 3);
+        }
+      }
+    }
+    if (b.healer && state.mode === "playing") {
+      if (!b.healPulseAt) b.healPulseAt = state.time + HEAL_EVERY;
+      else if (state.time >= b.healPulseAt) {
+        b.healPulseAt = state.time + HEAL_EVERY;
+        const bo = state.boss;
+        if (bo && !bo.dead && bo.hp < bo.maxHp) {         // önce boss'u onarır
+          bo.hp = Math.min(bo.maxHp, bo.hp + 2);
+          bo.flash = 1;
+          addFloater(bo.x + bo.w / 2, bo.y + 14, tr("ŞİFA") + " +2", "#f4978e");
+          sfx("heal");
+          spawnParticles(bo.x + bo.w / 4, bo.y, "#f4978e", 6, bo.w / 2, bo.h / 2);
+        } else {
+          const t = bricks.filter(o => !o.dead && o !== b && !o.unbreakable && o.hp < o.maxHp &&
+                                       (o.col - b.col) ** 2 + (o.row - b.row) ** 2 <= 2)[0];
+          if (t) {
+            t.hp++;
+            t.cracks = t.hp < t.maxHp ? makeCracks(t) : null;
+            t.flash = 0.6;
+            addFloater(t.x + BRICK.w / 2, t.y, tr("ŞİFA") + " +1", "#f4978e");
+            sfx("heal");
+          }
+        }
+      }
+    }
+  }
 }
 // Çoğaltan tuğla: kırıldığı yerden aşağı doğru yeni bir top çıkar
 function spawnSplitBall(x, y) {
@@ -110,7 +212,7 @@ function explode(center) {
   while (queue.length) {
     const b = queue.shift();
     for (const o of bricks) {
-      if (o.dead || o.unbreakable || seen.has(o) || (o.col - b.col) ** 2 + (o.row - b.row) ** 2 > 2) continue;
+      if (o.dead || o.unbreakable || o.armorHp > 0 || seen.has(o) || (o.col - b.col) ** 2 + (o.row - b.row) ** 2 > 2) continue;
       seen.add(o);
       o.flash = 1;
       if (o.explosive) queue.push(o);
@@ -284,7 +386,7 @@ function moveBall(b, dt) {
       if (br.dead) continue;
       const pierce = fire && !br.unbreakable && !b.decoy;
       if (collideRect(b, br.x, br.y, BRICK.w, BRICK.h, !pierce)) {
-        if (pierce) { damageBrick(br, 99); spawnParticles(br.x, br.y, "#ff6b35", 6); }
+        if (pierce) { damageBrick(br, 99, 0, "fire"); spawnParticles(br.x, br.y, "#ff6b35", 6); }
         else if (!b.decoy) damageBrick(br, ballDamage());
         break;
       }
@@ -359,7 +461,7 @@ function updateLasers(dt) {
     l.y -= 760 * dt;
     if (l.y < -12) return false;
     const br = bricks.find(br => !br.dead && laserHits(l, br.x, br.y, BRICK.w, BRICK.h));
-    if (br) { damageBrick(br, 1); spawnParticles(l.x - 2, l.y, "#ff4d6d", 3, 4, 4); return false; }
+    if (br) { damageBrick(br, 1, 0, "laser"); spawnParticles(l.x - 2, l.y, "#ff4d6d", 3, 4, 4); return false; }
     const bo = state.boss, uf = state.ufo;
     if (bo && !bo.dead && laserHits(l, bo.x, bo.y, bo.w, bo.h)) { hitBoss(1, l.x, l.y); return false; }
     if (obstacles.some(o => laserHits(l, o.x, o.y, o.w, o.h))) return false;

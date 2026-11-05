@@ -74,12 +74,12 @@ const arp = (type, freqs, dur, vol, step, toMul = 0) => freqs.map((f, i) => [typ
 const SFX = {
   wall:      [["square", 300, 190, 0.06, 0.14], ["n", 900, 0, 0.03, 0.05]],             // yan duvar: tok "düt"
   ceiling:   () => tone("triangle", rnd(950, 1150), 700, 0.09, 0.13),                   // tavan: parlak "tink"
-  brick:     combo => {                                                                 // combo ile incelen pop
-    const f = 330 * 2 ** (Math.min(combo - 1, 16) / 12);
+  brick:     (combo, tough) => {                                                        // combo ile incelen, sert tuğlayla kalınlaşan pop
+    const f = 330 * 2 ** (Math.min(combo - 1, 16) / 12) / (tough >= 3 ? 1.5 : tough === 2 ? 1.22 : 1);
     tone("triangle", f, f * 0.8, 0.12, 0.22);
     noise(1800, 0.05, 0.12);
   },
-  clack:     [["square", 260, 220, 0.05, 0.12]],                                        // dayanıklı tuğla
+  clack:     (hp = 1) => tone("square", 300 / (1 + 0.22 * (hp - 1)), 220 / (1 + 0.22 * (hp - 1)), 0.05, 0.12),   // kalan can arttıkça tok
   clank:     [["square", 150, 130, 0.07, 0.14], ["n:highpass", 3200, 0, 0.04, 0.1]],    // kırılmaz: metalik
   boom:      [["n:lowpass", 400, 0, 0.3, 0.35], ["sine", 120, 40, 0.3, 0.3]],           // patlama
   lose:      [["sawtooth", 280, 70, 0.5, 0.25], ["sine", 140, 50, 0.5, 0.18]],
@@ -110,6 +110,9 @@ const SFX = {
   bossRoar:  [["sawtooth", 80, 160, 0.6, 0.25], ["n:lowpass", 300, 0, 0.6, 0.2]],
   bossDie:   [["n:lowpass", 400, 0, 0.3, 0.35], ["sine", 120, 40, 0.3, 0.3], ["n:lowpass", 300, 0, 0.5, 0.3, 0.18], ["sine", 90, 30, 0.6, 0.3, 0.3]],
   stun:      [["square", 220, 110, 0.25, 0.18], ["square", 233, 116, 0.25, 0.12]],
+  freeze:    [["n:highpass", 3500, 0, 0.18, 0.2], ["sine", 1400, 700, 0.14, 0.14]],     // buz: cam kırılması
+  heal:      [["sine", 620, 930, 0.16, 0.12], ["sine", 930, 1240, 0.16, 0.1, 0.08]],   // onarım: yumuşak çan
+  vir:       [["sawtooth", 140, 90, 0.2, 0.14], ["n:lowpass", 600, 0, 0.15, 0.12]],    // virüs: kaygan homurtu
   curseWarn: [["sawtooth", 110, 104, 0.7, 0.14], ["sawtooth", 156, 147, 0.7, 0.1]],      // uğursuz triton
   curse:     [["square", 420, 60, 0.45, 0.14], ["n:lowpass", 500, 0, 0.35, 0.18]],
   ufo:       [["sine", 900, 1400, 0.12, 0.1], ["sine", 1400, 900, 0.12, 0.1, 0.12]],

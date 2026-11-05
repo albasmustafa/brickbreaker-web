@@ -19,6 +19,10 @@ const PACT_POOL = [
     desc: tr("1 cana düş, tüm puanlar ×1.6"),                mods: { scoreMul: 1.6, livesSet: 1 } },
   { id: "sessiz", icon: "🌑", name: tr("SESSİZ GECE"),   color: "#9aa5b1",
     desc: tr("Lanetler kapalı, -%20 puan"),                  mods: { noCurses: true, scoreMul: 0.8 } },
+  { id: "tugla", icon: "🧱", name: tr("SERT TUĞLALAR"),  color: "#e76f51",
+    desc: tr("Sıradan tuğlalar +1 can, puan ×1.35"),         mods: { brickHpAdd: 1, scoreMul: 1.35 } },
+  { id: "salgin", icon: "🦠", name: tr("VİRÜS SALGINI"), color: "#a3e635",
+    desc: tr("Her bölümde 2 virüs tuğla, puan ×1.3"),         mods: { virusBricks: 2, scoreMul: 1.3 } },
 ];
 const PACT_BY_ID = Object.fromEntries(PACT_POOL.map(p => [p.id, p]));
 const pactBar = $("pactbar"), pactCards = $("pact-cards");
@@ -27,13 +31,13 @@ let pactOffer = null;
 // Paktların toplam etkisi: çarpanlar çarpılır, toplananlar eklenir.
 function pactMods() {
   const m = { scoreMul: 1, speedMul: 1, bossHpMul: 1, curseDurMul: 1, curseBonusAdd: 0,
-              goldMul: 1, shield: 0, lives: 0, livesSet: 0, noCurses: false };
+              goldMul: 1, shield: 0, lives: 0, livesSet: 0, noCurses: false, brickHpAdd: 0, virusBricks: 0 };
   for (const id of run.pacts) {
     const p = PACT_BY_ID[id];
     if (!p) continue;
     const x = p.mods;
     for (const k of ["scoreMul", "speedMul", "bossHpMul", "curseDurMul", "goldMul"]) if (x[k] != null) m[k] *= x[k];
-    for (const k of ["curseBonusAdd", "shield", "lives"]) if (x[k] != null) m[k] += x[k];
+    for (const k of ["curseBonusAdd", "shield", "lives", "brickHpAdd", "virusBricks"]) if (x[k] != null) m[k] += x[k];
     if (x.livesSet != null) m.livesSet = m.livesSet ? Math.min(m.livesSet, x.livesSet) : x.livesSet;
     if (x.noCurses) m.noCurses = true;
   }

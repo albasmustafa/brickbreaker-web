@@ -6,7 +6,7 @@
 const CURSE_ICONS = {
   gorunmez: "👻", hayalet: "🫥", karanlik: "🌑", elektrik: "💡", sis: "🌫️", ayna: "🪞", sarhos: "🍺",
   ruzgar: "🌬️", agir: "🪨", nabiz: "💓", buz: "🧊", yarik: "🕳️", sahte: "🎭", meteor: "☄️",
-  daralan: "🧱", bariyer: "🚧", inis: "⬇️", dirilis: "🧟", zirh: "🛡️", ufo: "🛸",
+  daralan: "🧱", bariyer: "🚧", inis: "⬇️", dusen: "📉", dirilis: "🧟", zirh: "🛡️", ufo: "🛸",
 };
 const BRICK_CARDS = [
   { key: "1", name: tr("Tek Vuruş"), icon: "🧱", desc: tr("En temel tuğla: bir vuruşta kırılır."), hint: tr("Bir tuğla kır.") },
@@ -17,6 +17,12 @@ const BRICK_CARDS = [
   { key: "Z", name: tr("Elektrikli"), icon: "⚡", desc: tr("Her vuruşta en yakın 3 tuğlaya yıldırım atar."), hint: tr("Elektrikli bir tuğla kır.") },
   { key: "$", name: tr("Altın"), icon: "💰", desc: tr("×10 puan, altın yağmuru ve kesin iyi kapsül."), hint: tr("Altın bir tuğla kır.") },
   { key: "+", name: tr("Çoğaltan"), icon: "➕", desc: tr("Kırılınca aşağı doğru yeni bir top çıkar."), hint: tr("Çoğaltan bir tuğla kır.") },
+  { key: "H", name: tr("Yenilenen"), icon: "♻️", desc: tr("Yarım kalan tuğla zamanla 1 canını geri kazanır."), hint: tr("Yenilenen bir tuğlayı kır.") },
+  { key: "A", name: tr("Kalkanlı"), icon: "🛡️", desc: tr("Kalkanını top yavaşça aşındırır; ateş ve lazer hemen söker."), hint: tr("Kalkanlı bir tuğla kır.") },
+  { key: "T", name: tr("İkiz"), icon: "🔗", desc: tr("Biri kırılınca eşi de dağılır."), hint: tr("İkiz tuğlaları kır.") },
+  { key: "I", name: tr("Buz"), icon: "❄️", desc: tr("Kırılınca komşularını dondurur (+2 can); ateşte anında erir."), hint: tr("Buz tuğlasını kır.") },
+  { key: "V", name: tr("Virüs"), icon: "🦠", desc: tr("Komşularını sürekli güçlendirir; hızla yok et."), hint: tr("Virüs tuğlasını kır.") },
+  { key: "S", name: tr("Şifacı"), icon: "🩹", desc: tr("Boss'u ve komşularını onarır; önce onu vur."), hint: tr("Şifacı tuğlayı kır.") },
 ];
 const CODEX_CURSES = Object.keys(CURSES).map(id => ({
   id: "curse:" + id, type: "curse", key: id, name: CURSES[id].label, icon: CURSE_ICONS[id] || "🔮",
@@ -59,7 +65,8 @@ function codexBump(id) {
     else addFloater(W / 2, 132, "📖 " + tr("YENİ KART: {name}", { name: card.name }), "#c77dff");
   }
 }
-const brickCodexKey = b => b.unbreakable ? "X" : b.explosive ? "E" : b.electric ? "Z" : b.gold ? "$" : b.splitter ? "+" : String(b.maxHp);
+const brickCodexKey = b => b.unbreakable ? "X" : b.explosive ? "E" : b.electric ? "Z" : b.gold ? "$" : b.splitter ? "+" : b.regen ? "H"
+  : b.armored ? "A" : b.wasTwin ? "T" : b.ice ? "I" : b.virus ? "V" : b.healer ? "S" : String(b.maxHp);
 
 // --- Koleksiyon paneli ---
 const codexPanel = $("codexpanel"), codexGrid = $("codex-grid"), codexProgress = $("codex-progress"), codexNote = $("codex-note");

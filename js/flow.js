@@ -2,14 +2,25 @@
 // 7. OYUN AKIŞI: bölüm kurma, oyun başlatma, can/bölüm geçişleri, duraklatma
 // ======================================================================
 // Harita karakteri → tuğla türü (rakamlar: o kadar vuruşluk sıradan tuğla)
+// H = yenilenen (yarım kalınca canını geri kazanır) · A = kalkanlı (top yavaş aşındırır, ateş/lazer hemen söker)
+// T = ikiz (eşiyle birlikte kırılır) · I = buz (kırılınca komşuları donar; ateşte anında erir)
+// V = virüs (komşularını sürekli güçlendirir) · S = şifacı (boss'u ve komşularını onarır)
 const BRICK_TYPES = {
   X: { unbreakable: true, hp: Infinity }, E: { explosive: true, hp: 1 }, Z: { electric: true, hp: 2 },
   $: { gold: true, hp: 2 }, "+": { splitter: true, hp: 1 },
+  H: { regen: true, hp: 2 }, A: { armored: true, hp: 1 }, T: { twin: true, hp: 1 },
+  I: { ice: true, hp: 2 }, V: { virus: true, hp: 2 }, S: { healer: true, hp: 2 },
 };
+const ARMOR_HITS = 4;   // kalkanlı tuğlanın kalkanı kaç normal vuruşta söker
 function makeBrick(r, c, ch) {
   const x = BRICK.left + c * (BRICK.w + BRICK.gap);
+  const special = BRICK_TYPES[ch];
   const b = { x, baseX: x, y: BRICK.top + r * (BRICK.h + BRICK.gap), row: r, col: c, dead: false, cracks: null, flash: 0,
-              ...(BRICK_TYPES[ch] || { hp: clamp(parseInt(ch) || 1, 1, 3) }) };
+              ...(special || { hp: clamp((parseInt(ch) || 1) + pactMods().brickHpAdd, 1, 3) }) };   // SERT TUĞLALAR paktı: sıradan tuğlalar +1 can
+  if (b.armored) b.armorHp = b.maxArmor = ARMOR_HITS;
+  if (b.twin) b.wasTwin = true;
+  if (b.virus) b.spreadAt = 0;
+  if (b.healer) b.healPulseAt = 0;
   b.maxHp = b.hp;
   return b;
 }
@@ -20,13 +31,49 @@ function brickColor(b) {
   if (b.electric) return "#7b2cbf";
   if (b.gold) return "#ffc300";
   if (b.splitter) return "#06d6a0";
+  if (b.regen) return "#43aa8b";
+  if (b.armored) return "#4361ee";
+  if (b.wasTwin) return "#f72585";
+  if (b.ice) return "#90e0ef";
+  if (b.virus) return "#a3e635";
+  if (b.healer) return "#f4978e";
   return settings.brickColor === "gokkusagi" ? hslHex(b.row * 40 + b.col * 9, 78, 46 + b.hp * 8) : hpColor(b.hp);
+}
+
+// İkiz tuğlalar: kalan T'leri en yakınıyla çiftler (tek kalırsa öksüz normal davranır).
+// b.twin eşlenmemişse true (tür bayrağı), eşlenmişse tuğla nesnesi — bu yüzden nesne denetimi yapılır.
+function linkTwins() {
+  const paired = v => v && typeof v === "object";
+  const singles = bricks.filter(b => b.twin && !b.dead && !paired(b.twin));
+  for (const b of singles) {
+    if (paired(b.twin)) continue;
+    let best = null, bd = Infinity;
+    for (const o of singles) {
+      if (o === b || paired(o.twin)) continue;
+      const d = (o.col - b.col) ** 2 + (o.row - b.row) ** 2;
+      if (d < bd) { bd = d; best = o; }
+    }
+    if (best) { b.twin = best; best.twin = b; }
+  }
+}
+// VİRÜS SALGINI paktı: bölümün sıradan tuğlalarından birkaçını virüse çevirir
+function seedVirusBricks(n) {
+  const count = pactMods().virusBricks;
+  if (!count) return;
+  const plain = bricks.filter(b => !b.dead && !b.unbreakable && !b.explosive && !b.electric && !b.gold &&
+                                   !b.splitter && !b.regen && !b.armored && !b.twin && !b.ice && !b.virus && !b.healer);
+  for (let i = 0; i < count && plain.length; i++) {
+    const b = plain.splice((gameRandom() * plain.length) | 0, 1)[0];
+    Object.assign(b, BRICK_TYPES.V, { hp: 2, maxHp: 2, spreadAt: 0, cracks: null, colFade: 0 });
+  }
 }
 
 function buildLevel(n) {
   const song = typeof songLevel !== "undefined" && songLevel.active && songLevel.levels[n - 1];
   const def = song || LEVELS[(n - 1) % LEVELS.length], cycle = song ? 0 : Math.floor((n - 1) / LEVELS.length);
-  const map = Array.isArray(def) ? def : def.map || [];
+  // Günlük/haftalık koşuda bölümler tohumdan üretilir: aynı tohum = aynı simetrik duvar
+  const proc = !song && (run.daily || (typeof weekly !== "undefined" && weekly.active)) && Array.isArray(def);
+  const map = proc ? proceduralMap(run.daily ? weekHash(daily.date) : weekly.seed, n) : (Array.isArray(def) ? def : def.map || []);
   bricks = [];
   movingRows = [];
   map.forEach((line, r) => {
@@ -39,6 +86,8 @@ function buildLevel(n) {
       if (amp > 4) movingRows.push({ row: r, amp, speed: 1.1 + r * 0.17 + cycle * 0.2, phase: r * 1.3 });
     }
   });
+  seedVirusBricks(n);       // VİRÜS SALGINI paktı: klasik koşuda da her bölümde virüs ekler (pakt yoksa dokunmaz)
+  linkTwins();
   state.boss = def.boss ? makeBoss(def.boss, cycle) : null;
   buildPixelWall(!song && def.pixel);   // TÜNEL FIRTINASI duvarı (diğer bölümlerde kapanır)
   buildZones(n);

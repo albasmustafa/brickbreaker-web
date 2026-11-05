@@ -19,10 +19,14 @@ function makeDirectorChallenge(level) {
     if (level >= 2) pool.push({ id: "combo", text: tr("Bir kez 8 combo yap"), target: 8, reward: 500 });
     if (bricks.some(b => b.gold)) pool.push({ id: "gold", text: tr("2 altın tuğla kır"), target: 2, reward: 600 });
     if (hazardLevel() !== "kapali") pool.push({ id: "curse", text: tr("Bir lanet atlat"), target: 1, reward: 400 });
+    if (bricks.some(b => b.electric)) pool.push({ id: "zap", text: tr("3 elektrik tuğlası kır"), target: 3, reward: 700 });
+    if (bricks.some(b => b.wasTwin)) pool.push({ id: "twin", text: tr("2 ikiz tuğla kır"), target: 2, reward: 600 });
+    if (bricks.some(b => b.virus)) pool.push({ id: "viral", text: tr("Virüs tuğlalarını temizle"), target: bricks.filter(b => b.virus && !b.dead).length, reward: 800 });
   }
   const c = gpick(pool);
   return { ...c, startBricks: run.bricks, startGold: run.goldBricks || 0, startCurses: state.cursesSurvived,
-           startLifeLost: run.lifeLost, startTime: state.time, maxCombo: 0, done: false };
+           startLifeLost: run.lifeLost, startTime: state.time, startZap: run.zapBricks || 0, startTwin: run.twinBricks || 0,
+           startViral: run.virusBricks || 0, maxCombo: 0, done: false };
 }
 function startDirectorChallenge(level) {
   if (!directorEnabled()) { director.challenge = null; return null; }
@@ -35,6 +39,9 @@ function directorProgress(c) {
   if (c.id === "bricks") return [clamp(run.bricks - c.startBricks, 0, c.target), c.target];
   if (c.id === "gold") return [clamp((run.goldBricks || 0) - c.startGold, 0, c.target), c.target];
   if (c.id === "curse") return [clamp(state.cursesSurvived - c.startCurses, 0, c.target), c.target];
+  if (c.id === "zap") return [clamp(run.zapBricks - c.startZap, 0, c.target), c.target];
+  if (c.id === "twin") return [clamp(run.twinBricks - c.startTwin, 0, c.target), c.target];
+  if (c.id === "viral") return [clamp(run.virusBricks - c.startViral, 0, c.target), c.target];
   if (c.id === "combo") return [clamp(c.maxCombo, 0, c.target), c.target];
   if (c.id === "boss") return [c.done ? c.target : Math.min(c.target, state.time - c.startTime), c.target];
   return [0, 0];

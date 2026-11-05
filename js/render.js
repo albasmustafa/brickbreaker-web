@@ -7,7 +7,8 @@ const brickSprites = new Map();
 const easeOutBack = t => 1 + 2.7 * (t - 1) ** 3 + 1.7 * (t - 1) ** 2;
 // Cila durumları: HUD skoru gerçeğe yumuşak yaklaşır, combo artınca hap zıplar, kartlar mod değişince belirir
 let hudScore = 0, comboSeen = 0, comboPop = 0, modeSeen = "", modeAt = 0;
-const brickKind = b => b.unbreakable ? "un" : b.explosive ? "ex" : b.electric ? "el" : b.gold ? "gold" : b.splitter ? "split" : "n";
+const brickKind = b => b.unbreakable ? "un" : b.explosive ? "ex" : b.electric ? "el" : b.gold ? "gold" : b.splitter ? "split"
+  : b.regen ? "reg" : (b.armored && b.armorHp > 0) ? "ar" : b.wasTwin ? "twin" : b.ice ? "ice" : b.virus ? "vir" : b.healer ? "heal" : "n";
 const roundedStyle = () => settings.brickStyle === "parlak" || settings.brickStyle === "yuvarlak";
 
 function brickSprite(col, kind) {
@@ -99,6 +100,52 @@ function paintBrickIcon(g, kind, col) {
       bg.addColorStop(1, "#cfeee6");
       circle(cx + ox, cy, 4.3, bg, g);
     }
+  } else if (kind === "reg") {  // yenilenen: canlanan artı
+    g.strokeStyle = "#d8f3dc";
+    g.lineWidth = 3;
+    g.beginPath(); g.moveTo(cx - 6, cy); g.lineTo(cx + 6, cy); g.moveTo(cx, cy - 6); g.lineTo(cx, cy + 6); g.stroke();
+    g.strokeStyle = "rgba(0,0,0,0.35)";
+    g.lineWidth = 1;
+    g.strokeRect(cx - 7.5, cy - 1.5, 4, 4); g.strokeRect(cx - 1.5, cy - 7.5, 4, 4);
+    g.strokeRect(cx + 3.5, cy - 1.5, 4, 4); g.strokeRect(cx - 1.5, cy + 3.5, 4, 4);
+  } else if (kind === "ar") {   // kalkanlı: kapak plakası + cıvata
+    g.fillStyle = "rgba(255,255,255,0.22)";
+    g.fillRect(6, 5, w - 12, h - 10);
+    g.strokeStyle = "#caf0f8";
+    g.lineWidth = 2;
+    g.strokeRect(6.5, 5.5, w - 13, h - 11);
+    circle(cx, cy, 3, "#caf0f8", g);
+    circle(cx, cy, 1.2, shade("#4361ee", -0.3), g);
+  } else if (kind === "twin") { // ikiz: zincir halkaları
+    g.strokeStyle = "#ffd6f2";
+    g.lineWidth = 2.4;
+    for (const ox of [-6, 6]) { g.beginPath(); g.ellipse(cx + ox, cy, 4.4, 3.1, ox < 0 ? -0.5 : 0.5, 0, TAU); g.stroke(); }
+    g.beginPath(); g.moveTo(cx - 3, cy + 2); g.lineTo(cx + 3, cy - 2); g.stroke();
+  } else if (kind === "ice") {  // buz: kar tanesi
+    g.strokeStyle = "#e0fbfc";
+    g.lineWidth = 1.8;
+    g.beginPath();
+    for (let i = 0; i < 3; i++) { const a = i * Math.PI / 3; g.moveTo(cx - Math.cos(a) * 7, cy - Math.sin(a) * 7); g.lineTo(cx + Math.cos(a) * 7, cy + Math.sin(a) * 7); }
+    g.stroke();
+    for (const a of [0, Math.PI / 3, 2 * Math.PI / 3, Math.PI, 4 * Math.PI / 3, 5 * Math.PI / 3])
+      for (const r of [4.4]) { g.beginPath(); g.moveTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); g.lineTo(cx + Math.cos(a + 0.5) * (r + 2), cy + Math.sin(a + 0.5) * (r + 2)); g.lineTo(cx + Math.cos(a - 0.5) * (r + 2), cy + Math.sin(a - 0.5) * (r + 2)); g.stroke(); }
+  } else if (kind === "vir") {  // virüs: spor + dokunaçlar
+    circle(cx, cy, 4.6, "#3a5a40", g);
+    circle(cx - 1.4, cy - 1.4, 1.6, "rgba(255,255,255,0.5)", g);
+    g.strokeStyle = "#3a5a40";
+    g.lineWidth = 1.6;
+    g.beginPath();
+    for (let i = 0; i < 6; i++) { const a = i * TAU / 6; g.moveTo(cx + Math.cos(a) * 4.6, cy + Math.sin(a) * 4.6); g.lineTo(cx + Math.cos(a) * 8.5, cy + Math.sin(a) * 8.5); }
+    g.stroke();
+    for (let i = 0; i < 6; i++) { const a = i * TAU / 6; circle(cx + Math.cos(a) * 8.5, cy + Math.sin(a) * 8.5, 1.3, "#3a5a40", g); }
+  } else if (kind === "heal") { // şifacı: tıbbi haç
+    g.fillStyle = "#ffffff";
+    g.fillRect(cx - 2.4, cy - 7, 4.8, 14);
+    g.fillRect(cx - 7, cy - 2.4, 14, 4.8);
+    g.strokeStyle = "rgba(0,0,0,0.3)";
+    g.lineWidth = 1;
+    g.strokeRect(cx - 2.4, cy - 7, 4.8, 14);
+    g.strokeRect(cx - 7, cy - 2.4, 14, 4.8);
   }
 }
 
@@ -123,6 +170,32 @@ function drawBricks() {
     ctx.globalAlpha = a;
     const col = brickColor(b), kind = brickKind(b);
     blitBrick(brickSprite(col, kind), x, y);
+    if (b.colFade > 0 && b.prevCol && (b.prevCol !== col || b.prevKind !== kind)) {   // renk geçişi: eski görünüm üstten sönerek kalkar
+      ctx.globalAlpha = a * b.colFade;
+      blitBrick(brickSprite(b.prevCol, b.prevKind || kind), x, y);
+      ctx.globalAlpha = a;
+    }
+    if (b.armorHp > 0) {                                // kalkan plakası göstergesi: kalan aşınma hakkı
+      ctx.fillStyle = "#caf0f8";
+      for (let i = 0; i < b.armorHp; i++) ctx.fillRect(x + 5 + i * 6, y + 3, 4, 3);
+    }
+    if (b.frozen) {                                     // DONMUŞ: buz kılıfı
+      ctx.fillStyle = "rgba(202,240,248,0.42)";
+      fillRR(x, y, BRICK.w, BRICK.h, rounded ? 6 : 0);
+      ctx.strokeStyle = "rgba(144,224,239,0.9)";
+      ctx.lineWidth = 2;
+      rrPath(x + 1, y + 1, BRICK.w - 2, BRICK.h - 2, rounded ? 5 : 0);
+      ctx.stroke();
+      ctx.fillStyle = "rgba(255,255,255,0.8)";
+      circle(x + 9, y + BRICK.h - 6, 1.6);
+      circle(x + BRICK.w - 11, y + 6, 1.6);
+    }
+    if (b.infFlash > 0) {                               // ENFEKTE: virüs nabzı
+      ctx.globalAlpha = a * b.infFlash * 0.45;
+      ctx.fillStyle = "#a3e635";
+      fillRR(x, y, BRICK.w, BRICK.h, rounded ? 6 : 0);
+      ctx.globalAlpha = a;
+    }
     if (kind === "ex") {                                // fitil kıvılcımı
       for (let i = 0; i < 3; i++) { ctx.fillStyle = Math.random() < 0.5 ? "#ffd166" : "#ff6b35"; ctx.fillRect(cx + 8 + rnd(-2.5, 2.5), cy - 10 + rnd(-2.5, 2.5), 2, 2); }
     } else if (kind === "el" && Math.random() < 0.12) { // ara ara kıvılcım yayı
@@ -145,6 +218,17 @@ function drawBricks() {
       ctx.lineWidth = 1.5;
       for (const pts of b.cracks) { path(pts.map(([px, py]) => [x + px, y + py])); ctx.stroke(); }
     }
+    // Kenar parçalanması: her yarım candan iki kopuk uç (tuğla başına sabit yerlerde)
+    if (!b.unbreakable && b.hp < b.maxHp) {
+      const rand = seeded(b.row * 977 + b.col * 131 + b.maxHp * 7 + 3);
+      ctx.fillStyle = "rgba(0,0,0,0.45)";
+      for (let i = 0; i < (b.maxHp - b.hp) * 2; i++) {
+        const side = (rand() * 4) | 0, t = rand();
+        const px = side === 1 ? x + BRICK.w - 3 : side === 3 ? x : x + t * BRICK.w;
+        const py = side === 0 ? y : side === 2 ? y + BRICK.h - 3 : y + t * BRICK.h;
+        ctx.fillRect(px, py, 2.5, 2.5);
+      }
+    }
     // HP noktacıkları: kalan dayanıklılık kadar, sağ üstten sola (çatlakların üstüne)
     if (settings.hpDots && !b.unbreakable && !b.explosive) {
       const dc = dotColorFor(col);
@@ -160,6 +244,23 @@ function drawBricks() {
     if (tf) ctx.restore();
   }
 }
+// İKİZ bağları: eş tuğlalar arasında nabızlı kesik ışın (her çift bir kez çizilir)
+function drawTwinLinks() {
+  for (const b of bricks) {
+    if (b.dead || !b.twin || typeof b.twin !== "object" || b.twin.dead) continue;
+    if (b.twin.row < b.row || (b.twin.row === b.row && b.twin.col < b.col)) continue;
+    ctx.strokeStyle = hexToRgba("#f72585", 0.3 + 0.22 * Math.sin(state.time * 5));
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 4]);
+    ctx.lineDashOffset = -state.time * 30;
+    ctx.beginPath();
+    ctx.moveTo(b.x + BRICK.w / 2, b.y + BRICK.h / 2);
+    ctx.lineTo(b.twin.x + BRICK.w / 2, b.twin.y + BRICK.h / 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+}
+
 // Parıltılar: ara ara rastgele bir tuğlada beliren dört köşeli yıldız
 let glints = [], glintCd = 0;
 function updateGlints(dt) {
@@ -695,7 +796,7 @@ function draw() {
   if (curseOn("ayna")) { ctx.translate(W, 0); ctx.scale(-1, 1); }
   if (isFever()) { ctx.fillStyle = `hsla(${(state.time * 300) % 360},90%,55%,0.10)`; ctx.fillRect(0, 0, W, H); }   // ÇILGIN MOD tonu
 
-  drawStars(); drawZones(); drawHoles(); drawMusicBack(); drawPixelWall(); drawBricks(); drawGlints(); drawBoss();
+  drawStars(); drawZones(); drawHoles(); drawMusicBack(); drawPixelWall(); drawTwinLinks(); drawBricks(); drawGlints(); drawBoss();
   drawPowerups(); drawObstacles(); drawUfo(); drawWallPanels();
   for (const p of particles) { ctx.globalAlpha = clamp(p.life * 2.5, 0, 1); ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, p.size, p.size); }
   for (const f of fragments) {  // dönen tuğla parçaları

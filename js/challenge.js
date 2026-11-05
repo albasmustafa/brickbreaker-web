@@ -57,6 +57,8 @@ function startDaily() {
   state.lives = 1;
   state.diffSpeed = 1.15;
   state.speed = levelSpeed(1);
+  buildLevel(1);                    // günlük haritası tohumdan kurulur (startGame daily bayrağını sıfırlamıştı)
+  startDirectorChallenge(1);        // görev de tohumdan gelen duvara göre seçilsin
   callout(tr("☀️ GÜNLÜK MEYDAN OKUMA"), "#ffd166");
   return true;
 }
