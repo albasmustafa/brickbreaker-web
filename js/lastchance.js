@@ -4,7 +4,7 @@
 //     Günlük, pratik ve kapışmada teklif edilmez.
 // ======================================================================
 const lastChanceEl = $("lastchance");
-const lastChanceAvailable = () => !run.daily && !run.practice && !battle.active && !run.lastChanceUsed && !weekly.active;
+const lastChanceAvailable = () => !run.daily && !run.practice && !run.survival && !battle.active && !run.lastChanceUsed && !weekly.active;
 
 function showLastChance() {
   if (!lastChanceAvailable()) return false;

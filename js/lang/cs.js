@@ -258,4 +258,18 @@ I18N_DATA.cs = {
 769: "💠 ZEĎ OSTROVŮ",
 770: "🧩 Hrát Mozaikovou zeď",
 771: "💠 Hrát Zeď ostrovů",
+
+772: "OPILÝ MÍČ",
+773: "OPILÝ",
+774: "BOMBA",
+775: "Vyhrané zdi",
+776: "První Zeď",
+777: "Vyhej pixelovou zeď",
+778: "Král Zdí",
+779: "Vyhej 10 pixelových zdí",
+780: "Tyrkys",
+781: "Růžová Zahrada",
+782: "Hluboké Moře",
+783: "🔥 Přežití",
+784: "🔥 PŘEŽITÍ",
 };

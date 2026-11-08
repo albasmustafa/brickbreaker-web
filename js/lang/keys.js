@@ -772,5 +772,18 @@ const I18N_KEYS = [
 "💠 ADALAR DUVARI", // 769
 "🧩 Mozaik Duvar'ı oyna", // 770
 "💠 Adalar Duvarı'nı oyna", // 771
+"ZIK ZIK TOP", // 772
+"ZIK ZIK", // 773
+"BOMBA", // 774
+"Yenilen duvar", // 775
+"İlk Duvar", // 776
+"Bir piksel duvar kazan", // 777
+"Duvarlar Kralı", // 778
+"10 piksel duvar kazan", // 779
+"Turkuaz", // 780
+"Gül Bahçesi", // 781
+"Derin Deniz", // 782
+"🔥 Hayatta Kalma", // 783
+"🔥 HAYATTA KALMA", // 784
 ];
 const I18N_DATA = {};

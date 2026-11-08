@@ -350,6 +350,7 @@ function pxUpdate(dt) {
 // Bölüm bitti: kutlama, bonus, yıldız çanları. Koridorda toplar her yere saçılır ve CR7 kutlama yapar
 function pxWin() {
   pxWall.won = true;
+  if (pxWall.mode) { run.walls++; track("walls"); }   // piksel duvar kazanma sayacı (başarımlar)
   pxWall.wonAt = performance.now();
   state.callout = null;
   state.clearAt = state.time + 4.2;

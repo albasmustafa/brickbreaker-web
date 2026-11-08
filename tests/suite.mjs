@@ -49,17 +49,17 @@ test("Yükleme, arayüz ve özellik envanteri", async ({ p, expect }) => {
     tiers: TIERS.map(t => t.name).join(), ach: ACHIEVEMENTS.length, stats: Object.keys(STATS).length, career: careerPanel.hidden && versusPanel.querySelector(".rank-card") !== null,
     codex: CODEX_CARDS.length, codexPanel: codexPanel.hidden, song: typeof generateSongLevels === "function" })`);
   expect(r.mode === "menu" && r.bricks === 46 && r.levels === 16, "menü ve ilk bölüm: " + JSON.stringify(r));
-  expect(r.themes === 25, "25 hazır tema");
+  expect(r.themes === 28, "28 hazır tema");
   expect(r.tools === 10, "araç çubuğunda 10 düğme (ses, tema, rastgele, stüdyo, rekabet, meydan, editör, kariyer, ayarlar, tam ekran): " + r.tools);
-  expect(r.tiers === "Bronz,Gümüş,Altın,Platin,Elmas,Usta,Efsane" && r.ach === 27 && r.stats === 20 && r.career, "7 lig, 27 başarım, 20 sayaç, rütbe kartı: " + JSON.stringify([r.tiers, r.ach, r.stats, r.career]));
+  expect(r.tiers === "Bronz,Gümüş,Altın,Platin,Elmas,Usta,Efsane" && r.ach === 29 && r.stats === 21 && r.career, "7 lig, 29 başarım, 21 sayaç, rütbe kartı: " + JSON.stringify([r.tiers, r.ach, r.stats, r.career]));
   expect(r.panels, "paneller kapalı başlar");
-  expect(r.powers === "WMSFLYDKOHQRNZC", "15 kapsül: " + r.powers);
-  expect(r.curses === 21, "21 lanet: " + r.curses);
+  expect(r.powers === "WMSFLYDKOHQRNZCB", "16 kapsül: " + r.powers);
+  expect(r.curses === 22, "22 lanet: " + r.curses);
   expect(r.bosses === "TUĞLA KRAL,DEMİR İMPARATOR", "2 boss");
   expect(r.looks === 8 && r.paddle === 9 && r.arch === 5 && r.musicFx === 12, "görünüm/raket sesi/müzik tabloları");
   expect(r.sfx >= 36, "ses tablosu: " + r.sfx);
   expect(r.skills === "caylak,usta,efsane" && r.types === "XEZ$+HATIVS", "bot seviyeleri ve tuğla türleri: " + r.types);
-  expect(r.codex === 37 && r.codexPanel, "37 koleksiyon kartı, panel kapalı: " + JSON.stringify([r.codex, r.codexPanel]));
+  expect(r.codex === 38 && r.codexPanel, "38 koleksiyon kartı, panel kapalı: " + JSON.stringify([r.codex, r.codexPanel]));
   expect(r.song, "şarkıdan bölüm üreteci yüklü");
   expect(r.rows >= 18, "ayarlar paneli satırları üretildi: " + r.rows);
 });
@@ -188,7 +188,7 @@ test("Koleksiyon: kartlar, seviye, lanet direnci, kalıcılık ve sıfırlama", 
              progress: codexProgress.textContent, count: codexCard("curse:gorunmez").count };
   })()`);
   expect(r.lvl === 2 && Math.abs(r.resist - 0.8) < 1e-9 && r.discovered === 3 && r.count === 5, "kart seviyesi ve direnç: " + JSON.stringify(r));
-  expect(r.cards === 21 && r.got === 1 && r.open && r.progress.includes("1/21"), "koleksiyon paneli: " + JSON.stringify(r));
+  expect(r.cards === 22 && r.got === 1 && r.open && r.progress.includes("1/22"), "koleksiyon paneli: " + JSON.stringify(r));
   expect(Math.abs(r.dur - 6.4) < 1e-9, "lanet kartı süreyi kısaltır: " + r.dur);
   const saved = await p.eval("JSON.stringify([cardLevel('curse:gorunmez'), codexDiscovered()])");
   await p.reload();
@@ -647,7 +647,7 @@ test("Günlük meydan okuma: tek deneme, kurallar, kayıt", async ({ p, expect }
   expect(broken.used === false && broken.best === 0 && broken.streak === 0 && broken.start === true, "bozuk kayıt: " + JSON.stringify(broken));
 });
 
-test("Kapsüller: 15 kapsülün hepsi etkisini gösterir", async ({ p, expect }) => {
+test("Kapsüller: 16 kapsülün hepsi etkisini gösterir", async ({ p, expect }) => {
   const checks = {
     W: "paddle.wideUntil > state.time && paddle.w > 140", M: "balls.length === 3", S: "fxOn('slow')", F: "isFire()",
     L: "fxOn('laser') && lasers.length > 0", Y: "fxOn('magnet')", D: "fxOn('big') && balls[0].r > 12", K: "state.shield === 3",
@@ -662,7 +662,7 @@ test("Kapsüller: 15 kapsülün hepsi etkisini gösterir", async ({ p, expect })
   }
   const d = await p.eval(`(() => { const c = {}, g = {}; for (let i = 0; i < 6000; i++) { c[pickPower(false)] = 1; const k = pickPower(true); g[k] = 1; }
     return { all: Object.keys(c).length, goodBad: Object.keys(g).some(k => POWERS[k].bad || k === "Q") }; })()`);
-  expect(d.all === 15 && !d.goodBad, "ağırlıklı düşme: hepsi düşer, altın/boss yalnızca iyi kapsül verir");
+  expect(d.all === 16 && !d.goodBad, "ağırlıklı düşme: hepsi düşer, altın/boss yalnızca iyi kapsül verir");
   const y = await p.eval(`(() => { __start(1); applyPower("Y"); __ballAt(paddle.x + 30, paddle.y - 10, 0, 300); for (let i = 0; i < 5; i++) update(STEP);
     const stuck = balls[0].stuck; applyPower("M"); const pend = state.pendingMulti; action(); return { stuck, pend, n: balls.length }; })()`);
   expect(y.stuck && y.pend && y.n === 3, "YAPIŞ yakalar, yapışıkken ÇOKLU bekler ve bırakınca çoğalır: " + JSON.stringify(y));
@@ -1126,6 +1126,40 @@ test("Mozaik ve Adalar duvarları: fayans salınımı, elmas adalar, küpler, ka
   expect(pr.m === "15,true,true,mozaik" && pr.a === "16,true,true,adalar", "panelden mozaik/adalar pratiği: " + JSON.stringify(pr));
 });
 
+test("Hayatta Kalma, BOMBA kapsülü ve duvar başarımları", async ({ p, expect }) => {
+  const r = await p.eval(`(() => {
+    __start(1);
+    const d0 = bricks.filter(b => !b.dead).length;
+    applyPower("B");
+    const bomb = d0 - bricks.filter(b => !b.dead).length;          // BOMBA: çevreyi patlatır
+    __start(12);
+    const p0 = pxWall.left;
+    applyPower("B");
+    const bombPx = p0 - pxWall.left;                                // piksel duvarda 7×7 alan
+    closePanels(); startSurvival();
+    const start = { survival: run.survival, lives: state.lives, pact: pactEnabled(), mul: state.diffScoreMul, last: lastChanceAvailable() };
+    const m0 = mag() / state.speed;
+    state.time += 40;
+    const m1 = mag() / state.speed;                                 // ramp: 40 sn sonra daha hızlı
+    state.score = 1234; state.lives = 1; loseLife(); lastEnd();
+    const over = { mode: state.mode, lb: state.lbRank, list: leaderboard.kalma.length, top: leaderboard.kalma[0] && leaderboard.kalma[0].score };
+    __start(12); pxWin();
+    const walls = { stat: career.stats.walls, ach: !!career.ach.duvar, won: pxWall.won };
+    toMenu();
+    const cleared = !run.survival;
+    return { bomb, bombPx, start, m0, m1, over, walls, cleared };
+  })()`);
+  expect(r.bomb >= 3, "BOMBA en az 3 tuğla patlatır: " + r.bomb);
+  expect(r.bombPx >= 20, "BOMBA piksel duvarda alan patlatır: " + r.bombPx);
+  expect(r.start.survival && r.start.lives === 1 && !r.start.pact && !r.start.last && Math.abs(r.start.mul - 1.5) < 1e-9,
+         "hayatta kalma: tek can, pakt/son top yok, puan ×1.5: " + JSON.stringify(r.start));
+  expect(r.m0 === 1 && r.m1 > 1.3, "top zamanla hızlanır (40 sn → ×" + r.m1.toFixed(2) + ")");
+  expect(r.over.mode === "gameover" && r.over.lb >= 1 && r.over.list === 1 && r.over.top === 1234,
+         "kalma liderlik tablosuna yazılır: " + JSON.stringify(r.over));
+  expect(r.walls.stat >= 1 && r.walls.ach && r.walls.won, "duvar sayacı + başarım: " + JSON.stringify(r.walls));
+  expect(r.cleared, "menüye dönüş survival bayrağını temizler");
+});
+
 test("Diller: 25 dil eksiksiz, yer tutucular, RTL, dil seçici, tüm ekranlar taşmasız ve çevrilmiş", async ({ p, expect }) => {
   // Kaynak denetimi: her dil 675/675, yer tutucular birebir (tools/i18n.mjs --check)
   const tool = spawnSync(process.execPath, [fileURLToPath(new URL("../tools/i18n.mjs", import.meta.url)), "--check"], { encoding: "utf8" });
@@ -1225,7 +1259,7 @@ test("Kara delik, ÇILGIN MOD, lazer, kalkan, kombo yazıları", async ({ p, exp
   expect(r.shield[0] === 0 && r.shield[1], "kalkan topu bir kez kurtarır");
 });
 
-test("Lanetler: 21 lanetin her biri güvenle çalışır", async ({ p, expect }) => {
+test("Lanetler: 22 lanetin her biri güvenle çalışır", async ({ p, expect }) => {
   const ids = await p.eval("Object.keys(CURSES)");
   for (const id of ids) {
     const r = await p.eval(`(() => { __start(1); bricks.slice(0, 3).forEach(b => (b.dead = true)); const ok = !CURSES.${id}.ok || CURSES.${id}.ok(); startCurse("${id}"); const on = curseOn("${id}");
@@ -1310,7 +1344,7 @@ test("Temalar: hazır, sonsuz rastgele, stüdyo, paylaşım kodu, kısayollar, p
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })); const esc = settingsPanel.hidden && backdrop.hidden;
     return { open, grid, sugg, picked, edited, saved, code: code.slice(0, 4), imported, badMsg, deleted, rKey, tKey, typingSafe, exclusive, esc };
   })()`);
-  expect(s.open && s.grid === 25 && s.sugg === 8, "stüdyo açılır: 25 tema + 8 öneri");
+  expect(s.open && s.grid === 28 && s.sugg === 8, "stüdyo açılır: 28 tema + 8 öneri");
   expect(s.picked === "Okyanus", "galeriden tema seçilir");
   expect(s.edited[0] === "e" && s.edited[1] === "#123456" && s.edited[2] === "#94d2bd", "düzenleme hazır temayı bozmaz");
   expect(s.saved.join() === "c,Benim Temam,1,1", "tema kaydedilir: " + s.saved);
@@ -1511,7 +1545,7 @@ test("Kariyer: sayaçlar, başarımlar, seri, panel, kalıcılık, sıfırlama",
          "galibiyet serisi ve maç başarımları (8 kişilik, efsane bot, son can): " + JSON.stringify(r.streak));
   expect(r.loss.streak === 0 && r.loss.best === 3 && r.loss.attacks >= 1 && r.loss.blocked === 1 && r.loss.hist === 4 && r.loss.mode === "dostluk",
          "yenilgi seriyi bozar; saldırı ve kalkan sayılır; geçmiş: " + JSON.stringify(r.loss));
-  expect(r.panel.open && r.panel.stats === 20 && r.panel.ach === 27 && r.panel.achGot === r.panel.got && r.panel.rows === 5 && r.panel.head.includes(r.panel.got + "/27") && r.panel.card,
+  expect(r.panel.open && r.panel.stats === 21 && r.panel.ach === 29 && r.panel.achGot === r.panel.got && r.panel.rows === 5 && r.panel.head.includes(r.panel.got + "/29") && r.panel.card,
          "kariyer paneli: " + JSON.stringify(r.panel));
   const saved = await p.eval("JSON.stringify([career.stats.matches, career.stats.bricks, Object.keys(career.ach).length, career.history.length])");
   await p.reload();

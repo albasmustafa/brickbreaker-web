@@ -258,4 +258,18 @@ I18N_DATA.de = {
 769: "💠 INSELWAND",
 770: "🧩 Mosaikwand spielen",
 771: "💠 Inselwand spielen",
+
+772: "TAUMELNDER BALL",
+773: "TAUMELN",
+774: "BOMBE",
+775: "Gewonnene Wände",
+776: "Erste Wand",
+777: "Gewinne eine Pixelwand",
+778: "König der Wände",
+779: "Gewinne 10 Pixelwände",
+780: "Türkis",
+781: "Rosengarten",
+782: "Tiefsee",
+783: "🔥 Überleben",
+784: "🔥 ÜBERLEBEN",
 };

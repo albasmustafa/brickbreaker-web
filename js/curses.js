@@ -18,6 +18,7 @@ const CURSES = {
   ruzgar:   { label: tr("RÜZGAR"),             short: tr("RÜZGAR"),   dur: 9,  group: "fizik", start: () => (state.windDir = gameRandom() < 0.5 ? -1 : 1) },
   agir:     { label: tr("AĞIR YERÇEKİMİ"),     short: tr("AĞIR"),     dur: 8,  group: "fizik" },
   nabiz:    { label: tr("NABIZ"),              short: tr("NABIZ"),    dur: 8,  group: "fizik" },
+  zikzik:   { label: tr("ZIK ZIK TOP"),        short: tr("ZIK ZIK"),   dur: 8,  group: "fizik" },   // topun yolu dalgalanır
   buz:      { label: tr("BUZLU RAKET"),        short: tr("BUZ"),      dur: 9,  group: "raket", start: () => { paddle.iceV = 0; paddle.aimX = null; }, end: () => (paddle.iceV = 0) },
   yarik:    { label: tr("YARIK RAKET"),        short: tr("YARIK"),    dur: 8,  group: "raket" },
   sahte:    { label: tr("SAHTE TOPLAR"),       short: tr("SAHTE"),    dur: 8,  start: () => spawnDecoys(), end: () => popDecoys() },

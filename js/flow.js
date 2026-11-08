@@ -165,12 +165,26 @@ function startGame() {
   serveBall();
   callout(tr("BÖLÜM {n}", { n: 1 }), T().accent);
 }
+// HAYATTA KALMA: tek can, süreyle hızlanan top, puan ×1.5 — kendi liderlik tablosu
+function startSurvival() {
+  closePanels();
+  if (battle.active) closeBattle();
+  startGame();
+  run.survival = true;
+  stopGhost();
+  state.lives = 1;
+  state.diffScoreMul *= 1.5;
+  hidePactOffer();
+  callout(tr("🔥 HAYATTA KALMA"), "#ff9f1c");
+  return true;
+}
 function toMenu() {
   const backToEditor = run.custom;          // editör testinden dönünce editör yeniden açılır
   if (run.daily && typeof finishDaily === "function") finishDaily();
   run.daily = false;
   run.dailyFinished = false;
   run.practice = false;
+  run.survival = false;
   hidePactOffer();
   hideLastChance();
   director.challenge = null;
@@ -250,7 +264,7 @@ function gameOver() {
   sfx("gameover");
   if (battle.active) battleEliminated();   // kapışmada elendin
   else if (run.practice || wasWeekly || run.song) state.lbRank = 0;
-  else { state.lbRank = recordScore("klasik", { score: state.score, level: state.level }); careerGameEnd(); }
+  else { state.lbRank = recordScore(run.survival ? "kalma" : "klasik", { score: state.score, level: state.level }); careerGameEnd(); }
   if (run.daily && typeof finishDaily === "function") finishDaily();
 }
 function levelCleared() {

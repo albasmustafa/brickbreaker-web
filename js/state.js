@@ -48,7 +48,8 @@ const newBall = stuck => ({ x: W / 2, y: H - 60, r: 8, dx: 0, dy: 0, stuck: !!st
 // Bölüm hızı: zorluk çarpanı yeni oyunda kilitlenir (oyun ortasında ayar değişse de oyun bozulmaz)
 const levelSpeed = l => Math.min(BASE_SPEED * state.diffSpeed * 1.07 ** (l - 1) * pactSpeedMul(), MAX_SPEED);
 // Hedef hız: bölüm hızı + vuruş başı hızlanma, yavaşlatma/hızlandırma çarpanlarıyla
-const mag = () => state.speed * (fxOn("slow") ? SLOW_FACTOR : 1) * (fxOn("haste") ? 1.3 : 1);
+const mag = () => state.speed * (fxOn("slow") ? SLOW_FACTOR : 1) * (fxOn("haste") ? 1.3 : 1)
+             * (run.survival ? Math.min(1.8, 1 + state.time * 0.012) : 1);   // HAYATTA KALMA: süreyle hızlanır
 function setSpeed(b, m) {
   const s = Math.hypot(b.dx, b.dy) || 1;
   b.dx = b.dx / s * m;

@@ -258,4 +258,18 @@ I18N_DATA.it = {
 769: "💠 MURO DELLE ISOLE",
 770: "🧩 Gioca al Muro mosaico",
 771: "💠 Gioca al Muro delle isole",
+
+772: "PALLA UBRIACA",
+773: "UBRIACA",
+774: "BOMBA",
+775: "Muri vinti",
+776: "Primo Muro",
+777: "Vinci un muro di pixel",
+778: "Re dei Muri",
+779: "Vinci 10 muri di pixel",
+780: "Turchese",
+781: "Giardino di Rose",
+782: "Mare Profondo",
+783: "🔥 Sopravvivenza",
+784: "🔥 SOPRAVVIVENZA",
 };

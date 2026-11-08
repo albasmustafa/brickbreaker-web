@@ -24,7 +24,30 @@ const POWERS = {
   N: { label: tr("MİNİ"),   color: "#8b0000", w: 5, bad: true, sound: "bad", timer: "mini" },
   Z: { label: tr("HIZ"),    color: "#8b0000", w: 5, bad: true, sound: "bad", timer: "haste" },
   C: { label: tr("LANET"),  color: "#5a189a", w: 5, bad: true, sound: "bad", fx: () => curseFromCapsule() },
+  B: { label: tr("BOMBA"),  color: "#ff9f1c", w: 6, sound: "power", fx: () => bombBlast() },
 };
+// BOMBA kapsülü: rastgele bir hedefin çevresini anında patlatır (piksel duvarda 7×7 alan + zincir)
+function bombBlast() {
+  addShake(5);
+  sfx("boom");
+  if (pxWall.active) {
+    const solid = [];
+    for (let i = 0; i < pxWall.grid.length; i++) if (pxWall.grid[i] === PX_BLUE) solid.push(i);
+    if (!solid.length) return;
+    const t = solid[(gameRandom() * solid.length) | 0], c = t % pxWall.cols, r2 = (t / pxWall.cols) | 0;
+    for (let rr = r2 - 3; rr <= r2 + 3; rr++) for (let cc = c - 3; cc <= c + 3; cc++)
+      if (rr >= 0 && rr < pxWall.rows && cc >= 0 && cc < pxWall.cols) pxBreak(rr * pxWall.cols + cc);
+    pxIgnite(t, 8);
+    spawnParticles(PX.x + c * pxWall.s - 10, PX.y + r2 * pxWall.s - 10, "#ff9f1c", 16, 40, 40);
+    checkLevelDone();
+    return;
+  }
+  const alive = bricks.filter(b => !b.dead && !b.unbreakable);
+  if (!alive.length) return;
+  const t = alive[(gameRandom() * alive.length) | 0];
+  destroyBrick(t);
+  explode(t);
+}
 // Can doluyken +CAN, lanetler kapalıyken LANET düşmez
 const powerAllowed = k => !(k === "H" && state.lives >= MAX_LIVES) && !(k === "C" && hazardLevel() === "kapali");
 function pickPower(goodOnly) {
@@ -338,6 +361,7 @@ function moveBall(b, dt) {
   }
   b.boost = 1 + (b.boost - 1) * Math.exp(-BOOST_DECAY * dt);
   b.spin *= Math.exp(-SPIN_DECAY * dt);
+  if (curseOn("zikzik")) rotate(b, Math.sin(state.time * 7 + b.x * 0.02) * 2.4 * dt);   // ZIK ZIK TOP: dalgalı uçuş
   b.portalCd -= dt;
   b.rot += (b.spin * 6 + 4) * dt;
   // AĞIR YERÇEKİMİ: yukarı giden top ağırlaşır, düşen hızlanır (yön de aşağı bükülür)

@@ -258,4 +258,18 @@ I18N_DATA.id = {
 769: "💠 DINDING PULAU",
 770: "🧩 Mainkan Dinding Mosaik",
 771: "💠 Mainkan Dinding Pulau",
+
+772: "BOLA MABUK",
+773: "MABUK",
+774: "BOM",
+775: "Dinding yang dimenangkan",
+776: "Dinding Pertama",
+777: "Menangkan dinding piksel",
+778: "Raja Dinding",
+779: "Menangkan 10 dinding piksel",
+780: "Turkis",
+781: "Taman Mawar",
+782: "Laut Dalam",
+783: "🔥 Bertahan",
+784: "🔥 BERTAHAN",
 };

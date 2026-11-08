@@ -33,7 +33,10 @@ Pastel|dfe7fd f0f4ff 6c8cff ff8fab 7b2cbf b5b9c9 ff9f1c 3a3a5e 3a3a5e 2b2d42 6b7
 Amber|0c0800 140d00 ffb000 ff8c00 cc5500 3d2b00 ffd000 ffb000 ffd27a ffb000 8a6100 ffb000 2b1d00
 Sonbahar|1f130a 2b1a0d f4a259 bc4b51 8cb369 5b4636 f4e285 fbe9d0 ffffff fbe9d0 b39a80 f4a259 45301d
 Aurora|021526 03203a 6ef3d6 b388ff 00e5ff 2c4a63 ff8a65 e0f7fa ffffff e0f7fa 7fa3b8 6ef3d6 0d3456
-Siberpunk|0d0221 1a0b3b 00f0ff ff2a6d fdf500 3d2c5e ff8800 f5f5f5 ffffff e0f7ff 8a7fb5 ff2a6d 2b1655`
+Siberpunk|0d0221 1a0b3b 00f0ff ff2a6d fdf500 3d2c5e ff8800 f5f5f5 ffffff e0f7ff 8a7fb5 ff2a6d 2b1655
+Turkuaz|04202a 06303c 3ddad7 20b2aa 128277 3a5a5e ff7a48 ffb86b fff4e6 eafcf9 9dbfc2 3ddad7 66e0d6
+Gül Bahçesi|2b0a1e 3a0f2a ff87ab e5547f b3325a 5c2a42 ffd166 9d4edd ffeef4 fde7ef c391a6 ff87ab ffafd0
+Derin Deniz|01111f 04203a 00b4d8 0088a3 00627a 1d3a52 ff9f1c 2ec4b6 e0fbfc caf0f8 7fa3b8 00b4d8 48cae4`
   .trim().split("\n").map((line, i) => {
     const [name, cols] = line.split("|");
     const t = { name, id: "p" + i };
@@ -43,7 +46,7 @@ Siberpunk|0d0221 1a0b3b 00f0ff ff2a6d fdf500 3d2c5e ff8800 f5f5f5 ffffff e0f7ff 
 const MAX_CUSTOM_THEMES = 60;
 // Hazır tema adları (çeviri anahtarları; tablo yukarıda düz metin)
 [N_("Gece"), N_("Gün Batımı"), N_("Orman"), N_("Neon"), N_("Gameboy"), N_("Buz"), N_("Şeker"), N_("Klasik"), N_("Lav"), N_("Okyanus"), N_("Synthwave"), N_("Matrix"), N_("Sakura"),
- N_("Çöl"), N_("Uzay"), N_("Kahve"), N_("Altın"), N_("Lavanta"), N_("Vampir"), N_("Kağıt"), N_("Pastel"), N_("Amber"), N_("Sonbahar"), N_("Aurora"), N_("Siberpunk")];
+ N_("Çöl"), N_("Uzay"), N_("Kahve"), N_("Altın"), N_("Lavanta"), N_("Vampir"), N_("Kağıt"), N_("Pastel"), N_("Amber"), N_("Sonbahar"), N_("Aurora"), N_("Siberpunk"), N_("Turkuaz"), N_("Gül Bahçesi"), N_("Derin Deniz")];
 // Görünen tema adı: hazır tema çevrilir, adı değişmemiş rastgele tema seçilen dilde yeniden adlanır, kullanıcı adları olduğu gibi kalır
 function themeName(t) {
   if (!t) return "";

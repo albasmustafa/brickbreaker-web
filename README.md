@@ -23,7 +23,7 @@ js/core.js            tuval, sabitler, renk / çizim / DOM yardımcıları, yaz�
 js/lang/keys.js       dil anahtarları (Türkçe kaynak metinler; tools/i18n.mjs üretir)
 js/lang/<kod>.js      24 dilin çevirileri (kimlik → metin)
 js/i18n.js            dil seçimi, tr() çevirisi, RTL, statik HTML çevirisi
-js/themes.js          25 hazır tema, tema yönetimi, sonsuz rastgele tema üreteci
+js/themes.js          28 hazır tema, tema yönetimi, sonsuz rastgele tema üreteci
 js/settings.js        ayar tablosu: varsayılanlar + doğrulama + ayarlar panelinin satırları
 js/audio.js           Web Audio ses motoru, olay sesleri tablosu, raket sesleri
 js/levels.js          16 bölüm: 11 harita (2 boss) + Tünel Fırtınası + CR7 Koridoru + Mikro/Mozaik/Adalar duvarları
@@ -146,7 +146,7 @@ GitHub Actions (`.github/workflows/ci.yml`) her push ve pull request'te Node 22 
 - **ÇILGIN MOD:** 10 combo'da 6 sn boyunca tüm toplar ateş topu olur, puanlar ×2, tahta gökkuşağına döner.
 - **Bölümler:** 13 bölüm `LEVELS` dizisinde (11 harita: satır = sıra, karakter = tuğla türü); 5. ve 10. bölüm boss, 11. bölüm *Siber Labirent*, 12. bölüm **Tünel Fırtınası**, 13. bölüm **CR7 Koridoru**, 14. bölüm **Mikro Duvar**, 15. bölüm **Mozaik Duvar**, 16. bölüm **Adalar Duvarı** (aşağıda). Sonrası döngü, bölüm başına top hızı +%7, her turda boss canı +%50.
 - **Boss:** *Tuğla Kral* (40 can) ve *Demir İmparator* (70 can). Sağa sola gezer, gözleriyle topu izler, rakete nişanlı mermi atar (değerse raket 2.5 sn sersemler ve küçülür). Canı yarıya inince öfkelenir: hızlanır, üçlü yelpaze atar, altına yeni tuğlalar diker. Her 6 isabette iyi kapsül düşürür. Ölünce ağır çekim patlama + 5000 puan.
-- **Güç kapsülleri** (tuğla kırılınca %16 ihtimal): **GENİŞ** raket 10 sn · **ÇOKLU** her toptan 2 kopya (en çok 8 top) · **YAVAŞ** 8 sn · **ATEŞ** 6 sn top kırılabilir tuğlaları sekmeden deler · **LAZER** 8 sn raketten otomatik lazer (boss mermilerini de vurur) · **YAPIŞ** 10 sn top rakete yapışır, tıkla bırak (2.5 sn sonra kendisi kalkar) · **DEV** 10 sn kocaman top, 2 hasar · **KALKAN** alt kenarda 3 kurtarış · **DELİK** 7 sn topları büken kara delik; çok yaklaşan topu fırlatır, sonunda çöküp çevresindeki tuğlaları yutar · **+CAN** (en çok 9) · **KAOS?** rastgele herhangi biri.
+- **Güç kapsülleri** (tuğla kırılınca %16 ihtimal): **BOMBA** anında rastgele bir hedefin çevresini patlatır (piksel duvarda 7×7 alan + zincir), **GENİŞ** raket 10 sn · **ÇOKLU** her toptan 2 kopya (en çok 8 top) · **YAVAŞ** 8 sn · **ATEŞ** 6 sn top kırılabilir tuğlaları sekmeden deler · **LAZER** 8 sn raketten otomatik lazer (boss mermilerini de vurur) · **YAPIŞ** 10 sn top rakete yapışır, tıkla bırak (2.5 sn sonra kendisi kalkar) · **DEV** 10 sn kocaman top, 2 hasar · **KALKAN** alt kenarda 3 kurtarış · **DELİK** 7 sn topları büken kara delik; çok yaklaşan topu fırlatır, sonunda çöküp çevresindeki tuğlaları yutar · **+CAN** (en çok 9) · **KAOS?** rastgele herhangi biri.
 - **Kötü kapsüller** (kırmızı, kesikli çerçeve): **TERS** 6 sn kontroller ters · **MİNİ** 8 sn küçük raket · **HIZ** 6 sn top ×1.3 · **LANET** hemen bir lanet çağırır. Yakalamak cesaret ister: +250 puan.
 - **Ağır çekim:** son tuğla kırılınca ve boss ölünce zaman yavaşlar, ekran hafif yakınlaşır; büyük patlamalarda an donması.
 - **Efektler:** her isabette tuğla bir an parlar ve rengi yeni durumuna yumuşakça geçer; kırılmada parçacık + dönen parçalar; kenar vuruşu/patlama/kayıp ekranı sarsar; top izi. Müzik çalarken vuruşa denk gelen kırışlar **RİTİM! +15** bonusu verir.
@@ -215,7 +215,7 @@ Teknik notlar (i18n):
 - **Lanet Paktı:** Klasik koşuda 1. ve her 5. bölümün başında 3 risk/ödül paktı sunulur (CAM TOP, KAN BEDELİ, BOSS AVCI, LANET MIKSI, ALTIN ATEŞİ, KALKAN USTASI, SIFIR NOKTA, SESSİZ GECE, SERT TUĞLALAR, VİRÜS SALGINI). Paktlar koşu boyunca sürer; seçmezsen hiçbiri uygulanmaz. Ayarlar → Lanet Paktı ile kapatılabilir.
 - **Son Top Bahsi:** Son can da gidince bir kez "1 canla devam et" teklifi gelir; devam eden oyuncu hemen bir lanet yer. Günlük, pratik, haftalık ve kapışmada yoktur.
 - **Dramaturg:** Her bölüme isteğe bağlı bir görev koyar (tuğla kır, combo yap, can kaybetmeden bitir, boss'u 30 sn'de yen…). Tamamlanınca puan + iyi kapsül verir; zor anda "nefes", uzun sessizlikte "gösteri" anı yaratır. Ayarlar → Dramaturg ile kapatılabilir.
-- **Koleksiyon:** 21 lanet + 14 tuğla + 2 boss = 37 kart. Kartlar oynadıkça keşfedilir, 1/5/15 eşiklerinde seviye atlar. Lanet kartı seviyesi o lanetin süresini %10 kısaltır. Kariyer panelindeki **📖 Koleksiyon** düğmesiyle açılır.
+- **Koleksiyon:** 22 lanet + 14 tuğla + 2 boss = 38 kart. Kartlar oynadıkça keşfedilir, 1/5/15 eşiklerinde seviye atlar. Lanet kartı seviyesi o lanetin süresini %10 kısaltır. Kariyer panelindeki **📖 Koleksiyon** düğmesiyle açılır.
 - **Hayalet Koşu:** En iyi klasik koşunun raket/top hareketi kaydedilir; yeni koşuda yarı saydam hayalet aynı tempoyu gösterir. 🎯 Meydan panelinden `BBG1:` kodu alınıp arkadaşla paylaşılabilir. Ayarlar → Hayalet koşu ile kapatılabilir.
 - **Haftalık Kaos Tohumu:** Her hafta (pazartesi) aynı tohum: aynı **tohumdan üretilmiş simetrik bölümler**, aynı kapsül ve lanet sırası. Pakt, dramaturg, hayalet ve son top bahsi kapalıdır; skorlar aynı koşulda karşılaştırılır. 🎯 Meydan panelinden `BBW1:` sonuç kodu alınır.
 - **Şarkıdan Bölüm:** Bir ses dosyası seçilir; BPM, bas ve tiz enerjisi analiz edilip 3 bölüm (+ güçlü finalde boss) üretilir. Aynı şarkı aynı bölümü verir; `BBS1:` kodu ile paylaşılır. Şarkı arka planda çalar ve mevcut müzik senkronuyla birleşir.
@@ -264,6 +264,7 @@ Oyun sırasında rastgele aralıklarla bir **lanet** gelir: ekranın ortasında 
 | Meteor yağmuru | 8 sn | Yukarıdan meteorlar düşer; rakete değerse sersemletir (lazer vurur) |
 | Daralan duvarlar | 10 sn | Yan duvarlar 110 px içeri kapanır |
 | Gezgin bariyerler | 12 sn | Sahada kayan iki kırılmaz bariyer |
+| ZIK ZIK top | 8 sn | Topun uçuş yolu dalgalanır; nişan almak zorlaşır |
 | Tavan çöküyor | anlık | Tüm tuğlalar bir sıra aşağı iner |
 | Düşen duvar | 12 sn | Duvar ~4 sn'de bir sıra iner; bitirmeden düşersek raket tehlikede |
 | Diriliş | anlık | Kırılmış 3 tuğla geri gelir |
@@ -305,7 +306,7 @@ Araç çubuğundaki **🏅 Kariyer** (ya da Rekabet panelindeki **📊 Kariyer v
 - **Rütbe kartı:** lig, LP, sonraki lige ilerleme çubuğu, yerleştirme durumu, zirve puan.
 - **18 sayaç:** klasik oyun, kırılan tuğla, en iyi combo, en uzak bölüm, yenilen boss, ÇILGIN MOD, atlatılan lanet, yakalanan kapsül, oynama süresi, kapışma, galibiyet (yüzdesiyle), podyum (ilk 3), en uzun galibiyet serisi (şu anki seriyle), dereceli maç ve galibiyet, çevrim içi maç, gönderilen saldırı, kalkanla engellenen saldırı. Sayaçlar oyun sırasında canlı artar; klasik oyunlar da kapışmalar da sayılır.
 - **Son maçlar:** son 20 kapışma: tarih, mod (🏅 dereceli / 🤖 botlar / 🌐 çevrim içi), sıra (🏆 kazandın, 🏳 yarıda kaldı), skor, LP değişimi.
-- **Başarımlar:** 25 başarım. Açıldığı anda tuvalin üstünde bildirim çıkar (tam ekranda da), kısa bir melodi çalar; birden çok başarım açılırsa bildirimler sırayla gelir. Kilitli başarımlar panelde soluk görünür, açılanın üstüne gelince açıldığı tarih yazar.
+- **Başarımlar:** 29 başarım. Açıldığı anda tuvalin üstünde bildirim çıkar (tam ekranda da), kısa bir melodi çalar; birden çok başarım açılırsa bildirimler sırayla gelir. Kilitli başarımlar panelde soluk görünür, açılanın üstüne gelince açıldığı tarih yazar.
 
 | | Başarım | Nasıl açılır |
 |---|---|---|
@@ -339,6 +340,7 @@ Araç çubuğundaki **🏅 Kariyer** (ya da Rekabet panelindeki **📊 Kariyer v
 
 Araç çubuğundaki **🎯 Meydan** düğmesi iki şeyi bir arada açar:
 
+- **🔥 Hayatta Kalma:** tek can, sonsuz koşu — top sürenle hızlanır (en çok ×1.8), puan ×1.5, pakt ve son top bahsi yok; skorlar kendi liderlik tablosuna yazılır. 🎯 Meydan panelinden başlatılır.
 - **Günlük meydan okuma:** her gün **tek deneme**, o güne özel **tohumdan üretilmiş simetrik haritalarla**. Koşu **1 can**, **Kabus** lanet yoğunluğu ve **+%15 top hızı** ile başlar. Deneme başladığı anda kullanılmış sayılır; sayfayı yenilemek yeni deneme açmaz. Bugünkü skor, günlük en iyi ve üst üste oynanan gün serisi `bb_daily` içinde saklanır. Seri, dün de oynandıysa artar; bir gün atlanırsa 1'e döner. Yerel tarih kullanılır.
 - **Bölüm seçimi (pratik):** klasik oyunda ulaştığın en ileri bölüme kadar (1 her zaman açık) bölüm seçebilirsin. Seçilen bölüm **pratik koşu** olarak başlar; rekor, liderlik tablosu, kariyer sayaçları ve başarımlar sayılmaz.
 - **🌀 Tünel Fırtınası:** 12. bölüm kilitli olsa bile bu düğmeyle her zaman pratik olarak oynanır.
@@ -407,7 +409,7 @@ Her profile tohumdan bir ek efekt ve bir sıfat eklenir ("Antik Bas Fırtınası
 
 Her tema 13 renkten oluşur (sayfa, tahta, 3 tuğla, kırılmaz, patlayan, raket, top, yazı, soluk yazı, vurgu, arka plan efekti) ve tahtayı, tuğlaları, ekranları, hatta tuvalin altındaki çubuk etiketlerini boyar. Seçim kalıcıdır (`bb_theme_cur`).
 
-- **25 hazır tema:** Gece, Gün Batımı, Orman, Neon, Gameboy, Buz, Şeker, Klasik, Lav, Okyanus, Synthwave, Matrix, Sakura, Çöl, Uzay, Kahve, Altın, Lavanta, Vampir, Kağıt (açık), Pastel (açık), Amber, Sonbahar, Aurora, Siberpunk. **🎨** düğmesi veya **T** ile sırayla geçilir (kayıtlı temalar da sıraya girer).
+- **28 hazır tema:** Gece, Gün Batımı, Orman, Neon, Gameboy, Buz, Şeker, Klasik, Lav, Okyanus, Synthwave, Matrix, Sakura, Çöl, Uzay, Kahve, Altın, Lavanta, Vampir, Kağıt (açık), Pastel (açık), Amber, Sonbahar, Aurora, Siberpunk, Turkuaz, Gül Bahçesi, Derin Deniz. **🎨** düğmesi veya **T** ile sırayla geçilir (kayıtlı temalar da sıraya girer).
 - **Sonsuz rastgele tema:** **🎲 Tema** düğmesi veya **R**. Her tema bir tohumdan üretilir (analog, üçlü, tamamlayıcı, bölünmüş, dörtlü veya tek renk şeması); yazı tahtaya karşı en az 7:1, tuğlalar en az 2.4:1 kontrastla okunaklı kalacak şekilde ayarlanır; %20'si açık zeminlidir. Her birine isim verilir ("Zümrüt Rüya #4242" gibi), aynı tohum hep aynı temayı üretir.
 - **🖌️ Tema stüdyosu:** tüm hazır ve kayıtlı temaların renk önizlemeli galerisi, yenilenebilir 8 rastgele öneri, 13 rengin her biri için renk seçici (canlı önizleme), tema adı, **💾 Kaydet** / **🗑 Sil** (en çok 60 kayıtlı tema, `bb_custom_themes`), **📤 Kodu al** / **📥 Yükle** ile `BB1:...` paylaşım kodu. Hazır ya da rastgele bir temayı düzenlemek onu bozmaz, kaydedince senin temana dönüşür.
 - **Otomatik tema** (Ayarlar → Görünüm): her bölümde yeni rastgele tema.

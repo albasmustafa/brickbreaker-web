@@ -258,4 +258,18 @@ I18N_DATA.es = {
 769: "💠 MURO DE ISLAS",
 770: "🧩 Jugar al Muro mosaico",
 771: "💠 Jugar al Muro de islas",
+
+772: "BOLA BORRACHA",
+773: "BORRACHA",
+774: "BOMBA",
+775: "Muros ganados",
+776: "Primer Muro",
+777: "Gana un muro de píxeles",
+778: "Rey de los Muros",
+779: "Gana 10 muros de píxeles",
+780: "Turquesa",
+781: "Jardín de Rosas",
+782: "Mar Profundo",
+783: "🔥 Supervivencia",
+784: "🔥 SUPERVIVENCIA",
 };

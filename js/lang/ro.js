@@ -258,4 +258,18 @@ I18N_DATA.ro = {
 769: "💠 ZIDUL INSULELOR",
 770: "🧩 Joacă Zidul mozaic",
 771: "💠 Joacă Zidul insulelor",
+
+772: "MINGE BEATĂ",
+773: "BEATĂ",
+774: "BOMBĂ",
+775: "Ziduri câștigate",
+776: "Primul Zid",
+777: "Câștigă un zid de pixeli",
+778: "Regele Zidurilor",
+779: "Câștigă 10 ziduri de pixeli",
+780: "Turcoaz",
+781: "Grădina de Trandafiri",
+782: "Marea Adâncă",
+783: "🔥 Supraviețuire",
+784: "🔥 SUPRAVIEȚUIRE",
 };

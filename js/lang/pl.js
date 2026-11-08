@@ -258,4 +258,18 @@ I18N_DATA.pl = {
 769: "💠 ŚCIANA WYSP",
 770: "🧩 Zagraj w Mozaikową ścianę",
 771: "💠 Zagraj w Ścianę wysp",
+
+772: "CHWIAJĄCA PIŁKA",
+773: "CHWIAJĄC",
+774: "BOMBA",
+775: "Wygrane ściany",
+776: "Pierwsza Ściana",
+777: "Wygraj pikselową ścianę",
+778: "Król Ścian",
+779: "Wygraj 10 pikselowych ścian",
+780: "Turkus",
+781: "Ogród Róż",
+782: "Głębina",
+783: "🔥 Przetrwanie",
+784: "🔥 PRZETRWANIE",
 };

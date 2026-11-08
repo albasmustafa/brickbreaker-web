@@ -22,7 +22,7 @@ const STATS = {
   fevers: tr("ÇILGIN MOD"), curses: tr("Atlatılan lanet"), powers: tr("Yakalanan kapsül"), time: tr("Oynama süresi"),
   matches: tr("Kapışma"), wins: tr("Galibiyet"), podiums: tr("Podyum (ilk 3)"), bestStreak: tr("En uzun seri"), ranked: tr("Dereceli maç"),
   rankedWins: tr("Dereceli galibiyet"), online: tr("Çevrim içi maç"), attacks: tr("Gönderilen saldırı"), blocked: tr("Kalkanla engellenen"),
-  director: tr("Dramaturg görevi"), specials: tr("Yeni tür tuğla"),
+  director: tr("Dramaturg görevi"), specials: tr("Yeni tür tuğla"), walls: tr("Yenilen duvar"),
 };
 // test(s, m): s = kariyer sayaçları, m = biten kapışmanın özeti (yalnızca kapışma sonunda verilir)
 const ACHIEVEMENTS = [
@@ -38,6 +38,8 @@ const ACHIEVEMENTS = [
   { id: "kapsul", icon: "💊", name: tr("Kapsül Bağımlısı"), desc: tr("Toplam 100 kapsül yakala"), test: s => s.powers >= 100 },
   { id: "yeninesil", icon: "🧬", name: tr("Yeni Nesil"), desc: tr("Yeni türden bir tuğla kır"), test: s => s.specials >= 1 },
   { id: "cesitli", icon: "🎨", name: tr("Çeşitlilik Ustası"), desc: tr("Yeni türlerden toplam 100 tuğla kır"), test: s => s.specials >= 100 },
+  { id: "duvar", icon: "🧱", name: tr("İlk Duvar"), desc: tr("Bir piksel duvar kazan"), test: s => s.walls >= 1 },
+  { id: "duvarkral", icon: "👑", name: tr("Duvarlar Kralı"), desc: tr("10 piksel duvar kazan"), test: s => s.walls >= 10 },
   { id: "kapisma", icon: "⚔", name: tr("İlk Kapışma"), desc: tr("Bir kapışmayı bitir"), test: s => s.matches >= 1 },
   { id: "zafer", icon: "🏆", name: tr("İlk Zafer"), desc: tr("Bir kapışmayı kazan"), test: s => s.wins >= 1 },
   { id: "seri3", icon: "📈", name: tr("Seri Galip"), desc: tr("3 kapışmayı üst üste kazan"), test: s => s.bestStreak >= 3 },
@@ -91,11 +93,11 @@ function nextToast() {
 }
 
 // --- Sayaçlar ve başarımlar: oyun içi olaylar sayaçları canlı artırır, başarım anında açılır ---
-const run = { lifeLost: 0, ended: false, practice: false, daily: false, dailyFinished: false, bricks: 0, goldBricks: 0, powers: 0, bosses: 0, bestCombo: 0,
-              zapBricks: 0, twinBricks: 0, virusBricks: 0, specials: 0, beats: 0,
+const run = { lifeLost: 0, ended: false, practice: false, daily: false, dailyFinished: false, survival: false, bricks: 0, goldBricks: 0, powers: 0, bosses: 0, bestCombo: 0,
+              zapBricks: 0, twinBricks: 0, virusBricks: 0, specials: 0, beats: 0, walls: 0, survival: false,
               pacts: [], pactOfferLevel: 0, lastChanceUsed: false, song: false, custom: false };
-const resetRun = () => Object.assign(run, { lifeLost: 0, ended: false, practice: false, daily: false, dailyFinished: false, bricks: 0, goldBricks: 0, powers: 0, bosses: 0, bestCombo: 0,
-              zapBricks: 0, twinBricks: 0, virusBricks: 0, specials: 0, beats: 0,
+const resetRun = () => Object.assign(run, { lifeLost: 0, ended: false, practice: false, daily: false, dailyFinished: false, survival: false, bricks: 0, goldBricks: 0, powers: 0, bosses: 0, bestCombo: 0,
+              zapBricks: 0, twinBricks: 0, virusBricks: 0, specials: 0, beats: 0, walls: 0, survival: false,
               pacts: [], pactOfferLevel: 0, lastChanceUsed: false, song: false, custom: false });
 function track(key, n = 1) {
   if (run.practice) return;

@@ -258,4 +258,18 @@ I18N_DATA.vi = {
 769: "💠 TƯỜNG ĐẢO",
 770: "🧩 Chơi Tường khắc",
 771: "💠 Chơi Tường đảo",
+
+772: "BÓNG LẢNG ĐẢNG",
+773: "LẢNG ĐẢNG",
+774: "BOM",
+775: "Tường đã thắng",
+776: "Tường Đầu Tiên",
+777: "Thắng một tường pixel",
+778: "Vua Tường",
+779: "Thắng 10 tường pixel",
+780: "Ngọc lam",
+781: "Vườn Hồng",
+782: "Biển Sâu",
+783: "🔥 Sinh Tồn",
+784: "🔥 SINH TỒN",
 };

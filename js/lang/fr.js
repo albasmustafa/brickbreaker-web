@@ -258,4 +258,18 @@ I18N_DATA.fr = {
 769: "💠 MUR DES ÎLES",
 770: "🧩 Jouer au Mur mosaïque",
 771: "💠 Jouer au Mur des îles",
+
+772: "BALLE IVRE",
+773: "IVRE",
+774: "BOMBE",
+775: "Murs gagnés",
+776: "Premier Mur",
+777: "Gagne un mur de pixels",
+778: "Roi des Murs",
+779: "Gagne 10 murs de pixels",
+780: "Turquoise",
+781: "Jardin de Roses",
+782: "Mer Profonde",
+783: "🔥 Survie",
+784: "🔥 SURVIE",
 };

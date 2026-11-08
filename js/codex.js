@@ -5,7 +5,7 @@
 // ======================================================================
 const CURSE_ICONS = {
   gorunmez: "👻", hayalet: "🫥", karanlik: "🌑", elektrik: "💡", sis: "🌫️", ayna: "🪞", sarhos: "🍺",
-  ruzgar: "🌬️", agir: "🪨", nabiz: "💓", buz: "🧊", yarik: "🕳️", sahte: "🎭", meteor: "☄️",
+  ruzgar: "🌬️", agir: "🪨", nabiz: "💓", zikzik: "🥴", buz: "🧊", yarik: "🕳️", sahte: "🎭", meteor: "☄️",
   daralan: "🧱", bariyer: "🚧", inis: "⬇️", dusen: "📉", dirilis: "🧟", zirh: "🛡️", ufo: "🛸",
 };
 const BRICK_CARDS = [

@@ -258,4 +258,18 @@ I18N_DATA.az = {
 769: "💠 ADALAR DİVARI",
 770: "🧩 Mozayka Divarını oyna",
 771: "💠 Adalar Divarını oyna",
+
+772: "SALLANAN TOP",
+773: "SALLAN",
+774: "BOMBA",
+775: "Qazanılmış divarlar",
+776: "İlk Divar",
+777: "Piksel divarı qazan",
+778: "Divarlar Kralı",
+779: "10 piksel divarı qazan",
+780: "Firuzəyi",
+781: "Gül Bağı",
+782: "Dəniz Dərinliyi",
+783: "🔥 Sağ Qalma",
+784: "🔥 SAĞ QALMA",
 };

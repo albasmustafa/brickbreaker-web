@@ -258,4 +258,18 @@ I18N_DATA.hu = {
 769: "💠 SZIGETFAL",
 770: "🧩 Mozajkfal játéka",
 771: "💠 Szigetfal játéka",
+
+772: "RÉSZES LABDA",
+773: "RÉZES",
+774: "BOMBA",
+775: "Megnyert falak",
+776: "Első Fal",
+777: "Nyerj egy pixelfalat",
+778: "A Falak Királya",
+779: "Nyerj 10 pixelfalat",
+780: "Turkiz",
+781: "Rózsakert",
+782: "Mélytenger",
+783: "🔥 Túlélés",
+784: "🔥 TÚLÉLÉS",
 };

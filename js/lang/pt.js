@@ -258,4 +258,18 @@ I18N_DATA.pt = {
 769: "💠 PAREDE DAS ILHAS",
 770: "🧩 Jogar a Parede mosaico",
 771: "💠 Jogar a Parede das ilhas",
+
+772: "BOLA BÊBADA",
+773: "BÊBADA",
+774: "BOMBA",
+775: "Paredes vencidas",
+776: "Primeira Parede",
+777: "Vença uma parede de pixels",
+778: "Rei das Paredes",
+779: "Vença 10 paredes de pixels",
+780: "Turquesa",
+781: "Jardim das Rosas",
+782: "Mar Profundo",
+783: "🔥 Sobrevivência",
+784: "🔥 SOBREVIVÊNCIA",
 };

@@ -258,4 +258,18 @@ I18N_DATA.sv = {
 769: "💠 ÖVÄGG",
 770: "🧩 Spela Mosaikväggen",
 771: "💠 Spela Öväggen",
+
+772: "VINGLIG BOLL",
+773: "VINGLIG",
+774: "BOMB",
+775: "Vunna väggar",
+776: "Första Väggen",
+777: "Vinn en pixelvägg",
+778: "Väggarnas Kung",
+779: "Vinn 10 pixelväggar",
+780: "Turkos",
+781: "Rosenträdgård",
+782: "Djuphav",
+783: "🔥 Överlevnad",
+784: "🔥 ÖVERLEVNAD",
 };

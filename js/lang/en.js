@@ -258,4 +258,18 @@ I18N_DATA.en = {
 769: "💠 ISLANDS WALL",
 770: "🧩 Play the Mosaic Wall",
 771: "💠 Play the Islands Wall",
+
+772: "WOBBLY BALL",
+773: "WOBBLY",
+774: "BOMB",
+775: "Walls won",
+776: "First Wall",
+777: "Win a pixel wall",
+778: "King of Walls",
+779: "Win 10 pixel walls",
+780: "Turquoise",
+781: "Rose Garden",
+782: "Deep Sea",
+783: "🔥 Survival",
+784: "🔥 SURVIVAL",
 };

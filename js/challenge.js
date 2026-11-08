@@ -127,6 +127,7 @@ const challengeBtn = el("button", {
 });
 toolbar.insertBefore(challengeBtn, careerBtn);
 onClick("daily-start", startDaily);
+onClick("survival-start", startSurvival);
 // Tünel Fırtınası ve CR7 Koridoru her zaman pratik olarak açık (klasik oyunda 12. ve 13. bölüm)
 const TUNNEL_LEVEL = LEVELS.findIndex(l => l.pixel) + 1;
 const KORIDOR_LEVEL = LEVELS.findIndex(l => l.pixel === "koridor") + 1;

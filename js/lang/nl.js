@@ -258,4 +258,18 @@ I18N_DATA.nl = {
 769: "💠 EILANDENMUUR",
 770: "🧩 Speel de Mozaïekmuur",
 771: "💠 Speel de Eilandenmuur",
+
+772: "DRONKEN BAL",
+773: "DRONKEN",
+774: "BOM",
+775: "Gewonnen muren",
+776: "Eerste Muur",
+777: "Win een pixelmuur",
+778: "Koning der Muren",
+779: "Win 10 pixelmuren",
+780: "Turkoois",
+781: "Rozentuin",
+782: "Diepzee",
+783: "🔥 Overleven",
+784: "🔥 OVERLEVEN",
 };
