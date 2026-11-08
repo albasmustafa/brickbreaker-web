@@ -51,7 +51,7 @@ test("Yükleme, arayüz ve özellik envanteri", async ({ p, expect }) => {
   expect(r.mode === "menu" && r.bricks === 46 && r.levels === 16, "menü ve ilk bölüm: " + JSON.stringify(r));
   expect(r.themes === 28, "28 hazır tema");
   expect(r.tools === 10, "araç çubuğunda 10 düğme (ses, tema, rastgele, stüdyo, rekabet, meydan, editör, kariyer, ayarlar, tam ekran): " + r.tools);
-  expect(r.tiers === "Bronz,Gümüş,Altın,Platin,Elmas,Usta,Efsane" && r.ach === 29 && r.stats === 21 && r.career, "7 lig, 29 başarım, 21 sayaç, rütbe kartı: " + JSON.stringify([r.tiers, r.ach, r.stats, r.career]));
+  expect(r.tiers === "Bronz,Gümüş,Altın,Platin,Elmas,Usta,Efsane" && r.ach === 32 && r.stats === 21 && r.career, "7 lig, 32 başarım, 21 sayaç, rütbe kartı: " + JSON.stringify([r.tiers, r.ach, r.stats, r.career]));
   expect(r.panels, "paneller kapalı başlar");
   expect(r.powers === "WMSFLYDKOHQRNZCB", "16 kapsül: " + r.powers);
   expect(r.curses === 22, "22 lanet: " + r.curses);
@@ -1160,6 +1160,56 @@ test("Hayatta Kalma, BOMBA kapsülü ve duvar başarımları", async ({ p, expec
   expect(r.cleared, "menüye dönüş survival bayrağını temizler");
 });
 
+test("Kampanya: 8 dünya, geçerli haritalar, yıldızlar, kilit, boss'lar, panel, kalıcılık", async ({ p, expect }) => {
+  const r = await p.eval(`(() => {
+    const alpha = /^[123XEZ$+HATIVS.]+$/;
+    let badRows = 0, bossCount = 0, pixelCount = 0, levelCount = 0;
+    for (const w of CAMPAIGN) for (const lv of w.levels) {
+      levelCount++;
+      if (lv.boss) bossCount++;
+      if (lv.pixel) pixelCount++;
+      if (Array.isArray(lv)) for (const row of lv) if (row.length !== 10 || !alpha.test(row)) badRows++;
+    }
+    campSave.stars = {}; campSave.unlocked = 1; campSave.done = false; saveCampaign();   // temiz tur
+    const locked = startCampaign(2, 1) === false;                    // 2. dünya kilitli
+    const s1 = startCampaign(1, 1);
+    const st = { campaign: run.campaign, level: state.level, world: run.world, theme: theme.name === THEMES[0].name, bricks: bricks.length > 0 };
+    const step = () => { state.mode = "playing"; levelCleared(); state.clearAt = state.time; update(STEP); };
+    campaign.bestCombo = 9;                                          // combo yıldızı
+    step();
+    const stars1 = campStars(1, 1);
+    for (let i = 0; i < 3; i++) step();                              // 1-2, 1-3, 1-4
+    const bossFight = !!state.boss;                                  // 1-5: GECE BEKÇİSİ
+    const bossName = state.boss && state.boss.name;
+    state.mode = "playing";
+    hitBoss(9999, 400, 120);                                         // boss düşer → dünya biter → 2. dünya açılır
+    state.clearAt = state.time; update(STEP);                        // dünya geçişi işlensin
+    const unlocked2 = campSave.unlocked >= 2;
+    const world2 = [campaign.world, campaign.stage, theme.name === THEMES[3].name];
+    state.score = 777; state.lives = 1; loseLife(); lastEnd();       // kampanya liderliği
+    const lb = { mode: state.mode, rank: state.lbRank, list: leaderboard.kampanya.length, top: leaderboard.kampanya[0] && leaderboard.kampanya[0].score };
+    togglePanel(campaignPanel, renderCampaignUI);
+    const cards = campaignWorlds.querySelectorAll(".camp-world").length;
+    const lockedCards = campaignWorlds.querySelectorAll(".camp-world.locked").length;
+    const saved = JSON.parse(localStorage.getItem("bb_campaign"));
+    closePanels();
+    toMenu();
+    return { badRows, bossCount, pixelCount, levelCount, locked, s1, st, stars1, bossFight, bossName, unlocked2, world2, lb, cards, lockedCards, savedStars: saved.stars["1"] ? saved.stars["1"][0] : 0, menuClear: !run.campaign };
+  })()`);
+  expect(r.levelCount === 40 && r.badRows === 0, "40 bölüm, tüm haritalar geçerli: " + JSON.stringify([r.levelCount, r.badRows]));
+  expect(r.bossCount === 8 && r.pixelCount === 4, "8 boss, 4 piksel bölüm: " + JSON.stringify([r.bossCount, r.pixelCount]));
+  expect(r.locked && r.s1 && r.st.campaign && r.st.level === 1 && r.st.world === 1 && r.st.theme && r.st.bricks, "başlangıç: kilit + kurulum: " + JSON.stringify([r.locked, r.s1, r.st]));
+  expect(r.stars1 === 3, "can kaybı yok + 8 combo = 3 yıldız: " + r.stars1);
+  expect(r.bossFight && r.bossName === "GECE BEKÇİSİ", "1-5 boss: " + r.bossName);
+  expect(r.unlocked2 && r.world2.join() === "2,1,true", "dünya bitince sıradaki açılır (Neon teması): " + JSON.stringify(r.world2));
+  expect(r.lb.mode === "gameover" && r.lb.rank >= 1 && r.lb.list === 1 && r.lb.top === 777, "kampanya liderliği: " + JSON.stringify(r.lb));
+  expect(r.cards === 8 && r.lockedCards === 6, "panel: 8 kart, 6 kilitli: " + [r.cards, r.lockedCards]);
+  expect(r.savedStars === 3, "yıldızlar kalıcı: " + r.savedStars);
+  expect(r.menuClear, "menüye dönüş kampanya bayrağını temizler");
+  const ach = await p.eval(`(() => { renderCareer(); return !!career.ach.kampilk; })()`);
+  expect(ach, "İlk Dünya başarımı açılır");
+});
+
 test("Diller: 25 dil eksiksiz, yer tutucular, RTL, dil seçici, tüm ekranlar taşmasız ve çevrilmiş", async ({ p, expect }) => {
   // Kaynak denetimi: her dil 675/675, yer tutucular birebir (tools/i18n.mjs --check)
   const tool = spawnSync(process.execPath, [fileURLToPath(new URL("../tools/i18n.mjs", import.meta.url)), "--check"], { encoding: "utf8" });
@@ -1190,8 +1240,8 @@ test("Diller: 25 dil eksiksiz, yer tutucular, RTL, dil seçici, tüm ekranlar ta
         state.mode = "levelclear"; draw();
         state.mode = "playing"; run.daily = false; run.practice = true; state.lbRank = 3; state.newRecord = true; gameOver(); draw();
         __start(12); pxWin(); state.mode = "levelclear"; draw();
-        for (const panel of [settingsPanel, themePanel, versusPanel, careerPanel, codexPanel, challengePanel, edPanel]) {
-          const render = { [themePanel.id]: refreshThemeUI, [versusPanel.id]: refreshVersusUI, [careerPanel.id]: renderCareer, [codexPanel.id]: renderCodex, [challengePanel.id]: renderChallenge, [edPanel.id]: renderEditor }[panel.id];
+        for (const panel of [settingsPanel, themePanel, versusPanel, careerPanel, codexPanel, challengePanel, campaignPanel, edPanel]) {
+          const render = { [themePanel.id]: refreshThemeUI, [versusPanel.id]: refreshVersusUI, [careerPanel.id]: renderCareer, [codexPanel.id]: renderCodex, [challengePanel.id]: renderChallenge, [campaignPanel.id]: renderCampaignUI, [edPanel.id]: renderEditor }[panel.id];
           togglePanel(panel, render); closePanels();
         }
       } finally { proto.fillText = orig; }
@@ -1545,7 +1595,7 @@ test("Kariyer: sayaçlar, başarımlar, seri, panel, kalıcılık, sıfırlama",
          "galibiyet serisi ve maç başarımları (8 kişilik, efsane bot, son can): " + JSON.stringify(r.streak));
   expect(r.loss.streak === 0 && r.loss.best === 3 && r.loss.attacks >= 1 && r.loss.blocked === 1 && r.loss.hist === 4 && r.loss.mode === "dostluk",
          "yenilgi seriyi bozar; saldırı ve kalkan sayılır; geçmiş: " + JSON.stringify(r.loss));
-  expect(r.panel.open && r.panel.stats === 21 && r.panel.ach === 29 && r.panel.achGot === r.panel.got && r.panel.rows === 5 && r.panel.head.includes(r.panel.got + "/29") && r.panel.card,
+  expect(r.panel.open && r.panel.stats === 21 && r.panel.ach === 32 && r.panel.achGot === r.panel.got && r.panel.rows === 5 && r.panel.head.includes(r.panel.got + "/32") && r.panel.card,
          "kariyer paneli: " + JSON.stringify(r.panel));
   const saved = await p.eval("JSON.stringify([career.stats.matches, career.stats.bricks, Object.keys(career.ach).length, career.history.length])");
   await p.reload();

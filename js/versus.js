@@ -235,7 +235,7 @@ function updateBattle(dt) {
 }
 
 // --- Liderlik tablosu (bu cihazda) ---
-const leaderboard = { klasik: [], kapisma: [], kalma: [] };
+const leaderboard = { klasik: [], kapisma: [], kalma: [], kampanya: [] };
 { const l = store.get("bb_leaderboard", null); if (l) for (const k in leaderboard) if (Array.isArray(l[k])) leaderboard[k] = l[k].slice(0, 10); }
 function recordScore(mode, entry) {
   if (!entry.score) return 0;

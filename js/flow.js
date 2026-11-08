@@ -69,10 +69,12 @@ function seedVirusBricks(n) {
 }
 
 function buildLevel(n) {
+  // KAMPANYA: dünyanın bölümü her şeyin önündedir
+  const cdef = run.campaign && typeof campaignDef === "function" ? campaignDef() : null;
   // Şarkı bölümü ya da editörden test koşusu: hazır harita, döngü/tohum/piksel duvar yok
-  const song = (typeof songLevel !== "undefined" && songLevel.active && songLevel.levels[n - 1]) ||
-               (typeof editorPlayDef === "function" && editorPlayDef(n));
-  const def = song || LEVELS[(n - 1) % LEVELS.length], cycle = song ? 0 : Math.floor((n - 1) / LEVELS.length);
+  const song = !cdef && ((typeof songLevel !== "undefined" && songLevel.active && songLevel.levels[n - 1]) ||
+               (typeof editorPlayDef === "function" && editorPlayDef(n)));
+  const def = cdef || song || LEVELS[(n - 1) % LEVELS.length], cycle = cdef ? run.world - 1 : song ? 0 : Math.floor((n - 1) / LEVELS.length);
   // Günlük/haftalık koşuda bölümler tohumdan üretilir: aynı tohum = aynı simetrik duvar
   const proc = !song && (run.daily || (typeof weekly !== "undefined" && weekly.active)) && Array.isArray(def);
   const map = proc ? proceduralMap(run.daily ? weekHash(daily.date) : weekly.seed, n) : (Array.isArray(def) ? def : def.map || []);
@@ -98,7 +100,8 @@ function buildLevel(n) {
 function makeBoss(spec, cycle) {
   const hp = Math.round(spec.hp * (1 + 0.5 * cycle) * pactBossHpMul());
   return { name: spec.name, hp, maxHp: hp, w: 200, h: 62, x: W / 2 - 100, y: 78, baseY: 78, vx: spec.speed * (1 + 0.15 * cycle),
-           shootEvery: spec.shootEvery, shootAt: 2.5, minionAt: 6, t: 0, flash: 0, enraged: false, dead: false };
+           shootEvery: spec.shootEvery, shootAt: 2.5, minionAt: 6, t: 0, flash: 0, enraged: false, dead: false,
+           spread: spec.volley || 3, minions: !!spec.minions, rain: !!spec.rain, rainAt: 0 };   // kampanya boss bayrakları
 }
 // Duvar bölgeleri: tampon (hız patlaması), falso (kavis), portal (karşı duvardan çıkar); bölüm numarasıyla tohumlanır
 function buildZones(n) {
@@ -185,6 +188,7 @@ function toMenu() {
   run.dailyFinished = false;
   run.practice = false;
   run.survival = false;
+  run.campaign = false;
   hidePactOffer();
   hideLastChance();
   director.challenge = null;
@@ -242,6 +246,7 @@ function loseLife() {
   sfx("lose");
   addShake(6);
   state.hurt = 1;                          // cila: kenarlarda sönen kırmızı vinyet
+  if (run.campaign) campaign.stageLost++;   // KAMPANYA: yıldız etkisi
   if (pxWall.mode === "koridor" && typeof cr7Facepalm === "function") cr7Facepalm();   // CR7 üzülür
   state.combo = 0;
   clearEffects();
@@ -264,12 +269,13 @@ function gameOver() {
   sfx("gameover");
   if (battle.active) battleEliminated();   // kapışmada elendin
   else if (run.practice || wasWeekly || run.song) state.lbRank = 0;
-  else { state.lbRank = recordScore(run.survival ? "kalma" : "klasik", { score: state.score, level: state.level }); careerGameEnd(); }
+  else { state.lbRank = recordScore(run.survival ? "kalma" : run.campaign ? "kampanya" : "klasik", { score: state.score, level: state.level }); careerGameEnd(); }
   if (run.daily && typeof finishDaily === "function") finishDaily();
 }
 function levelCleared() {
   if (state.mode !== "playing") return;    // aynı karede iki kez tetiklenmesin
   addScore(500);
+  if (run.campaign) campaignStars();       // KAMPANYA: yıldızlar hesaplanır ve kaydedilir
   spawnConfetti(W / 2, H / 2 - 40, 46);    // cila: konfeti yağmuru
   directorLevelEnd();
   state.mode = "levelclear";
@@ -280,6 +286,7 @@ function levelCleared() {
   battleCharge(6);
 }
 function nextLevel() {
+  if (run.campaign) return advanceCampaign();              // KAMPANYA: dünya içi ilerleme
   if (run.custom) { editorComplete(); return; }   // editör bölümü tek bölümdür
   if (typeof songLevel !== "undefined" && songLevel.active && state.level >= songLevel.levels.length) { songComplete(); return; }
   state.level++;

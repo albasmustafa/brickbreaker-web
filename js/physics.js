@@ -109,6 +109,7 @@ function destroyBrick(b) {
   codexBump("brick:" + brickCodexKey(b));
   track("bricks");
   run.bestCombo = Math.max(run.bestCombo, state.combo);
+  if (run.campaign) campaign.bestCombo = Math.max(campaign.bestCombo, state.combo);   // kampanya yıldız ölçütü
   trackBest("bestCombo", state.combo);
   const pts = Math.round(10 * b.maxHp * Math.min(state.combo, 8) * (b.gold ? 10 * pactGoldMul() : 1) * (isFever() ? 2 : 1) * curseBonus());
   addScore(pts);
@@ -530,9 +531,14 @@ function updateBoss(dt) {
   if (bo.x < 20 || bo.x + bo.w > W - 20) { bo.x = clamp(bo.x, 20, W - 20 - bo.w); bo.vx = bo.x <= 20 ? Math.abs(bo.vx) : -Math.abs(bo.vx); }
   bo.y = bo.baseY + Math.sin(bo.t * 1.6) * 10;
   if (state.mode !== "playing") return;
-  if ((bo.shootAt -= dt) <= 0) {   // öfkeliyken üçlü yelpaze
+  if (bo.rain && bo.enraged && (bo.rainAt -= dt) <= 0) {   // kampanya: öfkeli boss tepeden mermi yağmuru yağdırır
+    bo.rainAt = 2.8;
+    for (let i = 0; i < 3; i++) bullets.push({ x: grnd(state.inset + 30, W - state.inset - 30), y: -10, vx: grnd(-40, 40), vy: 300, r: 7, dead: false });
+    sfx("bossShoot");
+  }
+  if ((bo.shootAt -= dt) <= 0) {   // öfkeliyken yelpaze (kampanya boss'ları daha geniş açar)
     bo.shootAt = bo.shootEvery;
-    const n = bo.enraged ? 3 : 1, sx = bo.x + bo.w / 2, sy = bo.y + bo.h;
+    const n = bo.enraged ? bo.spread || 3 : 1, sx = bo.x + bo.w / 2, sy = bo.y + bo.h;
     const base = Math.atan2(paddle.y - sy, paddle.x + paddle.w / 2 - sx);
     for (let i = 0; i < n; i++) {
       const a = base + (i - (n - 1) / 2) * 0.28;
@@ -540,7 +546,7 @@ function updateBoss(dt) {
     }
     sfx("bossShoot");
   }
-  if (bo.enraged && (bo.minionAt -= dt) <= 0) { bo.minionAt = 7; spawnMinions(); }
+  if (bo.enraged && bo.minions && (bo.minionAt -= dt) <= 0) { bo.minionAt = 7; spawnMinions(); }
 }
 // Öfkeli boss altına (4. sıraya) en çok 4 yeni tuğla diker
 function spawnMinions() {

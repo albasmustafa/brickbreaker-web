@@ -785,5 +785,26 @@ const I18N_KEYS = [
 "Derin Deniz", // 782
 "🔥 Hayatta Kalma", // 783
 "🔥 HAYATTA KALMA", // 784
+"GECE BEKÇİSİ", // 785
+"NEON LORD", // 786
+"Tünel", // 787
+"TÜNEL USTASI", // 788
+"BUZ KRALİÇESİ", // 789
+"KAN KONTU", // 790
+"KUZEY IŞIĞI", // 791
+"DERİNLİK DEVRİ", // 792
+"SİBER İMPARATOR", // 793
+"DÜNYA {n} TAMAM!", // 794
+"🌍 TUR TAMAMLANDI!", // 795
+"🗺️ Kampanya'yı aç", // 796
+"Kampanya", // 797
+"🗺️ Kampanya", // 798
+"Önce {n}. dünyayı bitir", // 799
+"İlk Dünya", // 800
+"Kampanyada bir dünyayı bitir", // 801
+"Turun Yarısı", // 802
+"Kampanyada 4 dünyayı bitir", // 803
+"Tur Şampiyonu", // 804
+"Kampanyayı baştan sona bitir", // 805
 ];
 const I18N_DATA = {};

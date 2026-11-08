@@ -137,6 +137,7 @@
   <div class="setnote" id="song-msg"></div>
   <div class="setnote">Şarkının BPM'i, bas ve tiz enerjisi 3 bölüme dönüşür; güçlü bir final varsa son bölüme boss eklenir. Aynı şarkı her zaman aynı bölümü üretir. Bölüm kodu arkadaşlarınla paylaşılabilir.</div>
   <div class="sethead">🌀 Tünel Fırtınası</div>
+  <div class="setrow"><button id="campaign-open">🗺️ Kampanya'yı aç</button></div>
   <div class="setrow"><button id="tunnel-start">🌀 Tünel Fırtınası'nı oyna</button><button id="koridor-start">⚽ CR7 Koridoru'nu oyna</button><button id="mikro-start">🔹 Mikro Duvar'ı oyna</button><button id="mozaik-start">🧩 Mozaik Duvar'ı oyna</button><button id="adalar-start">💠 Adalar Duvarı'nı oyna</button></div>
   <div class="setnote">Binlerce mavi piksel tuğla ve içinden geçen kırılmaz çelik L ve sarmal tüneller. Topu tünele sok: çıkışa taşınır, duvarı içeriden oyar, zincir reaksiyon başlar. Çıkışlardaki sarı +3 ve turuncu x3 küpleri raketle yakala, 300 topa kadar fırtına. Klasik oyunda 12. bölüm; buradan her zaman pratik olarak açık.</div>
   <div class="sethead">Bölüm seçimi (pratik)</div>
@@ -165,6 +166,10 @@
   <textarea id="ed-code" placeholder="BBL1:... bölüm kodunu ya da bağlantısını buraya yapıştır"></textarea>
   <div class="setnote" id="ed-msg"></div>
   <div class="setnote">Paletten tuğla seç, ızgaraya tıkla ya da sürükle; sağ tık siler. Sıra sonundaki ↔ o sırayı kaydırır, Ayna açıkken çizdiğin sağ yarıya yansır. Boss seçilirse ilk 5 sıra boss'a ayrılır. Test koşuları rekor ve kariyere sayılmaz. Bağlantıyla açılan bölüm doğrudan editöre yüklenir.</div>
+</section>
+
+<section id="campaignpanel" class="panel" role="dialog" aria-label="Kampanya" hidden>
+  <div id="campaign-worlds"></div>
 </section>
 <input type="file" id="vidfile" accept="video/*" hidden>
 <input type="file" id="audfile" accept="audio/*" hidden>
@@ -218,6 +223,7 @@
 <script src="js/weekly.js"></script>
 <script src="js/songlevel.js"></script>
 <script src="js/challenge.js"></script>
+<script src="js/campaign.js"></script>
 <script src="js/director.js"></script>
 <script src="js/versus.js"></script>
 <script src="js/pacts.js"></script>

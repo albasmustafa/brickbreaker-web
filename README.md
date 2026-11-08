@@ -31,6 +31,7 @@ js/state.js           oyun durumu, varlık listeleri, top matematiği
 js/flow.js            bölüm kurma, oyun başlatma, can/bölüm geçişleri, duraklatma
 js/effects.js         parçacık, parça, çatlak, yıldırım, yazılar, sarsıntı
 js/physics.js         kapsül tablosu, tuğla hasarı, duvar bölgeleri, top, lazer, kara delik, boss
+js/campaign.js        kampanya: 8 dünya × 5 bölüm, yıldızlar, kilitler, panel
 js/tunnel.js          Tünel Fırtınası, CR7 Koridoru ve Mikro Duvar: piksel duvar ızgarası, çelik tüneller/kaburgalar, zincir reaksiyon, +3/x3/ok/ateş küpleri, kazanma ekranı
 js/curses.js          21 lanet: zamanlayıcı, etkiler, çizimleri
 js/update.js          sabit adımlı (120 Hz) dünya güncellemesi
@@ -71,7 +72,7 @@ Okunaklı tek dosyada her bölümün başında kaynak dosyanın adı yazar. Ana 
 ## Testler
 
 `npm test` her testi temiz kayıtlı (boş localStorage) yeni bir sayfada çalıştırır; sayfadaki herhangi bir JS hatası testi düşürür. Kapsam:
-- **Oyun:** yükleme ve özellik envanteri; servis, oynanış, can, oyun sonu, duraklatma; koşu sayaçları ve pratikte kayıt dışı kalma; 15 kapsülün her biri; duvar bölgeleri, falso ve SMASH; tüm tuğla türleri; boss; kara delik, ÇILGIN MOD, lazer ve kalkan; 25 dil (her dil eksiksiz ve yer tutucuları uyumlu, html lang/dir ve RTL, dil seçici, tüm ekranlar ve panellerin her dilde hatasız ve tuvale sığarak çizilmesi, çevrilmemiş Türkçe metin kalmaması); Tünel Fırtınası (piksel duvar, tünelde taşınma, içeriden oyma ve zincir, +3/x3 küplerin raketle yakalanması, 300 top sınırı ve akıcılığı, kırılmaz çelik, kazanma ekranı, sonraki bölümde kapanma, panelden pratik); CR7 Koridoru (tam mavi duvar, dar koridor, ok/ateş küpleri, dar raket, CR7 koreografisi, kazanma saçılımı); Mozaik ve Adalar duvarları (fayans salınımı, tek ton fayanslar, elmas adalar, çelik çekirdekler, saçılım).
+- **Oyun:** yükleme ve özellik envanteri; servis, oynanış, can, oyun sonu, duraklatma; koşu sayaçları ve pratikte kayıt dışı kalma; 15 kapsülün her biri; duvar bölgeleri, falso ve SMASH; tüm tuğla türleri; boss; kara delik, ÇILGIN MOD, lazer ve kalkan; 25 dil (her dil eksiksiz ve yer tutucuları uyumlu, html lang/dir ve RTL, dil seçici, tüm ekranlar ve panellerin her dilde hatasız ve tuvale sığarak çizilmesi, çevrilmemiş Türkçe metin kalmaması); Tünel Fırtınası (piksel duvar, tünelde taşınma, içeriden oyma ve zincir, +3/x3 küplerin raketle yakalanması, 300 top sınırı ve akıcılığı, kırılmaz çelik, kazanma ekranı, sonraki bölümde kapanma, panelden pratik); CR7 Koridoru (tam mavi duvar, dar koridor, ok/ateş küpleri, dar raket, CR7 koreografisi, kazanma saçılımı); Mozaik ve Adalar duvarları (fayans salınımı, tek ton fayanslar, elmas adalar, çelik çekirdekler, saçılım); Kampanya (40 bölümün geçerliliği, yıldız hesabı, kilitler, boss'lar, panel, kalıcılık, liderlik).
 - **Meydan okuma:** bölüm kilidi, pratik başlatma, günlük tek deneme, günlük kurallar, seri/tarih hesabı, kalıcılık ve bozuk kayıt.
 - **Lanetler:** 21 lanetin her biri, ayrıntılı davranışlarıyla.
 - **Yeni nesil:** altı yeni tuğla türünün tümü (ikiz çift kırımı, kalkan aşınması, buz dondurması, virüs güçlendirmesi, şifa nabzı, yenilenme); günlük/haftalığa tohumdan simetrik yordamsal haritalar, SERT TUĞLALAR ve VİRÜS SALGINI paktları, Düşen Duvar laneti, ritm bonusu ve yeni dramaturg görevleri.
@@ -227,6 +228,16 @@ Teknik notlar (i18n):
 - **Küpler (alt kaburganın boşluklarında):** 🟠 ▲ ateş topu · 🟢 → yörünge kılavuzu · 🟡 +3 top.
 - Kazanınca toplar sahaya saçılır (CR7 Koridoru'ndaki gibi).
 - Meydan panelindeki **🔹 Mikro Duvar'ı oyna** düğmesiyle her zaman pratik yapılabilir.
+
+## 🗺️ Kampanya — 8 Dünya Turu
+
+Klasik modun yanında tam bir oyun-bitirme deneyimi: **8 dünya × 5 bölüm** (her dünyanın 5.'si boss), her dünya kendi temasıyla açılır (Gece → Neon → Tünel → Buz → Vampir → Aurora → Derin Deniz → Siberpunk). 🎯 Meydan panelindeki **🗺️ Kampanya'yı aç** düğmesiyle.
+
+- **Yıldızlar:** bölüm başına 1-3 ★ — temizle (1) + can kaybetmeden bitir (1) + 8 combo yap (1). Yıldızlar `bb_campaign` içinde kalıcıdır; panelde bölüm başına gösterilir.
+- **Kilitler:** bir dünya bitmeden sıradaki açılmaz; biten dünyalar yeniden oynanabilir (yıldız toplanmaya devam eder).
+- **Boss'lar:** Gece Bekçisi'nden SİBER İMPARATOR'a 8 boss — kampanya boss'ları öfkelenince daha geniş yelpaze (5'li), bazıları minyon diker, final boss'u tepeden mermi yağmuru yağdırır.
+- **Piksel ziyaretleri:** Tünel dünyası Mikro Duvar'a, Aurora Mozaik'e, Derin Deniz Adalar'a, Siberpunk CR7 Koridoru'na uğrar.
+- **Ödüller:** dünya sonu +puan, **kampanya liderlik tablosu**, İlk Dünya / Turun Yarısı / Tur Şampiyonu başarımları.
 
 ## Mozaik Duvar & Adalar Duvarı (15–16. bölüm)
 
