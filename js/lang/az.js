@@ -253,4 +253,9 @@ I18N_DATA.az = {
 765: "🔹 MİKRO DİVAR",
 766: "Orta",
 767: "🔹 Mikro Divarı oyna",
+
+768: "🧩 MOZAYKA DİVARI",
+769: "💠 ADALAR DİVARI",
+770: "🧩 Mozayka Divarını oyna",
+771: "💠 Adalar Divarını oyna",
 };

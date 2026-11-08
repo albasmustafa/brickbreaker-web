@@ -253,4 +253,9 @@ I18N_DATA.vi = {
 765: "🔹 TƯỜNG VI MÔ",
 766: "Vừa",
 767: "🔹 Chơi Tường vi mô",
+
+768: "🧩 TƯỜNG KHẢC",
+769: "💠 TƯỜNG ĐẢO",
+770: "🧩 Chơi Tường khắc",
+771: "💠 Chơi Tường đảo",
 };

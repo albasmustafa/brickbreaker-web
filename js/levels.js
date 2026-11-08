@@ -100,4 +100,6 @@ const LEVELS = [
   { pixel: "tunnel", map: [] },   // 12: TÜNEL FIRTINASI — binlerce piksel tuğla, çelik L ve sarmal tüneller (js/tunnel.js)
   { pixel: "koridor", map: [] },  // 13: CR7 KORİDORU — tamı tamına mavi duvar, ortada dar dikey koridor; +3/ok/ateş küpleri
   { pixel: "mikro", map: [] },    // 14: MİKRO DUVAR — minik (4 px) tuğlalar ve boşluklu çelik kaburgalar; top zor girer
+  { pixel: "mozaik", map: [] },   // 15: MOZAİK DUVAR — 28 px fayanslar mavi/çelik/boşluk salınımıyla; küçük parçalar her yanda
+  { pixel: "adalar", map: [] },   // 16: ADALAR DUVARI — serpilmiş elmas tuğla takımları, kimi çelik çekirdekli
 ];

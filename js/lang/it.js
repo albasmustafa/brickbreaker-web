@@ -253,4 +253,9 @@ I18N_DATA.it = {
 765: "🔹 MURO MICRO",
 766: "Medio",
 767: "🔹 Gioca al Muro micro",
+
+768: "🧩 MURO MOSAICO",
+769: "💠 MURO DELLE ISOLE",
+770: "🧩 Gioca al Muro mosaico",
+771: "💠 Gioca al Muro delle isole",
 };

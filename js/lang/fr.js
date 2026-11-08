@@ -253,4 +253,9 @@ I18N_DATA.fr = {
 765: "🔹 MUR MICRO",
 766: "Moyen",
 767: "🔹 Jouer au Mur micro",
+
+768: "🧩 MUR MOSAÏQUE",
+769: "💠 MUR DES ÎLES",
+770: "🧩 Jouer au Mur mosaïque",
+771: "💠 Jouer au Mur des îles",
 };

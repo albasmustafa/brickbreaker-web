@@ -253,4 +253,9 @@ I18N_DATA.pt = {
 765: "🔹 PAREDE MICRO",
 766: "Médio",
 767: "🔹 Jogar a Parede micro",
+
+768: "🧩 PAREDE MOSAICO",
+769: "💠 PAREDE DAS ILHAS",
+770: "🧩 Jogar a Parede mosaico",
+771: "💠 Jogar a Parede das ilhas",
 };

@@ -253,4 +253,9 @@ I18N_DATA.pl = {
 765: "🔹 MIKROŚCIANA",
 766: "Średni",
 767: "🔹 Zagraj w Mikrościanę",
+
+768: "🧩 MOZAIKOWA ŚCIANA",
+769: "💠 ŚCIANA WYSP",
+770: "🧩 Zagraj w Mozaikową ścianę",
+771: "💠 Zagraj w Ścianę wysp",
 };

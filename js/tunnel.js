@@ -41,15 +41,15 @@ function buildPixelWall(on) {
   Object.assign(pxWall, { active: !!on, mode: on || null, burns: [], cubes: [], dirty: [], pend: 0, flushAt: 0, statAcc: 0, entered: false, chained: false,
                           finale: false, storm: false, maxed: false, won: false, peak: 1 });
   if (!on) { pxWall.grid = pxWall.owner = null; pxWall.tunnels = []; pxWall.s = PX.s; pxWall.cols = PX.cols; pxWall.rows = PX.rows; return; }
-  // MİKRO DUVAR: hücreyarı küçük (4 px) → aynı alanda ~2,25 kat daha çok minik tuğla; top katman katman öğütür
-  const s = on === "mikro" ? 4 : PX.s;
+  // MİNİK HÜCRELİ DUVARLAR (mikro/mozaik/adalar): hücre 4 px → aynı alanda ~2,25 kat daha çok minik tuğla
+  const s = on === "mikro" || on === "mozaik" || on === "adalar" ? 4 : PX.s;
   const cols = Math.round(PX.cols * PX.s / s), rows = Math.round(PX.rows * PX.s / s), n = cols * rows;
   Object.assign(pxWall, { s, cols, rows });
   const grid = new Uint8Array(n).fill(PX_BLUE), owner = new Uint8Array(n), tone = new Uint8Array(n);
   const rand = seeded(4242);                          // tuğla tonları her seferinde aynı
   for (let i = 0; i < n; i++) tone[i] = (rand() * PX_BLUES.length) | 0;
   const center = i => [(i % cols) * s + s / 2, ((i / cols) | 0) * s + s / 2];
-  const paths = on === "koridor" ? KORIDOR_PATHS : on === "mikro" ? [] : TUNNEL_PATHS;
+  const paths = on === "koridor" ? KORIDOR_PATHS : (on === "mikro" || on === "mozaik" || on === "adalar") ? [] : TUNNEL_PATHS;
   // 1) Tünel içi (boşluk): yolun her kolu boyunca 36 px genişliğinde kanal
   paths.forEach((pts, k) => {
     for (let i = 0; i < n; i++) {
@@ -95,6 +95,52 @@ function buildPixelWall(on) {
     }
     for (const [kind, [a, b]] of [["fire", gaps[0]], ["aim", gaps[1]], ["plus", gaps[2]]]) {
       const hx = PX.x + (a + b) / 2 * s, hy = PX.y + 11 * s + 22;
+      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
+    }
+  }
+  if (on === "mozaik") {   // MOZAİK: 7×7 hücrelik (28 px) fayanslar — mavi/çelik/boşluk salınımı; fayans tek tondan
+    const T = 7, tw = Math.floor(cols / T), th = Math.floor(rows / T);
+    grid.fill(PX_HOLLOW);
+    for (let ty = 0; ty < th; ty++) for (let tx = 0; tx < tw; tx++) {
+      const v = (tx * 7 + ty * 13 + 3) % 10;                    // çeşitlilik: ~%60 mavi, %10 çelik, %30 aralık
+      const tileTone = (tx * 3 + ty * 5) % PX_BLUES.length;
+      for (let r2 = 0; r2 < T; r2++) for (let c2 = 0; c2 < T; c2++) {
+        const i = (ty * T + r2) * cols + tx * T + c2;
+        grid[i] = v < 6 ? PX_BLUE : v === 6 ? PX_STEEL : PX_HOLLOW;
+        tone[i] = tileTone;
+      }
+    }
+    for (let i = th * T * cols; i < n; i++) { grid[i] = PX_HOLLOW; }   // artan alt şerit boş
+    for (const [kind, tx] of [["fire", 4], ["aim", 13], ["plus", 22]]) {   // üç fayans aralığı küp yuvası
+      const hx = PX.x + (tx * T + T / 2) * s, hy = PX.y + (T + T / 2) * s;
+      for (let r2 = 0; r2 < T; r2++) for (let c2 = 0; c2 < T; c2++) grid[(T + r2) * cols + tx * T + c2] = PX_HOLLOW;
+      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
+    }
+  }
+  if (on === "adalar") {    // ADALAR: serpilmiş küçük elmas tuğla takımları; bazılarının çelik çekirdeği var
+    grid.fill(PX_HOLLOW);
+    const irand = seeded(777);
+    const place = (cx, cy, R, steel) => {
+      const islandTone = (irand() * PX_BLUES.length) | 0;
+      for (let dy2 = -R; dy2 <= R; dy2++) for (let dx2 = -R; dx2 <= R; dx2++) {
+        if (Math.abs(dx2) + Math.abs(dy2) > R) continue;
+        const c = cx + dx2, r2 = cy + dy2;
+        if (c < 0 || c >= cols || r2 < 0 || r2 >= rows) continue;
+        const i = r2 * cols + c;
+        grid[i] = steel && Math.abs(dx2) + Math.abs(dy2) <= 1 ? PX_STEEL : PX_BLUE;
+        tone[i] = islandTone;
+      }
+    };
+    for (let iy = 0; iy < 8; iy++) for (let ix = 0; ix < 15; ix++) {
+      const cx = 6 + ix * 13 + ((irand() * 5) | 0) - 2, cy = 4 + iy * 8 + ((irand() * 3) | 0) - 1;
+      place(cx, cy, 3 + ((ix + iy) % 2), (ix * 2 + iy) % 4 === 0);
+    }
+    for (const [kind, cx, cy] of [["fire", 30, 30], ["aim", 95, 8], ["mul", 160, 30]]) {   // aralarda üç küp
+      const hx = PX.x + cx * s, hy = PX.y + cy * s;
+      for (let dy2 = -3; dy2 <= 3; dy2++) for (let dx2 = -3; dx2 <= 3; dx2++) {
+        const c = cx + dx2, r2 = cy + dy2;
+        if (c >= 0 && c < cols && r2 >= 0 && r2 < rows && Math.abs(dx2) + Math.abs(dy2) <= 3) grid[r2 * cols + c] = PX_HOLLOW;
+      }
       pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
     }
   }
@@ -310,7 +356,7 @@ function pxWin() {
   addScore(2500);
   for (let k = 0; k < 6; k++) spawnCoins(rnd(150, 650), rnd(140, 320), 18);
   for (let k = 0; k < 3; k++) tone("triangle", [784, 988, 1318][k], 0, 0.35, 0.2, 0.45 + k * 0.3);
-  if (pxWall.mode === "koridor" || pxWall.mode === "mikro") {
+  if (pxWall.mode) {
     if (pxWall.mode === "koridor") {
       if (typeof cr7Cheer === "function") cr7Cheer(5);
       callout(tr("⚽ SIUUU!"), "#ffd60a");
@@ -328,13 +374,15 @@ function pxWin() {
 function pxPaintCell(i) {
   const g = pxWall.g, s = pxWall.s, cols = pxWall.cols, rows = pxWall.rows, c = i % cols, r = (i / cols) | 0, x = c * s, y = r * s, t = pxWall.grid[i];
   g.clearRect(x, y, s, s);
-  if (t === PX_BLUE || t === PX_BURN) {               // piksel tuğla: 5×5, üstü parlak, altı gölgeli
+  if (t === PX_BLUE || t === PX_BURN) {               // piksel tuğla: üstü/solu parlak, altı/sağı gölgeli (büyük hücrede tam bevel)
     g.fillStyle = PX_BLUES[pxWall.tone[i]];
     g.fillRect(x + 0.5, y + 0.5, s - 1, s - 1);
     g.fillStyle = "rgba(255,255,255,0.35)";
     g.fillRect(x + 0.5, y + 0.5, s - 1, 1);
+    if (s >= 6) g.fillRect(x + 0.5, y + 0.5, 1, s - 1);
     g.fillStyle = "rgba(0,0,30,0.35)";
     g.fillRect(x + 0.5, y + s - 1.5, s - 1, 1);
+    if (s >= 6) g.fillRect(x + s - 1.5, y + 0.5, 1, s - 1);
   } else if (t === PX_STEEL) {                        // fırçalanmış çelik: kenarlarda pah
     const same = (dc, dr) => { const cc = c + dc, rr = r + dr; return cc >= 0 && cc < cols && rr >= 0 && rr < rows && pxWall.grid[rr * cols + cc] === PX_STEEL; };
     g.fillStyle = ["#8d99ae", "#97a3b6", "#8492a6"][pxWall.tone[i] % 3];
@@ -391,6 +439,13 @@ function drawPixelWall() {
     P.dirty.length = 0;
   }
   const reveal = clamp(state.buildFade / 3, 0, 1);    // bölüm başında yukarıdan aşağı belirir
+  ctx.fillStyle = "rgba(0,0,0,0.20)";                 // cila: duvarın düşen gölgesi
+  ctx.fillRect(PX.x + 2, PX.y + 4, ww, wh);
+  const shg = ctx.createLinearGradient(0, PX.y + wh, 0, PX.y + wh + 16);
+  shg.addColorStop(0, "rgba(0,0,0,0.26)");
+  shg.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = shg;
+  ctx.fillRect(PX.x - 4, PX.y + wh, ww + 8, 16);
   ctx.save();
   ctx.beginPath();
   ctx.rect(PX.x - 2, PX.y - 2, ww + 4, wh * (1 - (1 - reveal) ** 3) + 4);

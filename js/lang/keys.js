@@ -768,5 +768,9 @@ const I18N_KEYS = [
 "🔹 MİKRO DUVAR", // 765
 "Orta", // 766
 "🔹 Mikro Duvar'ı oyna", // 767
+"🧩 MOZAİK DUVAR", // 768
+"💠 ADALAR DUVARI", // 769
+"🧩 Mozaik Duvar'ı oyna", // 770
+"💠 Adalar Duvarı'nı oyna", // 771
 ];
 const I18N_DATA = {};

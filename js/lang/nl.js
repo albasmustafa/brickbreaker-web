@@ -253,4 +253,9 @@ I18N_DATA.nl = {
 765: "🔹 MICROMUUR",
 766: "Gemiddeld",
 767: "🔹 Speel de Micromuur",
+
+768: "🧩 MOZAÏEKMUUR",
+769: "💠 EILANDENMUUR",
+770: "🧩 Speel de Mozaïekmuur",
+771: "💠 Speel de Eilandenmuur",
 };

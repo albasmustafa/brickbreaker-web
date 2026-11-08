@@ -253,4 +253,9 @@ I18N_DATA.hu = {
 765: "🔹 MIKROFAL",
 766: "Közepes",
 767: "🔹 Mikrofal játéka",
+
+768: "🧩 MOZAJKFAL",
+769: "💠 SZIGETFAL",
+770: "🧩 Mozajkfal játéka",
+771: "💠 Szigetfal játéka",
 };

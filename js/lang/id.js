@@ -253,4 +253,9 @@ I18N_DATA.id = {
 765: "🔹 DINDING MIKRO",
 766: "Sedang",
 767: "🔹 Mainkan Dinding Mikro",
+
+768: "🧩 DINDING MOSAIK",
+769: "💠 DINDING PULAU",
+770: "🧩 Mainkan Dinding Mosaik",
+771: "💠 Mainkan Dinding Pulau",
 };

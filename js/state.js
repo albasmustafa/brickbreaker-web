@@ -38,7 +38,7 @@ const isFire = () => fxOn("fire") || isFever();
 const ballDamage = () => (fxOn("big") ? 2 : 1);
 
 function initStars() {
-  stars = Array.from({ length: 70 }, () => ({ x: Math.random() * W, y: Math.random() * H, s: rnd(0.5, 1.8), v: rnd(4, 18), ph: rnd(0, 6.28) }));
+  stars = Array.from({ length: 70 }, () => ({ x: Math.random() * W, y: Math.random() * H, s: rnd(0.5, 1.8), v: rnd(4, 18), ph: rnd(0, 6.28), d: rnd(0.3, 1) }));
   matrixCols = [];
   for (let x = 8; x < W; x += 20) matrixCols.push({ x, y: rnd(-H, H), v: rnd(50, 160) });
 }

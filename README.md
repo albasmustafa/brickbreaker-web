@@ -26,7 +26,7 @@ js/i18n.js            dil seçimi, tr() çevirisi, RTL, statik HTML çevirisi
 js/themes.js          25 hazır tema, tema yönetimi, sonsuz rastgele tema üreteci
 js/settings.js        ayar tablosu: varsayılanlar + doğrulama + ayarlar panelinin satırları
 js/audio.js           Web Audio ses motoru, olay sesleri tablosu, raket sesleri
-js/levels.js          14 bölüm: 11 harita (2 boss) + Tünel Fırtınası + CR7 Koridoru + Mikro Duvar
+js/levels.js          16 bölüm: 11 harita (2 boss) + Tünel Fırtınası + CR7 Koridoru + Mikro/Mozaik/Adalar duvarları
 js/state.js           oyun durumu, varlık listeleri, top matematiği
 js/flow.js            bölüm kurma, oyun başlatma, can/bölüm geçişleri, duraklatma
 js/effects.js         parçacık, parça, çatlak, yıldırım, yazılar, sarsıntı
@@ -71,7 +71,7 @@ Okunaklı tek dosyada her bölümün başında kaynak dosyanın adı yazar. Ana 
 ## Testler
 
 `npm test` her testi temiz kayıtlı (boş localStorage) yeni bir sayfada çalıştırır; sayfadaki herhangi bir JS hatası testi düşürür. Kapsam:
-- **Oyun:** yükleme ve özellik envanteri; servis, oynanış, can, oyun sonu, duraklatma; koşu sayaçları ve pratikte kayıt dışı kalma; 15 kapsülün her biri; duvar bölgeleri, falso ve SMASH; tüm tuğla türleri; boss; kara delik, ÇILGIN MOD, lazer ve kalkan; 25 dil (her dil eksiksiz ve yer tutucuları uyumlu, html lang/dir ve RTL, dil seçici, tüm ekranlar ve panellerin her dilde hatasız ve tuvale sığarak çizilmesi, çevrilmemiş Türkçe metin kalmaması); Tünel Fırtınası (piksel duvar, tünelde taşınma, içeriden oyma ve zincir, +3/x3 küplerin raketle yakalanması, 300 top sınırı ve akıcılığı, kırılmaz çelik, kazanma ekranı, sonraki bölümde kapanma, panelden pratik); CR7 Koridoru (tam mavi duvar, dar koridor, ok/ateş küpleri, dar raket, CR7 koreografisi, kazanma saçılımı).
+- **Oyun:** yükleme ve özellik envanteri; servis, oynanış, can, oyun sonu, duraklatma; koşu sayaçları ve pratikte kayıt dışı kalma; 15 kapsülün her biri; duvar bölgeleri, falso ve SMASH; tüm tuğla türleri; boss; kara delik, ÇILGIN MOD, lazer ve kalkan; 25 dil (her dil eksiksiz ve yer tutucuları uyumlu, html lang/dir ve RTL, dil seçici, tüm ekranlar ve panellerin her dilde hatasız ve tuvale sığarak çizilmesi, çevrilmemiş Türkçe metin kalmaması); Tünel Fırtınası (piksel duvar, tünelde taşınma, içeriden oyma ve zincir, +3/x3 küplerin raketle yakalanması, 300 top sınırı ve akıcılığı, kırılmaz çelik, kazanma ekranı, sonraki bölümde kapanma, panelden pratik); CR7 Koridoru (tam mavi duvar, dar koridor, ok/ateş küpleri, dar raket, CR7 koreografisi, kazanma saçılımı); Mozaik ve Adalar duvarları (fayans salınımı, tek ton fayanslar, elmas adalar, çelik çekirdekler, saçılım).
 - **Meydan okuma:** bölüm kilidi, pratik başlatma, günlük tek deneme, günlük kurallar, seri/tarih hesabı, kalıcılık ve bozuk kayıt.
 - **Lanetler:** 21 lanetin her biri, ayrıntılı davranışlarıyla.
 - **Yeni nesil:** altı yeni tuğla türünün tümü (ikiz çift kırımı, kalkan aşınması, buz dondurması, virüs güçlendirmesi, şifa nabzı, yenilenme); günlük/haftalığa tohumdan simetrik yordamsal haritalar, SERT TUĞLALAR ve VİRÜS SALGINI paktları, Düşen Duvar laneti, ritm bonusu ve yeni dramaturg görevleri.
@@ -144,7 +144,7 @@ GitHub Actions (`.github/workflows/ci.yml`) her push ve pull request'te Node 22 
 - **Yeni nesil tuğlalar (2/6/9/11. bölümlerde):** **H** yenilenen (turkuaz; yarım kalırsa ~6 sn'de 1 canını geri kazanır), **A** kalkanlı (lacivert plaka; topu 4 vuruşta aşındırır, ateş ve lazer kalkanı hemen söker), **T** ikiz (pembe; aralarında nabızlı ışın vardır, biri kırılınca eşi de dağılır), **I** buz (açık mavi; kırılınca komşularını dondurur: +2 can ve buz kılıfı, ateşte anında erir), **V** virüs (limon yeşili; ~5 sn'de bir en zayıf komşusunu +1 can güçlendirir, erken yok edilmezse duvar sertleşir), **S** şifacı (mercan; boss varsa boss'u, yoksa yaralı komşusunu onarır). Yeni türden kırılan tuğlalar kariyerde **Yeni tür tuğla** sayacına ve koleksiyon kartlarına işler.
 - **Combo:** rakete dokunmadan üst üste kırılan her tuğla çarpanı büyütür (x8) ve kırılma sesi perde perde inceler (sert tuğlalar daha tok sesle kırılır). Skor = 10 × dayanıklılık × çarpan. 5/8/15/20/30 combo'da ekranda dev yazı çıkar. 3 vuruşluk tuğlalar son vuruşta mikro an-donması ve biraz daha güçlü sarsıntıyla dağılır.
 - **ÇILGIN MOD:** 10 combo'da 6 sn boyunca tüm toplar ateş topu olur, puanlar ×2, tahta gökkuşağına döner.
-- **Bölümler:** 13 bölüm `LEVELS` dizisinde (11 harita: satır = sıra, karakter = tuğla türü); 5. ve 10. bölüm boss, 11. bölüm *Siber Labirent*, 12. bölüm **Tünel Fırtınası**, 13. bölüm **CR7 Koridoru**, 14. bölüm **Mikro Duvar** (aşağıda). Sonrası döngü, bölüm başına top hızı +%7, her turda boss canı +%50.
+- **Bölümler:** 13 bölüm `LEVELS` dizisinde (11 harita: satır = sıra, karakter = tuğla türü); 5. ve 10. bölüm boss, 11. bölüm *Siber Labirent*, 12. bölüm **Tünel Fırtınası**, 13. bölüm **CR7 Koridoru**, 14. bölüm **Mikro Duvar**, 15. bölüm **Mozaik Duvar**, 16. bölüm **Adalar Duvarı** (aşağıda). Sonrası döngü, bölüm başına top hızı +%7, her turda boss canı +%50.
 - **Boss:** *Tuğla Kral* (40 can) ve *Demir İmparator* (70 can). Sağa sola gezer, gözleriyle topu izler, rakete nişanlı mermi atar (değerse raket 2.5 sn sersemler ve küçülür). Canı yarıya inince öfkelenir: hızlanır, üçlü yelpaze atar, altına yeni tuğlalar diker. Her 6 isabette iyi kapsül düşürür. Ölünce ağır çekim patlama + 5000 puan.
 - **Güç kapsülleri** (tuğla kırılınca %16 ihtimal): **GENİŞ** raket 10 sn · **ÇOKLU** her toptan 2 kopya (en çok 8 top) · **YAVAŞ** 8 sn · **ATEŞ** 6 sn top kırılabilir tuğlaları sekmeden deler · **LAZER** 8 sn raketten otomatik lazer (boss mermilerini de vurur) · **YAPIŞ** 10 sn top rakete yapışır, tıkla bırak (2.5 sn sonra kendisi kalkar) · **DEV** 10 sn kocaman top, 2 hasar · **KALKAN** alt kenarda 3 kurtarış · **DELİK** 7 sn topları büken kara delik; çok yaklaşan topu fırlatır, sonunda çöküp çevresindeki tuğlaları yutar · **+CAN** (en çok 9) · **KAOS?** rastgele herhangi biri.
 - **Kötü kapsüller** (kırmızı, kesikli çerçeve): **TERS** 6 sn kontroller ters · **MİNİ** 8 sn küçük raket · **HIZ** 6 sn top ×1.3 · **LANET** hemen bir lanet çağırır. Yakalamak cesaret ister: +250 puan.
@@ -227,6 +227,18 @@ Teknik notlar (i18n):
 - **Küpler (alt kaburganın boşluklarında):** 🟠 ▲ ateş topu · 🟢 → yörünge kılavuzu · 🟡 +3 top.
 - Kazanınca toplar sahaya saçılır (CR7 Koridoru'ndaki gibi).
 - Meydan panelindeki **🔹 Mikro Duvar'ı oyna** düğmesiyle her zaman pratik yapılabilir.
+
+## Mozaik Duvar & Adalar Duvarı (15–16. bölüm)
+
+Mikro Duvar'ın küçük parçalı iki kardeşi — üstteki dikdörtgenler çok sayıda minik parçaya bölünür:
+
+- **🧩 Mozaik Duvar (15):** duvar 28 px'lik **fayanslara** ayrılır; her fayans tek tondan mavi (küçük parça görünümü), bazıları çelik, aralarında boşluklar salınım yapar. Top fayans fayans öğütür, boşluklardan içre sızar. Küpler: ▲ ateş · → yön · +3.
+- **💠 Adalar Duvarı (16):** ~120 küçük **elmas tuğla takımı** boşluklar arasında serpilir; her dördüncünün **çelik çekirdeği** vardır — çevresinden kırmak gerekir. Top adaların arasında serbestçe dolaşır. Küpler: ▲ ateş · → yön · x3.
+- İkisinde de kazanınca toplar sahaya saçılır. Meydan panelinden **🧩 Mozaik Duvar'ı oyna** ve **💠 Adalar Duvarı'nı oyna** düğmeleriyle her zaman pratik yapılır.
+
+## Genel görsel cila
+
+Kartlar (menü, duraklatma, bölüm sonu, oyun sonu) belirdiğinde üstlerinden bir kez **ışık süpürmesi** geçer; toplar azken yumuşak bir **parıltı halesi** taşır; piksel duvarların altında **gölge** ve hücrelerde tam **bevel** vardır; yıldızlı/kar arka planlar raketi izleyen hafif **paralaksla** derinlik kazanır.
 
 ## Lanetler (engeller)
 

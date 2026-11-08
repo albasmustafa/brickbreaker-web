@@ -253,4 +253,9 @@ I18N_DATA.cs = {
 765: "🔹 MIKROZEĎ",
 766: "Střední",
 767: "🔹 Hrát Mikrozeď",
+
+768: "🧩 MOZAIKOVÁ ZEĎ",
+769: "💠 ZEĎ OSTROVŮ",
+770: "🧩 Hrát Mozaikovou zeď",
+771: "💠 Hrát Zeď ostrovů",
 };

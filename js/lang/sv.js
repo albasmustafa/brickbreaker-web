@@ -253,4 +253,9 @@ I18N_DATA.sv = {
 765: "🔹 MIKROVÄGG",
 766: "Medel",
 767: "🔹 Spela Mikroväggen",
+
+768: "🧩 MOSAIKVÄGG",
+769: "💠 ÖVÄGG",
+770: "🧩 Spela Mosaikväggen",
+771: "💠 Spela Öväggen",
 };

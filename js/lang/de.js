@@ -253,4 +253,9 @@ I18N_DATA.de = {
 765: "🔹 MIKROWAND",
 766: "Mittel",
 767: "🔹 Mikrowand spielen",
+
+768: "🧩 MOSAIKWAND",
+769: "💠 INSELWAND",
+770: "🧩 Mosaikwand spielen",
+771: "💠 Inselwand spielen",
 };

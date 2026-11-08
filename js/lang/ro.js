@@ -253,4 +253,9 @@ I18N_DATA.ro = {
 765: "🔹 ZID MICRO",
 766: "Mediu",
 767: "🔹 Joacă Zidul micro",
+
+768: "🧩 ZID MOZAIC",
+769: "💠 ZIDUL INSULELOR",
+770: "🧩 Joacă Zidul mozaic",
+771: "💠 Joacă Zidul insulelor",
 };

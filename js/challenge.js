@@ -98,7 +98,8 @@ function renderChallenge() {
     const n = i + 1, locked = n > max, boss = !!def.boss;
     return el("button", {
       className: n === max ? "active" : "",
-      textContent: (boss ? "☠ " : def.pixel === "koridor" ? "⚽ " : def.pixel === "mikro" ? "🔹 " : def.pixel ? "🌀 " : "") + n,
+      textContent: (boss ? "☠ " : def.pixel === "koridor" ? "⚽ " : def.pixel === "mikro" ? "🔹 " : def.pixel === "mozaik" ? "🧩 " :
+                    def.pixel === "adalar" ? "💠 " : def.pixel ? "🌀 " : "") + n,
       title: locked ? tr("Önce klasik oyunda {n}. bölüme ulaş", { n }) : tr("Bölüm {n} pratiği", { n }),
       disabled: locked,
       onclick: () => startPractice(n),
@@ -130,7 +131,11 @@ onClick("daily-start", startDaily);
 const TUNNEL_LEVEL = LEVELS.findIndex(l => l.pixel) + 1;
 const KORIDOR_LEVEL = LEVELS.findIndex(l => l.pixel === "koridor") + 1;
 const MIKRO_LEVEL = LEVELS.findIndex(l => l.pixel === "mikro") + 1;
+const MOZAIK_LEVEL = LEVELS.findIndex(l => l.pixel === "mozaik") + 1;
+const ADALAR_LEVEL = LEVELS.findIndex(l => l.pixel === "adalar") + 1;
 onClick("tunnel-start", () => startPractice(TUNNEL_LEVEL, true));
 onClick("koridor-start", () => startPractice(KORIDOR_LEVEL, true));
 onClick("mikro-start", () => startPractice(MIKRO_LEVEL, true));
+onClick("mozaik-start", () => startPractice(MOZAIK_LEVEL, true));
+onClick("adalar-start", () => startPractice(ADALAR_LEVEL, true));
 renderChallenge();

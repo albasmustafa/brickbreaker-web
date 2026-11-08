@@ -253,4 +253,9 @@ I18N_DATA.en = {
 765: "🔹 MICRO WALL",
 766: "Medium",
 767: "🔹 Play the Micro Wall",
+
+768: "🧩 MOSAIC WALL",
+769: "💠 ISLANDS WALL",
+770: "🧩 Play the Mosaic Wall",
+771: "💠 Play the Islands Wall",
 };

@@ -286,12 +286,13 @@ function drawGlints() {
 const MATRIX_CH = "01アイウエオカキクケコサシスセソタチツテトナニヌネノ#$%";
 function drawStars() {
   const fx = settings.bgFx;
+  const par = (paddle.x + paddle.w / 2 - W / 2) * -0.045;   // cila: raketi izleyen hafif paralaks
   if (fx === "yildiz") {
     ctx.fillStyle = T().star;
     const streak = 1 + (musicWarp() - 1) * 2.5;         // müzikle hızlanınca yıldızlar çizgiye döner
-    for (const s of stars) ctx.fillRect(s.x, s.y, s.s, s.s * streak);
+    for (const s of stars) ctx.fillRect(s.x + par * s.d, s.y, s.s, s.s * streak);
   } else if (fx === "kar") {
-    for (const s of stars) circle(s.x, s.y, s.s * 1.5, hexToRgba(T().dim, 0.55));
+    for (const s of stars) circle(s.x + par * s.d, s.y, s.s * 1.5, hexToRgba(T().dim, 0.55));
   } else if (fx === "kabarcik") {
     ctx.strokeStyle = hexToRgba(T().dim, 0.4);
     ctx.lineWidth = 1;
@@ -564,6 +565,12 @@ function drawBalls() {
       circle(t.x, t.y, b.r * (0.4 + 0.6 * f), fire ? (i % 2 ? "#ffd166" : "#ff6b35") : rainbow ? `hsl(${(i * 24 + state.time * 240) % 360},90%,62%)` : T().ball);
     });
     if (b.boost > 1.1 && !crowd) { ctx.globalAlpha = clamp((b.boost - 1) * 0.8, 0, 0.6) * ghostA; circle(b.x, b.y, b.r + 6, "#ffffff"); }   // hız patlaması halesi
+    if (!crowd && balls.length <= 20) {                 // cila: yumuşak top parıltısı (kalabalıkta kapalı)
+      ctx.globalAlpha = 0.10 * ghostA;
+      circle(b.x, b.y, b.r + 10, hexToRgba(ballCol, 0.9));
+      ctx.globalAlpha = 0.16 * ghostA;
+      circle(b.x, b.y, b.r + 5, hexToRgba(ballCol, 0.9));
+    }
     ctx.globalAlpha = 0.28 * ghostA;
     if (!crowd) circle(b.x + 3, b.y + 4, b.r, "#000000");   // zemine düşen gölge
     ctx.globalAlpha = ghostA;
@@ -789,6 +796,16 @@ function drawCard(cx, cy, w, h) {
   ctx.strokeStyle = hexToRgba(T().accent, 0.8);
   ctx.lineWidth = 2;
   ctx.stroke();
+  const sw = clamp((performance.now() - modeAt - 120) / 650, 0, 1);   // cila: kart belirirken ışık süpürmesi
+  if (sw > 0 && sw < 1) {
+    ctx.save();
+    rrPath(cx - w / 2, cy - h / 2, w, h, 18);
+    ctx.clip();
+    const sx = cx - w / 2 + (sw * 1.7 - 0.35) * w;
+    ctx.fillStyle = lgrad(sx - 55, 0, sx + 55, 0, [[0, "rgba(255,255,255,0)"], [0.5, "rgba(255,255,255,0.16)"], [1, "rgba(255,255,255,0)"]]);
+    ctx.fillRect(sx - 60, cy - h / 2, 120, h);
+    ctx.restore();
+  }
 }
 // Degrade dolgulu, hafif parlayan başlık (glow: isteğe göre nabızlı parlama)
 function titleText(s, x, y, size, c1, c2, maxW = W - 40, glow = 18) {
