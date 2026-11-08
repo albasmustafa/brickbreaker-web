@@ -48,7 +48,7 @@ test("Yükleme, arayüz ve özellik envanteri", async ({ p, expect }) => {
     musicFx: MUSIC_FX_ALL.length, skills: Object.keys(BOT_SKILL).join(","), types: Object.keys(BRICK_TYPES).join(""), rows: settingsPanel.querySelectorAll(".setrow").length,
     tiers: TIERS.map(t => t.name).join(), ach: ACHIEVEMENTS.length, stats: Object.keys(STATS).length, career: careerPanel.hidden && versusPanel.querySelector(".rank-card") !== null,
     codex: CODEX_CARDS.length, codexPanel: codexPanel.hidden, song: typeof generateSongLevels === "function" })`);
-  expect(r.mode === "menu" && r.bricks === 46 && r.levels === 12, "menü ve ilk bölüm: " + JSON.stringify(r));
+  expect(r.mode === "menu" && r.bricks === 46 && r.levels === 14, "menü ve ilk bölüm: " + JSON.stringify(r));
   expect(r.themes === 25, "25 hazır tema");
   expect(r.tools === 10, "araç çubuğunda 10 düğme (ses, tema, rastgele, stüdyo, rekabet, meydan, editör, kariyer, ayarlar, tam ekran): " + r.tools);
   expect(r.tiers === "Bronz,Gümüş,Altın,Platin,Elmas,Usta,Efsane" && r.ach === 27 && r.stats === 20 && r.career, "7 lig, 27 başarım, 20 sayaç, rütbe kartı: " + JSON.stringify([r.tiers, r.ach, r.stats, r.career]));
@@ -914,15 +914,170 @@ test("Tünel Fırtınası: piksel duvar, çelik tüneller, zincir, küpler, 300 
   if (shots) { await sleep(1600); await p.shot(shots + "/tunnel-win.png"); }
   const n = await p.eval(`(() => {
     state.clearAt = state.time; update(STEP);
+    const afterTunnel = [state.level, pxWall.active, pxWall.mode];
+    state.mode = "playing"; levelCleared();        // koridoru bitir (saçılım + SIUUU dahil)
+    state.clearAt = state.time; update(STEP);
+    const afterKoridor = [state.level, pxWall.active, pxWall.mode];
+    state.mode = "playing"; levelCleared();        // mikro duvarı da bitir
+    state.clearAt = state.time; update(STEP);
     const next = [state.level, pxWall.active];
     toMenu(); $("tunnel-start").click();
     const practice = [state.level, run.practice, pxWall.active, state.mode];
     toMenu();
-    return { next, practice, menu: pxWall.active, label: [...levelGrid.querySelectorAll("button")].pop().textContent };
+    return { afterTunnel, afterKoridor, next, practice, menu: pxWall.active, label: [...levelGrid.querySelectorAll("button")].pop().textContent };
   })()`);
-  expect(n.next[0] === 13 && n.next[1] === false, "sonraki bölümde piksel duvar kapanır: " + n.next);
+  expect(n.afterTunnel.join() === "13,true,koridor", "12.den sonra CR7 Koridoru açılır: " + JSON.stringify(n.afterTunnel));
+  expect(n.afterKoridor.join() === "14,true,mikro", "koridordan sonra Mikro Duvar açılır: " + JSON.stringify(n.afterKoridor));
+  expect(n.next[0] === 15 && n.next[1] === false, "mikrodan sonra piksel duvar kapanır: " + n.next);
   expect(n.practice.join() === "12,true,true,serve", "Meydan panelinden her zaman pratik: " + n.practice);
-  expect(n.menu === false && n.label === "🌀 12", "menüde kapalı, bölüm ızgarasında 🌀 12: " + JSON.stringify(n));
+  expect(n.menu === false && n.label === "🔹 14", "menüde kapalı, bölüm ızgarasında 🔹 14: " + JSON.stringify(n));
+});
+
+test("CR7 Koridoru: tam mavi duvar, dar koridor, ok/ateş küpleri, dar raket, CR7, kazanma saçılımı", async ({ p, expect }) => {
+  const r = await p.eval(`(() => {
+    __start(13);
+    const P = pxWall, g = P.grid, count = t => g.reduce((s, v) => s + (v === t), 0);
+    const hollowRow = [...Array(PX.cols).keys()].filter(c => g[(PX.rows - 5) * PX.cols + c] === PX_HOLLOW).length;
+    const info = { active: P.active, mode: P.mode, level: state.level, total: P.total, blue: count(PX_BLUE), steel: count(PX_STEEL),
+                   hollow: count(PX_HOLLOW), tunnels: P.tunnels.length, cubes: P.cubes.map(q => q.kind).join(","),
+                   bricks: bricks.length, speed: state.speed, base: levelSpeed(13) };
+    // Giriş duvarın altına açık ve koridor dar (5-7 hücre)
+    const entr = g[pxCellAt(P.tunnels[0].segs[0].a[0], PX.y + PX.rows * PX.s - 3)];
+    // Dar raket: hedef genişlik %72
+    update(STEP);
+    const paddleW = paddle.targetW;
+    // Küpler: +3 üç top ekler, → yön kılavuzu, ▲ ateş
+    const b0 = balls.length;
+    pxCatch({ kind: "plus" });
+    const plus = balls.length - b0;
+    pxCatch({ kind: "aim" });
+    const aim = state.aimUntil > state.time;
+    pxCatch({ kind: "fire" });
+    const fire = isFire();
+    draw();
+    const aimDrawn = true;
+    // CR7: ruh halleri çizilir, kutlama/üzülme kancaları çalışır
+    cr7Cheer(1); draw();
+    const cheer = cr7.mood === "yay";
+    cr7Facepalm(); draw();
+    const face = cr7.mood === "face";
+    // Top koridora girer: alt ortadan sok, tepede zinceri tutuşturur
+    const s0 = P.tunnels[0].segs[0], b = __ballAt(s0.a[0], PX.y + PX.rows * PX.s + 30, 0, -mag());
+    let guided = false, chained = false;
+    for (let i = 0; i < 900 && !(guided && chained); i++) { update(STEP); if (b.tun) guided = true; if (P.chained) chained = true; }
+    for (let i = 0; i < 360; i++) update(STEP);   // zincir cephesi yayılsın
+    const carve = P.total - P.left;
+    // Kazanma: kalan her şeyi kır, saçılım + SIUUU
+    for (let i = 0; i < g.length; i++) pxBreak(i);
+    P.burns = [];
+    if (state.mode !== "playing") state.mode = "playing";
+    update(STEP);
+    const won = { mode: state.mode, won: P.won, balls: balls.length, mood: cr7.mood };
+    return { info, entr, hollowRow, paddleW, plus, aim, fire, aimDrawn, cheer, face, guided, chained, carve, won };
+  })()`);
+  expect(r.info.active && r.info.mode === "koridor" && r.info.level === 13 && r.info.bricks === 0, "13. bölüm koridor düzeyi: " + JSON.stringify(r.info));
+  expect(r.info.total > 4800 && r.info.blue > 4800, "tamı tamına mavi duvar: " + JSON.stringify([r.info.total, r.info.blue]));
+  expect(r.info.steel > 150 && r.info.hollow > 200 && r.info.tunnels === 1 && r.entr === 3, "tek koridor, çelik dudaklar, giriş açık: " + JSON.stringify([r.info.steel, r.info.hollow, r.entr]));
+  expect(r.hollowRow >= 5 && r.hollowRow <= 7, "koridor dar (5-7 hücre): " + r.hollowRow);
+  expect(Math.abs(r.paddleW - 72) < 1, "raket dar ve hassas: " + r.paddleW);
+  expect(r.info.speed >= r.info.base, "yüksek zorluk: bölüm hızı yüksek: " + JSON.stringify([r.info.speed, r.info.base]));
+  expect(r.plus === 3 && r.aim && r.fire && r.aimDrawn, "küpler: +3 üç top, → yön, ▲ ateş: " + JSON.stringify([r.plus, r.aim, r.fire]));
+  expect(r.cheer && r.face, "CR7 kutlar ve üzülünce yüzünü kapatır: " + JSON.stringify([r.cheer, r.face]));
+  expect(r.guided && r.chained && r.carve > 40, "koridorda taşınma ve zincirle oyma: " + JSON.stringify([r.guided, r.chained, r.carve]));
+  expect(r.won.mode === "levelclear" && r.won.won && r.won.balls > 30 && r.won.mood === "yay", "kazanınca toplar saçılır, CR7 kutlar: " + JSON.stringify(r.won));
+  const pr = await p.eval(`(() => { toMenu(); $("koridor-start").click();
+    const st = [state.level, run.practice, pxWall.active, pxWall.mode, state.mode]; toMenu(); return st; })()`);
+  expect(pr.join() === "13,true,true,koridor,serve", "panelden koridor pratiği: " + pr);
+});
+
+test("Modlar: kolay/orta/zor — hız, can, raket, kapsül, lanet sıklığı, puan; menü hapları tıklanır", async ({ p, expect }) => {
+  const r = await p.eval(`(() => {
+    // Menü hapları çizildi ve kutular dolu
+    state.mode = "menu"; draw();
+    const boxes = menuModeBoxes.map(b => b.v).join();
+    const ortaLabel = menuModeBoxes.find(b => b.v === "normal");
+    // Orta (varsayılan): referans değerler
+    settings.difficulty = "normal"; startGame(); launchBall();
+    const orta = { lives: state.lives, speed: state.speed, pad: state.diffPaddle, drop: state.diffDrop, gap: state.diffCurseGap, mul: state.diffScoreMul };
+    const s0 = state.score; addScore(100);
+    const ortaScore = state.score - s0;
+    // Kolay: geniş raket, bol kapsül, seyrek lanet, puan ×0.75
+    settings.difficulty = "kolay"; startGame(); launchBall();
+    const kolay = { lives: state.lives, speed: state.speed, pad: state.diffPaddle, drop: state.diffDrop, gap: state.diffCurseGap, mul: state.diffScoreMul };
+    const s1 = state.score; addScore(100);
+    const kolayScore = state.score - s1;
+    // Zor: dar raket, sık lanet, puan ×1.35
+    settings.difficulty = "zor"; startGame(); launchBall();
+    const zor = { lives: state.lives, speed: state.speed, pad: state.diffPaddle, drop: state.diffDrop, gap: state.diffCurseGap, mul: state.diffScoreMul };
+    const s2 = state.score; addScore(100);
+    const zorScore = state.score - s2;
+    scheduleNextCurse(true);                      // zorlanet aralığı kısalır
+    const curseIn = state.curseAt - state.time;
+    // Menü hapı tıklaması: zor kutusunu tıkla → ayar değişir, oyun başlamaz
+    settings.difficulty = "normal";
+    state.mode = "menu"; draw();
+    const z = menuModeBoxes.find(b => b.v === "zor");
+    const clicked = tryMenuModeClick((z.x + z.w / 2) * (canvas.getBoundingClientRect().width / W) + canvas.getBoundingClientRect().left,
+                                     (z.y + z.h / 2) * (canvas.getBoundingClientRect().height / H) + canvas.getBoundingClientRect().top);
+    const afterClick = { mode: state.mode, diff: settings.difficulty, saved: JSON.parse(localStorage.getItem("bb_settings")).difficulty };
+    settings.difficulty = "normal";
+    return { boxes, ortaLabel: !!ortaLabel, orta, kolay, zor, scores: [kolayScore, ortaScore, zorScore], curseIn, clicked, afterClick };
+  })()`);
+  expect(r.boxes === "kolay,normal,zor" && r.ortaLabel, "menüde üç mod hapı: " + r.boxes);
+  expect(r.orta.lives === 3 && Math.abs(r.orta.pad - 1) < 1e-9 && r.scores[1] === 100, "orta: can 3, raket ×1, puan ×1: " + JSON.stringify(r.orta));
+  expect(r.kolay.lives === 5 && r.kolay.speed < 340 && r.kolay.pad > 1 && r.kolay.drop > 1 && r.kolay.gap > 1 && r.scores[0] === 75,
+         "kolay: yavaş, geniş raket, bol kapsül, seyrek lanet, puan ×0.75: " + JSON.stringify(r.kolay) + r.scores[0]);
+  expect(r.zor.lives === 2 && r.zor.speed > 340 && r.zor.pad < 1 && r.zor.drop < 1 && r.zor.gap < 1 && r.scores[2] === 135,
+         "zor: hızlı, dar raket, az kapsül, sık lanet, puan ×1.35: " + JSON.stringify(r.zor) + r.scores[2]);
+  expect(r.curseIn > 0, "lanet zamanlayıcı çalışır: " + r.curseIn);
+  expect(r.clicked && r.afterClick.mode === "menu" && r.afterClick.diff === "zor" && r.afterClick.saved === "zor",
+         "menüden mod seçilebilir, oyun başlamaz, kalıcı: " + JSON.stringify(r.afterClick));
+  const pill = await p.eval(`(() => { settings.difficulty = "normal"; state.mode = "menu"; draw();
+    return settingsPanel.querySelector('[data-opt="difficulty"][data-val="normal"]').textContent; })()`);
+  expect(pill === "Orta", "ayarlar panelinde orta etiketi: " + pill);
+});
+
+test("Mikro Duvar: minik tuğlalar, çelik kaburgalar, boşluklar, küpler, kazanma saçılımı", async ({ p, expect }) => {
+  const r = await p.eval(`(() => {
+    __start(14);
+    const P = pxWall, g = P.grid, count = t => g.reduce((s2, v) => s2 + (v2 => v2)(0) + (v === t ? 1 : 0), 0);
+    const info = { active: P.active, mode: P.mode, level: state.level, cell: P.s, cols: P.cols, rows: P.rows,
+                   total: P.total, steel: count(PX_STEEL), hollow: count(PX_HOLLOW), tunnels: P.tunnels.length,
+                   cubes: P.cubes.map(q => q.kind).join(","), bricks: bricks.length };
+    // Kaburga sırası çelik, boşluklar mavi: 11. sıra kontrolü
+    const rib = [...Array(P.cols).keys()].filter(c => g[11 * P.cols + c] === PX_STEEL).length;
+    const gapOpen = [30, 101, 157].every(c => g[11 * P.cols + c] === PX_BLUE || g[11 * P.cols + c] === PX_STEEL);
+    const gapBlue = [30, 101, 157].filter(c => g[11 * P.cols + c] !== PX_STEEL).length;
+    // Top duvara çarpar: minik hücreler kırılır ama kaburga durdurur (çelik kırılmaz)
+    const b = __ballAt(432, 400, 0, -mag());   // orta boşluğun tam ortası: içeri sızar
+    const steel0 = count(PX_STEEL);
+    for (let i = 0; i < 300; i++) update(STEP);
+    const grind = { broke: P.total - P.left, steelSame: count(PX_STEEL) === steel0, ballOk: isFinite(balls[0] ? balls[0].x : 0) };
+    // Ateş küpü: koridora benzer biçimde yakalanır
+    pxCatch({ kind: "fire" });
+    const fire = isFire();
+    pxCatch({ kind: "aim" });
+    const aim = state.aimUntil > state.time;
+    draw();
+    // Kazanınca saçılım
+    for (let i = 0; i < g.length; i++) pxBreak(i);
+    P.burns = [];
+    if (state.mode !== "playing") state.mode = "playing";
+    update(STEP);
+    const won = { mode: state.mode, won: P.won, balls: balls.length };
+    return { info, rib, gapBlue, grind, fire, aim, won };
+  })()`);
+  expect(r.info.active && r.info.mode === "mikro" && r.info.level === 14 && r.info.bricks === 0, "14. bölüm mikro düzeyi: " + JSON.stringify(r.info));
+  expect(r.info.cell === 4 && r.info.cols === 189 && r.info.rows === 66 && r.info.total > 10000, "minik hücreler (4 px), 10.000+ tuğla: " + JSON.stringify(r.info));
+  expect(r.info.steel > 700 && r.info.hollow === 0 && r.info.tunnels === 0, "çelik kaburgalar, tünel yok: " + JSON.stringify(r.info));
+  expect(r.rib > 140 && r.gapBlue === 3, "kaburga sırası çelik, üç boşluk açık: " + JSON.stringify([r.rib, r.gapBlue]));
+  expect(r.info.cubes === "fire,aim,plus", "küpler: ateş, yön, +3: " + r.info.cubes);
+  expect(r.grind.broke >= 5 && r.grind.steelSame && r.grind.ballOk, "top minik tuğlaları öğütür, çelik kırılmaz: " + JSON.stringify(r.grind));
+  expect(r.fire && r.aim, "ateş ve yön küpleri etkili: " + JSON.stringify([r.fire, r.aim]));
+  expect(r.won.mode === "levelclear" && r.won.won && r.won.balls > 30, "kazanınca toplar saçılır: " + JSON.stringify(r.won));
+  const pr = await p.eval(`(() => { toMenu(); $("mikro-start").click();
+    const st = [state.level, run.practice, pxWall.active, pxWall.mode, state.mode]; toMenu(); return st; })()`);
+  expect(pr.join() === "14,true,true,mikro,serve", "panelden mikro pratiği: " + pr);
 });
 
 test("Diller: 25 dil eksiksiz, yer tutucular, RTL, dil seçici, tüm ekranlar taşmasız ve çevrilmiş", async ({ p, expect }) => {

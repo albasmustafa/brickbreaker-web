@@ -13,7 +13,7 @@ const SETTING_ROWS = [
     opts: "random:🎲 Rastgele|pop:Pop|bip:Bip|lazer:Lazer|tik:Tık|bas:Bas|zil:Zil|boing:Boing|pluck:Pluck|8bit:8-bit" },
   { key: "shake", label: tr("Ekran sarsıntısı"), def: matchMedia("(prefers-reduced-motion: reduce)").matches ? "azaltilmis" : "acik",
     opts: "acik:Açık|azaltilmis:Azaltılmış|kapali:Kapalı" },
-  { key: "difficulty", label: tr("Zorluk"), def: "normal", opts: "kolay:Kolay|normal:Normal|zor:Zor" },
+  { key: "difficulty", label: tr("Zorluk"), def: "normal", opts: "kolay:Kolay|normal:Orta|zor:Zor" },
   { key: "hazards", label: tr("Lanetler"), def: "normal", opts: "kapali:Kapalı|az:Az|normal:Normal|kabus:Kâbus" },
   { key: "pacts", label: tr("Lanet Paktı"), def: "acik", opts: "acik:Açık|kapali:Kapalı" },
   { key: "director", label: tr("Dramaturg"), def: "acik", opts: "acik:Açık|kapali:Kapalı" },

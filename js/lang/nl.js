@@ -244,4 +244,13 @@ I18N_DATA.nl = {
 758: "Kleurenblindvriendelijk",
 759: "Flitsen en knipperen",
 760: "Kleurenblindvriendelijk: de sterktekleuren van de stenen komen uit een palet dat ook bij kleurenblindheid te onderscheiden is (lichtblauw, geel, vermiljoen), en elke steen toont stipjes voor de resterende treffers. Met minder flitsen gaat de muziekflits uit, draaien de kleuren van RAZERNIJMODUS langzaam en wordt snel knipperen een vaste kleur.",
+
+761: "⚽ CR7-GANG",
+762: "RICHTING",
+763: "⚽ SIUUU!",
+764: "⚽ Speel de CR7-gang",
+
+765: "🔹 MICROMUUR",
+766: "Gemiddeld",
+767: "🔹 Speel de Micromuur",
 };

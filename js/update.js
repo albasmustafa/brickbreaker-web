@@ -16,7 +16,8 @@ function update(dt) {
     paddle.x = clamp(paddle.x, wl, wr - paddle.w);
   } else paddle.x = clamp(paddle.x + dir * paddle.speed * dt, wl, wr - paddle.w);
   // Genişlik animasyonu: GENİŞ büyütür, MİNİ ve sersemleme küçültür
-  paddle.targetW = PADDLE_W * (state.time < paddle.wideUntil ? PADDLE_WIDE / PADDLE_W : 1) * (fxOn("mini") || fxOn("stun") ? 0.6 : 1);
+  paddle.targetW = PADDLE_W * (state.time < paddle.wideUntil ? PADDLE_WIDE / PADDLE_W : 1) * (fxOn("mini") || fxOn("stun") ? 0.6 : 1)
+                       * (pxWall.mode === "koridor" ? 0.72 : 1) * (state.diffPaddle ?? 1);   // koridor dar raket + mod genişliği
   const newW = paddle.w + (paddle.targetW - paddle.w) * Math.min(1, dt * 8);
   paddle.x = clamp(paddle.x - (newW - paddle.w) / 2, wl, Math.max(wl, wr - newW));
   paddle.w = newW;

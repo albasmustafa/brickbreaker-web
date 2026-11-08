@@ -244,4 +244,13 @@ I18N_DATA.ro = {
 758: "Pentru daltoniști",
 759: "Străluciri și clipiri",
 760: "Pentru daltoniști: culorile de rezistență ale cărămizilor vin dintr-o paletă care se distinge și în daltonism (albastru deschis, galben, vermillon), iar fiecare cărămidă arată punctele loviturilor rămase. Cu străluciri reduse, blițul muzicii se oprește, culorile MODULUI FRENEZIE se schimbă încet, iar clipirile rapide devin o culoare fixă.",
+
+761: "⚽ CORIDOR CR7",
+762: "DIRECȚIE",
+763: "⚽ SIUUU!",
+764: "⚽ Joacă Coridorul CR7",
+
+765: "🔹 ZID MICRO",
+766: "Mediu",
+767: "🔹 Joacă Zidul micro",
 };

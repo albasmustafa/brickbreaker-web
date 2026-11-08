@@ -244,4 +244,13 @@ I18N_DATA.hu = {
 758: "Színvak-barát",
 759: "Villanás és villogás",
 760: "Színvak-barát: a téglák tartóssági színei olyan palettából jönnek, amely színvaksággal is megkülönböztethető (világoskék, sárga, cinóbervörös), és minden téglán látszanak a hátralévő találatok pöttyei. Csökkentett villanásnál a zenei villanás kikapcsol, az ŐRÜLET MÓD színei lassan váltakoznak, a gyors villogásból pedig állandó szín lesz.",
+
+761: "⚽ CR7-FOLYOSÓ",
+762: "IRÁNY",
+763: "⚽ SIUUU!",
+764: "⚽ CR7-folyosó játéka",
+
+765: "🔹 MIKROFAL",
+766: "Közepes",
+767: "🔹 Mikrofal játéka",
 };

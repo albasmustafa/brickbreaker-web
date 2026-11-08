@@ -244,4 +244,13 @@ I18N_DATA.pt = {
 758: "Para daltônicos",
 759: "Brilhos e piscadas",
 760: "Para daltônicos: as cores de resistência dos tijolos usam uma paleta que continua distinguível com daltonismo (azul-claro, amarelo, vermelhão), e cada tijolo mostra os pontinhos de golpes restantes. Com brilhos reduzidos, o flash da música desliga, as cores do MODO FRENESI giram devagar e as piscadas rápidas viram cor fixa.",
+
+761: "⚽ CORREDOR CR7",
+762: "DIREÇÃO",
+763: "⚽ SIUUU!",
+764: "⚽ Jogar o Corredor CR7",
+
+765: "🔹 PAREDE MICRO",
+766: "Médio",
+767: "🔹 Jogar a Parede micro",
 };

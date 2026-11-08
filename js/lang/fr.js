@@ -244,4 +244,13 @@ I18N_DATA.fr = {
 758: "Adapté aux daltoniens",
 759: "Flashs et clignotements",
 760: "Adapté aux daltoniens : les couleurs de résistance des briques utilisent une palette qui reste distinguable en cas de daltonisme (bleu clair, jaune, vermillon), et chaque brique affiche les points des coups restants. Avec les flashs réduits, le flash de la musique s'éteint, les couleurs du MODE FRÉNÉSIE tournent lentement et les clignotements rapides deviennent une couleur fixe.",
+
+761: "⚽ COULOIR CR7",
+762: "DIRECTION",
+763: "⚽ SIUUU!",
+764: "⚽ Jouer au Couloir CR7",
+
+765: "🔹 MUR MICRO",
+766: "Moyen",
+767: "🔹 Jouer au Mur micro",
 };

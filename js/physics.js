@@ -103,7 +103,7 @@ function destroyBrick(b) {
     addFloater(cx, b.y - 14, tr("RİTİM!") + " +15", "#ffd166");
   }
   if (b.gold) { spawnCoins(cx, b.y + BRICK.h / 2, 26); sfx("coin"); dropPowerupAt(cx, b.y, true); }   // altın: kesin iyi kapsül
-  else if (gameRandom() < 0.16) dropPowerupAt(cx, b.y);
+  else if (gameRandom() < 0.16 * (state.diffDrop ?? 1)) dropPowerupAt(cx, b.y);   // mod: kapsül düşme oranı
   if (b.splitter) spawnSplitBall(cx, b.y + BRICK.h + 10);
   if (b.ice) freezeNeighbors(b);          // BUZ: kırılınca komşuları donar
   const mate = b.twin;

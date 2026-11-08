@@ -244,4 +244,13 @@ I18N_DATA.es = {
 758: "Apto para daltónicos",
 759: "Destellos y parpadeos",
 760: "Apto para daltónicos: los colores de resistencia de los ladrillos usan una paleta que se distingue también con daltonismo (azul claro, amarillo, bermellón), y cada ladrillo muestra los puntos de golpes restantes. Con destellos reducidos, el destello de la música se apaga, los colores del MODO FRENESÍ cambian despacio y el parpadeo rápido se vuelve un color fijo.",
+
+761: "⚽ PASILLO CR7",
+762: "DIRECCIÓN",
+763: "⚽ SIUUU!",
+764: "⚽ Jugar al Pasillo CR7",
+
+765: "🔹 MURO MICRO",
+766: "Medio",
+767: "🔹 Jugar al Muro micro",
 };

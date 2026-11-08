@@ -98,4 +98,6 @@ const LEVELS = [
     ".EI1ZZ1IE.",
   ],
   { pixel: "tunnel", map: [] },   // 12: TÜNEL FIRTINASI — binlerce piksel tuğla, çelik L ve sarmal tüneller (js/tunnel.js)
+  { pixel: "koridor", map: [] },  // 13: CR7 KORİDORU — tamı tamına mavi duvar, ortada dar dikey koridor; +3/ok/ateş küpleri
+  { pixel: "mikro", map: [] },    // 14: MİKRO DUVAR — minik (4 px) tuğlalar ve boşluklu çelik kaburgalar; top zor girer
 ];

@@ -244,4 +244,13 @@ I18N_DATA.en = {
 758: "Colorblind-friendly",
 759: "Flashing and blinking",
 760: "Colorblind-friendly: brick durability colors use a palette that stays distinguishable with color blindness (light blue, yellow, vermilion), and every brick shows its remaining-hit dots. With reduced flashing, the music flash turns off, FRENZY MODE colors cycle slowly and fast blinking becomes a steady color.",
+
+761: "⚽ CR7 CORRIDOR",
+762: "AIM",
+763: "⚽ SIUUU!",
+764: "⚽ Play the CR7 Corridor",
+
+765: "🔹 MICRO WALL",
+766: "Medium",
+767: "🔹 Play the Micro Wall",
 };

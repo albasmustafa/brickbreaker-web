@@ -14,32 +14,44 @@ const TUNNEL_PATHS = [
   [[100, 300], [100, 46], [300, 46]],                                                    // L
   [[430, 300], [430, 40], [720, 40], [720, 210], [540, 210], [540, 120], [630, 120]],   // sarmal
 ];
+// CR7 KORİDORU (13. bölüm): bambaşka bir yerleşim — tümü mavi dolu duvar, yalnız ortada tek dar dikey koridor.
+// Top alt ortadan girer, boru gibi yukarı taşınır, tepede zinciri tutuşturup yanları oya oya iner.
+const KORIDOR_PATHS = [
+  [[378, 292], [378, 40]],                                                               // ortadan tepeye düz dar koridor
+];
 const PX_BLUES = ["#1d5fe0", "#2470f5", "#2f80ff", "#3b8cff", "#1a56d0", "#4a9bff"];
-const CUBE_KINDS = { plus: { label: "+3", color: "#ffd60a" }, mul: { label: "x3", color: "#ff8c1a" } };
-const pxWall = { active: false, grid: null, owner: null, tone: null, total: 0, left: 0, tunnels: [], cubes: [], burns: [],
+const CUBE_KINDS = {
+  plus: { label: "+3", color: "#ffd60a" }, mul: { label: "x3", color: "#ff8c1a" },
+  aim:  { label: "→", color: "#43d64f" }, fire: { label: "▲", color: "#ff6b35" },        // koridor küpleri: yön ve ateş
+};
+const pxWall = { active: false, mode: null, s: PX.s, cols: PX.cols, rows: PX.rows, grid: null, owner: null, tone: null, total: 0, left: 0, tunnels: [], cubes: [], burns: [],
                  canvas: null, g: null, dirty: [], full: false, pend: 0, flushAt: 0, statAcc: 0, sfxAt: 0, enterSfxAt: 0, clankAt: 0,
                  entered: false, chained: false, finale: false, storm: false, maxed: false, won: false, wonAt: 0, peak: 1 };
 const pxSolid = t => t === PX_BLUE || t === PX_STEEL || t === PX_BURN;
 const pxDone = () => !pxWall.active || pxWall.left <= 0;
 const pxCellAt = (x, y) => {
-  const c = Math.floor((x - PX.x) / PX.s), r = Math.floor((y - PX.y) / PX.s);
-  return c < 0 || r < 0 || c >= PX.cols || r >= PX.rows ? -1 : r * PX.cols + c;
+  const c = Math.floor((x - PX.x) / pxWall.s), r = Math.floor((y - PX.y) / pxWall.s);
+  return c < 0 || r < 0 || c >= pxWall.cols || r >= pxWall.rows ? -1 : r * pxWall.cols + c;
 };
 // Kolun dikdörtgeni (tünel yarı genişliği kadar şişirilmiş), ext: uç taraftan ek uzama
 const inSegRect = (x, y, a, b, ext = 0) => x > Math.min(a[0], b[0]) - PX.half - ext && x < Math.max(a[0], b[0]) + PX.half + ext &&
                                           y > Math.min(a[1], b[1]) - PX.half - ext && y < Math.max(a[1], b[1]) + PX.half + ext;
 
 function buildPixelWall(on) {
-  Object.assign(pxWall, { active: !!on, burns: [], cubes: [], dirty: [], pend: 0, flushAt: 0, statAcc: 0, entered: false, chained: false,
+  Object.assign(pxWall, { active: !!on, mode: on || null, burns: [], cubes: [], dirty: [], pend: 0, flushAt: 0, statAcc: 0, entered: false, chained: false,
                           finale: false, storm: false, maxed: false, won: false, peak: 1 });
-  if (!on) { pxWall.grid = pxWall.owner = null; pxWall.tunnels = []; return; }
-  const { s, cols, rows } = PX, n = cols * rows;
+  if (!on) { pxWall.grid = pxWall.owner = null; pxWall.tunnels = []; pxWall.s = PX.s; pxWall.cols = PX.cols; pxWall.rows = PX.rows; return; }
+  // MİKRO DUVAR: hücreyarı küçük (4 px) → aynı alanda ~2,25 kat daha çok minik tuğla; top katman katman öğütür
+  const s = on === "mikro" ? 4 : PX.s;
+  const cols = Math.round(PX.cols * PX.s / s), rows = Math.round(PX.rows * PX.s / s), n = cols * rows;
+  Object.assign(pxWall, { s, cols, rows });
   const grid = new Uint8Array(n).fill(PX_BLUE), owner = new Uint8Array(n), tone = new Uint8Array(n);
   const rand = seeded(4242);                          // tuğla tonları her seferinde aynı
   for (let i = 0; i < n; i++) tone[i] = (rand() * PX_BLUES.length) | 0;
   const center = i => [(i % cols) * s + s / 2, ((i / cols) | 0) * s + s / 2];
+  const paths = on === "koridor" ? KORIDOR_PATHS : on === "mikro" ? [] : TUNNEL_PATHS;
   // 1) Tünel içi (boşluk): yolun her kolu boyunca 36 px genişliğinde kanal
-  TUNNEL_PATHS.forEach((pts, k) => {
+  paths.forEach((pts, k) => {
     for (let i = 0; i < n; i++) {
       const [x, y] = center(i);
       for (let j = 0; j < pts.length - 1; j++) if (inSegRect(x, y, pts[j], pts[j + 1])) { grid[i] = PX_HOLLOW; owner[i] = k + 1; break; }
@@ -55,7 +67,7 @@ function buildPixelWall(on) {
     }
   }
   // 3) Çıkış ağızları: son kolun ucundaki çelik açılır, kanal mavi tuğlalara bakar
-  pxWall.tunnels = TUNNEL_PATHS.map(local => {
+  pxWall.tunnels = paths.map(local => {
     const pts = local.map(([x, y]) => [x + PX.x, y + PX.y]);
     const segs = pts.slice(0, -1).map((a, j) => {
       const b = pts[j + 1], len = Math.hypot(b[0] - a[0], b[1] - a[1]), dx = (b[0] - a[0]) / len, dy = (b[1] - a[1]) / len;
@@ -63,14 +75,29 @@ function buildPixelWall(on) {
     });
     const last = segs[segs.length - 1], e = local[local.length - 1], cap = [e[0] + last.dx * 30, e[1] + last.dy * 30];
     for (let i = 0; i < n; i++) if (grid[i] === PX_STEEL) { const [x, y] = center(i); if (inSegRect(x, y, e, cap)) grid[i] = PX_BLUE; }
-    // Çıkışta üst üste iki küp: sarı +3 ve turuncu x3
+    // Çıkış küpleri: Tünel'de sarı +3 ve turuncu x3; Koridor'da yeşil ok ve ateş de var (üçüncü küp ağzın içinde)
     const ex = last.b[0] - last.dx * 6, ey = last.b[1] - last.dy * 6;
-    for (const [kind, side] of [["plus", -1], ["mul", 1]]) {
-      const hx = ex + last.px * side * 8.5, hy = ey + last.py * side * 8.5;
+    const kinds = on === "koridor"
+      ? [["plus", -1, 0], ["aim", 1, 0], ["fire", 0, 26]]
+      : [["plus", -1, 0], ["mul", 1, 0]];
+    for (const [kind, side, back] of kinds) {
+      const hx = ex + last.px * side * 8.5 - last.dx * back, hy = ey + last.py * side * 8.5 - last.dy * back;
       pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
     }
     return { pts, segs };
   });
+  if (on === "mikro") {   // kaburgalar: her 11. sıra çelik — yalnız üç boşluktan geçilir; topun duvara girmesi zordur
+    const gaps = [[24, 38], [95, 109], [151, 165]];
+    for (const rr of [11, 22, 33, 44, 55]) for (let c = 0; c < cols; c++) {
+      if (gaps.some(([a, b]) => c >= a && c < b)) continue;
+      const i = rr * cols + c;
+      if (grid[i] === PX_BLUE) grid[i] = PX_STEEL;
+    }
+    for (const [kind, [a, b]] of [["fire", gaps[0]], ["aim", gaps[1]], ["plus", gaps[2]]]) {
+      const hx = PX.x + (a + b) / 2 * s, hy = PX.y + 11 * s + 22;
+      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
+    }
+  }
   let blue = 0;
   for (let i = 0; i < n; i++) if (grid[i] === PX_BLUE) blue++;
   Object.assign(pxWall, { grid, owner, tone, total: blue, left: blue, full: true });
@@ -78,7 +105,7 @@ function buildPixelWall(on) {
 
 // Topun dairesine değen dolu hücreler (steelOnly: yalnızca çelik). out verilmezse ilk değmede true döner.
 function pxOverlap(x, y, r, steelOnly, out) {
-  const { s, cols, rows } = PX, g = pxWall.grid;
+  const s = pxWall.s, cols = pxWall.cols, rows = pxWall.rows, g = pxWall.grid;
   const c0 = Math.max(0, Math.floor((x - r - PX.x) / s)), c1 = Math.min(cols - 1, Math.floor((x + r - PX.x) / s));
   const r0 = Math.max(0, Math.floor((y - r - PX.y) / s)), r1 = Math.min(rows - 1, Math.floor((y + r - PX.y) / s));
   let hit = false;
@@ -117,7 +144,7 @@ function pxBall(b, ox, oy, sdt) {
       if (broke >= 4 || pxWall.grid[i] === PX_STEEL || !pxBreak(i)) continue;
       broke++;
       if (inside) {
-        if (!pxWall.chained) { pxWall.chained = true; callout(tr("ZİNCİR REAKSİYON!"), "#4cc9f0"); sfx("boom"); addShake(6); pxIgnite(i, 14); }
+        if (!pxWall.chained) { pxWall.chained = true; callout(tr("ZİNCİR REAKSİYON!"), "#4cc9f0"); sfx("boom"); addShake(6); pxIgnite(i, 14); if (pxWall.mode === "koridor" && typeof cr7Cheer === "function") cr7Cheer(1.4); }
         else pxIgnite(i, 5);
       }
     }
@@ -180,7 +207,7 @@ function pxBreak(i) {
   P.pend += 4 * (isFever() ? 2 : 1);
   if (++P.statAcc >= 20) { P.statAcc = 0; run.bricks++; track("bricks"); }   // 20 piksel = 1 tuğla (kariyer sayacı şişmesin)
   if (particles.length < 260 && Math.random() < 0.5) {
-    spawnParticles(PX.x + (i % PX.cols) * PX.s, PX.y + ((i / PX.cols) | 0) * PX.s, PX_BLUES[P.tone[i]], 2, PX.s, PX.s);
+    spawnParticles(PX.x + (i % pxWall.cols) * pxWall.s, PX.y + ((i / pxWall.cols) | 0) * pxWall.s, PX_BLUES[P.tone[i]], 2, pxWall.s, pxWall.s);
   }
   if (state.time - P.sfxAt > 0.05) { P.sfxAt = state.time; sfx("brick", 1 + (P.left % 9)); }
   return true;
@@ -195,7 +222,8 @@ function pxIgnite(i, e) {
   }
 }
 
-// Küp yakalandı: +3 üç top ekler, x3 her topu üçe katlar (en çok 300)
+// Küp yakalandı: +3 üç top ekler, x3 her topu üçe katlar (en çok 300);
+// koridorda ayrıca → yeşil ok yörünge kılavuzu ve ▲ ateş topu verir
 function pxCatch(q) {
   const K = CUBE_KINDS[q.kind];
   addShake(3);
@@ -205,7 +233,7 @@ function pxCatch(q) {
       const a = -Math.PI / 2 + k * 0.45;
       balls.push(Object.assign(newBall(false), { x: paddle.x + paddle.w / 2 + k * 14, y: paddle.y - 12, dx: Math.cos(a) * mag(), dy: Math.sin(a) * mag() }));
     }
-  } else {
+  } else if (q.kind === "mul") {
     for (const s of balls.filter(b => !b.decoy && !b.stuck)) {
       const base = Math.atan2(s.dy, s.dx);
       for (const a of [-0.3, 0.3]) {
@@ -213,10 +241,19 @@ function pxCatch(q) {
         balls.push(Object.assign(newBall(false), { x: s.x, y: s.y, dx: Math.cos(base + a) * mag(), dy: Math.sin(base + a) * mag(), tunnelUntil: s.tunnelUntil || 0 }));
       }
     }
+  } else if (q.kind === "aim") {
+    state.aimUntil = state.time + FX_TIME.aim;
+    addFloater(paddle.x + paddle.w / 2, paddle.y - 18, "→ " + tr("YÖN") + "!", K.color);
+    sfx("power");
+  } else if (q.kind === "fire") {
+    state.fireUntil = state.time + FX_TIME.fire;
+    addFloater(paddle.x + paddle.w / 2, paddle.y - 18, "▲ " + tr("ATEŞ") + "!", K.color);
+    sfx("fire");
   }
+  if (pxWall.mode === "koridor" && typeof cr7Cheer === "function") cr7Cheer(1.6);
   const n = balls.length;
   pxWall.peak = Math.max(pxWall.peak, n);
-  addFloater(paddle.x + paddle.w / 2, paddle.y - 18, K.label + " → " + tr("{n} TOP", { n }), K.color);
+  if (q.kind === "plus" || q.kind === "mul") addFloater(paddle.x + paddle.w / 2, paddle.y - 30, K.label + " → " + tr("{n} TOP", { n }), K.color);
   sfx("multi");
   addScore(50);
   if (!pxWall.storm && n >= STORM_AT) { pxWall.storm = true; callout(tr("🌪 TOP FIRTINASI!"), "#4cc9f0"); sfx("fever"); addShake(8); }
@@ -264,7 +301,7 @@ function pxUpdate(dt) {
   if (P.pend && (state.time >= P.flushAt || P.left <= 0)) { addScore(P.pend); P.pend = 0; P.flushAt = state.time + 0.1; }
   if (P.left <= 0 && !P.burns.length) checkLevelDone();
 }
-// Bölüm bitti: kutlama, bonus, yıldız çanları
+// Bölüm bitti: kutlama, bonus, yıldız çanları. Koridorda toplar her yere saçılır ve CR7 kutlama yapar
 function pxWin() {
   pxWall.won = true;
   pxWall.wonAt = performance.now();
@@ -273,11 +310,23 @@ function pxWin() {
   addScore(2500);
   for (let k = 0; k < 6; k++) spawnCoins(rnd(150, 650), rnd(140, 320), 18);
   for (let k = 0; k < 3; k++) tone("triangle", [784, 988, 1318][k], 0, 0.35, 0.2, 0.45 + k * 0.3);
+  if (pxWall.mode === "koridor" || pxWall.mode === "mikro") {
+    if (pxWall.mode === "koridor") {
+      if (typeof cr7Cheer === "function") cr7Cheer(5);
+      callout(tr("⚽ SIUUU!"), "#ffd60a");
+    }
+    for (let k = 0; k < 48 && balls.length < STORM_MAX; k++) {          // kazanma: toplar her yere saçılır
+      const a = grnd(0, TAU), m2 = grnd(200, 460);
+      balls.push(Object.assign(newBall(false), { x: W / 2 + grnd(-30, 30), y: H / 2 - 60, dx: Math.cos(a) * m2, dy: Math.sin(a) * m2 }));
+    }
+    pxWall.peak = Math.max(pxWall.peak, balls.length);
+    addShake(6);
+  }
 }
 
 // --- Çizim ---
 function pxPaintCell(i) {
-  const g = pxWall.g, { s, cols, rows } = PX, c = i % cols, r = (i / cols) | 0, x = c * s, y = r * s, t = pxWall.grid[i];
+  const g = pxWall.g, s = pxWall.s, cols = pxWall.cols, rows = pxWall.rows, c = i % cols, r = (i / cols) | 0, x = c * s, y = r * s, t = pxWall.grid[i];
   g.clearRect(x, y, s, s);
   if (t === PX_BLUE || t === PX_BURN) {               // piksel tuğla: 5×5, üstü parlak, altı gölgeli
     g.fillStyle = PX_BLUES[pxWall.tone[i]];
@@ -327,7 +376,7 @@ function drawCube(x, y, kind, rot, sc) {
 function drawPixelWall() {
   const P = pxWall;
   if (!P.active) return;
-  const ww = PX.cols * PX.s, wh = PX.rows * PX.s;
+  const ww = P.cols * P.s, wh = P.rows * P.s;
   if (!P.canvas) P.canvas = document.createElement("canvas");
   if (P.full) {                                       // bölüm başında bir kez tamamı, sonra yalnızca değişen hücreler
     P.canvas.width = ww * DPR;

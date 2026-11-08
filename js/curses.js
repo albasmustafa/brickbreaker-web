@@ -47,7 +47,7 @@ function scheduleNextCurse(first) {
   const hz = HAZARD[hazardLevel()];
   if (!hz || battle.active || pactNoCurses()) { state.curseAt = Infinity; return; }   // kapışmada lanetler rakiplerden gelir
   const lvlMul = Math.max(0.55, 1 - (state.level - 1) * 0.04);       // bölüm ilerledikçe sıklaşır
-  state.curseAt = state.time + (first ? hz.grace : hz.every * lvlMul * grnd(0.7, 1.3));
+  state.curseAt = state.time + (first ? hz.grace : hz.every * lvlMul * (state.diffCurseGap ?? 1) * grnd(0.7, 1.3));   // mod: lanet sıklığı
 }
 function pickCurse() {
   const active = activeCurses(), used = new Set(active.map(k => CURSES[k].group).filter(Boolean));

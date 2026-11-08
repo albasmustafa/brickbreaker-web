@@ -244,4 +244,13 @@ I18N_DATA.vi = {
 758: "Thân thiện mù màu",
 759: "Chớp sáng và nhấp nháy",
 760: "Thân thiện mù màu: màu độ bền của gạch lấy từ bảng màu vẫn phân biệt được khi mù màu (xanh nhạt, vàng, đỏ son), và mỗi viên gạch hiện chấm số lần đánh còn lại. Khi giảm chớp sáng, chớp nhạc tắt, màu CHẾ ĐỘ ĐIÊN CUỒNG đổi chậm và nhấp nháy nhanh thành màu cố định.",
+
+761: "⚽ HÀNH LANG CR7",
+762: "HƯỚNG",
+763: "⚽ SIUUU!",
+764: "⚽ Chơi Hành lang CR7",
+
+765: "🔹 TƯỜNG VI MÔ",
+766: "Vừa",
+767: "🔹 Chơi Tường vi mô",
 };

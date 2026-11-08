@@ -761,5 +761,12 @@ const I18N_KEYS = [
 "Renk körü dostu", // 758
 "Parlama ve yanıp sönme", // 759
 "Renk körü dostu: tuğla dayanıklılık renkleri renk körlüğünde de ayırt edilen bir paletle (açık mavi, sarı, kızıl) çizilir ve her tuğlada kalan vuruş noktacıkları görünür. Parlama azaltılınca müzik flaşı kapanır, ÇILGIN MOD renkleri yavaş döner, hızlı yanıp sönmeler sabit renge döner.", // 760
+"⚽ CR7 KORİDORU", // 761
+"YÖN", // 762
+"⚽ SIUUU!", // 763
+"⚽ CR7 Koridoru'nu oyna", // 764
+"🔹 MİKRO DUVAR", // 765
+"Orta", // 766
+"🔹 Mikro Duvar'ı oyna", // 767
 ];
 const I18N_DATA = {};

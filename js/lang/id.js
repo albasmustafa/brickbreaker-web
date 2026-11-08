@@ -244,4 +244,13 @@ I18N_DATA.id = {
 758: "Ramah buta warna",
 759: "Kilatan dan kedipan",
 760: "Ramah buta warna: warna ketahanan bata memakai palet yang tetap terbedakan bagi buta warna (biru muda, kuning, merah vermilion), dan tiap bata menampilkan titik sisa pukulan. Dengan kilatan dikurangi, kilat musik mati, warna MODE GILA berganti pelan, dan kedipan cepat menjadi warna tetap.",
+
+761: "⚽ KORIDOR CR7",
+762: "ARAH",
+763: "⚽ SIUUU!",
+764: "⚽ Mainkan Koridor CR7",
+
+765: "🔹 DINDING MIKRO",
+766: "Sedang",
+767: "🔹 Mainkan Dinding Mikro",
 };

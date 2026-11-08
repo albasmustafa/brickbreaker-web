@@ -230,7 +230,16 @@ document.addEventListener("keydown", e => {
 });
 document.addEventListener("keyup", e => { keys[keyName(e)] = false; });
 canvas.addEventListener("mousemove", e => pointerAim(e.clientX));
-canvas.addEventListener("click", action);
+function tryMenuModeClick(clientX, clientY) {   // menüdeki mod hapları: tıkla seç, oyun başlamasın
+  if (state.mode !== "menu" || !menuModeBoxes.length) return false;
+  const rect = canvas.getBoundingClientRect();
+  const x = (clientX - rect.left) * (W / rect.width), y = (clientY - rect.top) * (H / rect.height);
+  const hit = menuModeBoxes.find(b => x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h);
+  if (!hit) return false;
+  if (settings.difficulty !== hit.v) { settings.difficulty = hit.v; saveSettings(); sfx("power"); }
+  return true;
+}
+canvas.addEventListener("click", e => { if (!tryMenuModeClick(e.clientX, e.clientY)) action(); });
 // Mobil: parmak raketi götürür (mutlak) ya da kaydırdığı kadar iter (göreli); dokunuş aynı zamanda eylemdir
 let touchX = null, lastInputTouch = false;
 function touchNudge(clientX) {

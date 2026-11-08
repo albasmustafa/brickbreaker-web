@@ -244,4 +244,13 @@ I18N_DATA.pl = {
 758: "Dla daltonistów",
 759: "Błyski i miganie",
 760: "Dla daltonistów: kolory wytrzymałości cegieł pochodzą z palety rozróżnialnej przy daltonizmie (jasnoniebieski, żółty, cynobrowy), a na każdej cegle widać kropki pozostałych trafień. Przy słabszych błyskach błysk muzyki się wyłącza, kolory TRYBU SZAŁU zmieniają się powoli, a szybkie miganie zamienia się w stały kolor.",
+
+761: "⚽ KORYTARZ CR7",
+762: "KIERUNEK",
+763: "⚽ SIUUU!",
+764: "⚽ Zagraj w Korytarz CR7",
+
+765: "🔹 MIKROŚCIANA",
+766: "Średni",
+767: "🔹 Zagraj w Mikrościanę",
 };

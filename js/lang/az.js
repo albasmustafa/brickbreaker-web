@@ -244,4 +244,13 @@ I18N_DATA.az = {
 758: "Rəng korluğuna uyğun",
 759: "Parıltı və yanıb-sönmə",
 760: "Rəng korluğuna uyğun: kərpiclərin möhkəmlik rəngləri rəng korluğunda da seçilən palitradan gəlir (açıq mavi, sarı, al qırmızı) və hər kərpicdə qalan zərbə nöqtələri görünür. Parıltı azaldılanda musiqi parıltısı sönür, DƏLİ REJİM rəngləri yavaş dəyişir, sürətli yanıb-sönmə sabit rəngə çevrilir.",
+
+761: "⚽ CR7 KORİDORU",
+762: "İSTİQAMƏT",
+763: "⚽ SIUUU!",
+764: "⚽ CR7 Koridorunu oyna",
+
+765: "🔹 MİKRO DİVAR",
+766: "Orta",
+767: "🔹 Mikro Divarı oyna",
 };

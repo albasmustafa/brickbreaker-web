@@ -244,4 +244,13 @@ I18N_DATA.cs = {
 758: "Pro barvoslepé",
 759: "Záblesky a blikání",
 760: "Pro barvoslepé: barvy odolnosti cihel jsou z palety rozlišitelné i při barvosleposti (světle modrá, žlutá, rumělková) a každá cihla ukazuje tečky zbývajících zásahů. Se slabšími záblesky se vypne hudební záblesk, barvy REŽIMU ŠÍLENSTVÍ se mění pomalu a rychlé blikání se změní na stálou barvu.",
+
+761: "⚽ CHODBA CR7",
+762: "SMĚR",
+763: "⚽ SIUUU!",
+764: "⚽ Hrát Chodbu CR7",
+
+765: "🔹 MIKROZEĎ",
+766: "Střední",
+767: "🔹 Hrát Mikrozeď",
 };

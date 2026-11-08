@@ -244,4 +244,13 @@ I18N_DATA.de = {
 758: "Farbenblind-freundlich",
 759: "Blitze und Blinken",
 760: "Farbenblind-freundlich: Die Haltbarkeitsfarben der Steine stammen aus einer Palette, die auch bei Farbenblindheit unterscheidbar bleibt (Hellblau, Gelb, Zinnoberrot), und jeder Stein zeigt Punkte für die verbleibenden Treffer. Mit reduzierten Blitzen ist der Musikblitz aus, die Farben im RAUSCHMODUS wechseln langsam und schnelles Blinken wird zu einer festen Farbe.",
+
+761: "⚽ CR7-KORRIDOR",
+762: "RICHTUNG",
+763: "⚽ SIUUU!",
+764: "⚽ CR7-Korridor spielen",
+
+765: "🔹 MIKROWAND",
+766: "Mittel",
+767: "🔹 Mikrowand spielen",
 };

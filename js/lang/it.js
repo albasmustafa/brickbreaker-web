@@ -244,4 +244,13 @@ I18N_DATA.it = {
 758: "Adatto ai daltonici",
 759: "Lampi e lampeggi",
 760: "Adatto ai daltonici: i colori di resistenza dei mattoni usano una tavolozza distinguibile anche con il daltonismo (azzurro, giallo, vermiglio), e ogni mattone mostra i puntini dei colpi rimasti. Con i lampi ridotti, il flash della musica si spegne, i colori della MODALITÀ FRENESIA cambiano lentamente e i lampeggi rapidi diventano un colore fisso.",
+
+761: "⚽ CORRIDOIO CR7",
+762: "DIREZIONE",
+763: "⚽ SIUUU!",
+764: "⚽ Gioca al Corridoio CR7",
+
+765: "🔹 MURO MICRO",
+766: "Medio",
+767: "🔹 Gioca al Muro micro",
 };

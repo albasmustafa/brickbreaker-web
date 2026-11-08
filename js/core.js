@@ -21,13 +21,19 @@ const SLOW_FACTOR = 0.65, SLOW_TIME = 8, WIDE_TIME = 10;
 const MAX_BALLS = 8, MAX_LIVES = 9;
 const FX_GAIN_MAX = 0.55;                    // efekt sesi üst sınırı (ses ayarıyla çarpılır)
 const SHAKE_SCALE = { acik: 1, azaltilmis: 0.35, kapali: 0 };
-const DIFFICULTY = { kolay: { speedMul: 0.85, lives: 5 }, normal: { speedMul: 1, lives: 3 }, zor: { speedMul: 1.15, lives: 2 } };
+// Modlar (kolay/orta/zor): yeni oyunda kilitlenir. Yalnız hız ve can değil — raket genişliği,
+// kapsül düşme oranı (dropMul), lanet aralığı (curseGap: büyük = seyrek) ve puan çarpanı da moda bağlı.
+const DIFFICULTY = {
+  kolay: { speedMul: 0.85, lives: 5, paddleMul: 1.12, dropMul: 1.3, curseGap: 1.35, scoreMul: 0.75 },
+  normal: { speedMul: 1, lives: 3, paddleMul: 1, dropMul: 1, curseGap: 1, scoreMul: 1 },
+  zor: { speedMul: 1.15, lives: 2, paddleMul: 0.88, dropMul: 0.85, curseGap: 0.8, scoreMul: 1.35 },
+};
 const HP_DOT = { size: 5, gap: 4, pad: 6, lumThreshold: 0.18, dark: "#12182b", light: "#f5f7fa" };
 const MIN_VERT = 0.28;                       // dikey hız en az bu oranda: duvarlar arası sonsuz yatay sekme olmasın
 const SPIN_MAX = 1.1, SPIN_DECAY = 1.1;      // falso: saniyedeki en büyük dönüş (rad) ve sönme hızı
 const BOOST_DECAY = 1.4;                     // geçici hız patlamasının sönme hızı
 const FEVER_COMBO = 10, FEVER_TIME = 6;
-const FX_TIME = { fire: 6, laser: 8, magnet: 10, big: 10, reverse: 6, mini: 8, haste: 6, stun: 2.5 };
+const FX_TIME = { fire: 6, laser: 8, magnet: 10, big: 10, reverse: 6, mini: 8, haste: 6, stun: 2.5, aim: 10 };
 const ZONE_STYLE = { bumper: "#ff5d8f", spin: "#80ffdb", portal: "#9d4edd" };
 const CURSE_COLOR = "#c77dff";
 const COLS = 10;

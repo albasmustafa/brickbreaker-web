@@ -98,7 +98,7 @@ function renderChallenge() {
     const n = i + 1, locked = n > max, boss = !!def.boss;
     return el("button", {
       className: n === max ? "active" : "",
-      textContent: (boss ? "☠ " : def.pixel ? "🌀 " : "") + n,
+      textContent: (boss ? "☠ " : def.pixel === "koridor" ? "⚽ " : def.pixel === "mikro" ? "🔹 " : def.pixel ? "🌀 " : "") + n,
       title: locked ? tr("Önce klasik oyunda {n}. bölüme ulaş", { n }) : tr("Bölüm {n} pratiği", { n }),
       disabled: locked,
       onclick: () => startPractice(n),
@@ -126,7 +126,11 @@ const challengeBtn = el("button", {
 });
 toolbar.insertBefore(challengeBtn, careerBtn);
 onClick("daily-start", startDaily);
-// Tünel Fırtınası her zaman pratik olarak açık (klasik oyunda 12. bölüm)
+// Tünel Fırtınası ve CR7 Koridoru her zaman pratik olarak açık (klasik oyunda 12. ve 13. bölüm)
 const TUNNEL_LEVEL = LEVELS.findIndex(l => l.pixel) + 1;
+const KORIDOR_LEVEL = LEVELS.findIndex(l => l.pixel === "koridor") + 1;
+const MIKRO_LEVEL = LEVELS.findIndex(l => l.pixel === "mikro") + 1;
 onClick("tunnel-start", () => startPractice(TUNNEL_LEVEL, true));
+onClick("koridor-start", () => startPractice(KORIDOR_LEVEL, true));
+onClick("mikro-start", () => startPractice(MIKRO_LEVEL, true));
 renderChallenge();

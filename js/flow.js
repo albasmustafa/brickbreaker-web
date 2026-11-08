@@ -133,7 +133,7 @@ function clearEffects() {
   paddle.iceV = 0; paddle.aimX = null;
 }
 function addScore(n) {
-  state.score += Math.round(n * pactScoreMul());
+  state.score += Math.round(n * pactScoreMul() * (state.diffScoreMul ?? 1));   // mod puan çarpanı
   if (!run.practice && state.score > state.high) store.set("bb_highscore", (state.high = state.score));
   // Rekoru ilk geçtiğin an duyurulur (callout değil: combo/bölüm yazılarını ezmesin)
   if (!run.practice && !state.recordShown && state.startHigh > 0 && state.score > state.startHigh) {
@@ -151,6 +151,7 @@ function startGame() {
   resetRun();
   const diff = DIFFICULTY[settings.difficulty];
   Object.assign(state, { level: 1, score: 0, diffSpeed: diff.speedMul, lives: diff.lives, combo: 0, startHigh: state.high,
+                         diffPaddle: diff.paddleMul ?? 1, diffDrop: diff.dropMul ?? 1, diffCurseGap: diff.curseGap ?? 1, diffScoreMul: diff.scoreMul ?? 1,
                          newRecord: false, recordShown: false, time: 0, shake: 0, callout: null, cursesSurvived: 0, inset: 0, hurt: 0 });
   state.speed = levelSpeed(1);
   clearEffects();
@@ -227,6 +228,7 @@ function loseLife() {
   sfx("lose");
   addShake(6);
   state.hurt = 1;                          // cila: kenarlarda sönen kırmızı vinyet
+  if (pxWall.mode === "koridor" && typeof cr7Facepalm === "function") cr7Facepalm();   // CR7 üzülür
   state.combo = 0;
   clearEffects();
   state.speed = levelSpeed(state.level);   // hızlanmayı sıfırla
@@ -275,6 +277,8 @@ function nextLevel() {
   serveBall();
   if (settings.autoTheme === "bolum") randomTheme();
   if (state.boss) { callout("⚠ " + tr(state.boss.name) + " ⚠", "#ff4d6d"); sfx("bossRoar"); }
+  else if (pxWall.mode === "koridor") callout(tr("⚽ CR7 KORİDORU"), "#ffd60a");
+  else if (pxWall.mode === "mikro") callout(tr("🔹 MİKRO DUVAR"), "#4cc9f0");
   else if (pxWall.active) callout(tr("🌀 TÜNEL FIRTINASI"), "#4cc9f0");
   else callout(tr("BÖLÜM {n}", { n: state.level }), T().accent);
 }

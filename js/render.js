@@ -396,6 +396,101 @@ function drawHoles() {
     ctx.stroke();
   }
 }
+// --- CR7 (13. bölüm maskotu): sağ altta kutlama yapan, üzülünce yüzünü kapayan animasyonlu figür ---
+const cr7 = { mood: "idle", until: 0 };
+const cr7Cheer = (dur = 1.6) => { cr7.mood = "yay"; cr7.until = state.time + dur; };
+const cr7Facepalm = () => { cr7.mood = "face"; cr7.until = state.time + 1.8; };
+function drawCr7() {
+  if (pxWall.mode !== "koridor") return;
+  if (cr7.mood !== "idle" && state.time >= cr7.until) cr7.mood = "idle";
+  const t = state.time, win = pxWall.won;
+  const cheer = win || cr7.mood === "yay", face = !win && cr7.mood === "face";
+  const x = W - 64, groundY = H - 24;
+  const jump = cheer ? Math.abs(Math.sin(t * 6)) * 13 : Math.sin(t * 2) * 1.5;   // kutlama: hoplar; normal: nefes alır
+  const y = groundY - jump;
+  ctx.fillStyle = "rgba(0,0,0,0.3)";                                             // gölge
+  ctx.beginPath();
+  ctx.ellipse(x, groundY + 2, 16 * (1 - jump / 40), 4, 0, 0, TAU);
+  ctx.fill();
+  const limb = (x1, y1, x2, y2, lw) => { ctx.strokeStyle = "#e8b17a"; ctx.lineWidth = lw; ctx.lineCap = "round"; path([[x1, y1], [x2, y2]]); ctx.stroke(); ctx.lineCap = "butt"; };
+  limb(x - 5, y - 34, x - 7, y - 16, 4);                                        // bacaklar
+  limb(x + 5, y - 34, x + 7, y - 16, 4);
+  if (cheer) { limb(x - 8, y - 48, x - 16, y - 62, 4); limb(x + 8, y - 48, x + 16, y - 62, 4); }   // kollar: havada V
+  else if (face) { limb(x - 8, y - 48, x - 4, y - 57, 4); limb(x + 8, y - 48, x + 4, y - 57, 4); }
+  else { const sw = Math.sin(t * 3) * 2; limb(x - 8, y - 48, x - 10 - sw, y - 36, 4); limb(x + 8, y - 48, x + 10 + sw, y - 36, 4); }
+  fillRR(x - 9, y - 50, 18, 18, 4, "#a4161a");                                  // forma
+  ctx.strokeStyle = "#7a0c14";
+  ctx.lineWidth = 1;
+  rrPath(x - 9, y - 50, 18, 18, 4);
+  ctx.stroke();
+  Object.assign(ctx, { fillStyle: "#ffffff", font: "bold 10px monospace", textAlign: "center" });
+  ctx.fillText("7", x, y - 38);
+  circle(x, y - 58, 7, "#e8b17a");                                              // kafa
+  ctx.fillStyle = "#2b2117";                                                    // saç
+  ctx.beginPath();
+  ctx.arc(x, y - 58, 7, Math.PI, TAU);
+  ctx.fill();
+  if (face) {                                                                   // yüzünü kapatır
+    circle(x - 4, y - 57, 3.4, "#e8b17a");
+    circle(x + 4, y - 57, 3.4, "#e8b17a");
+  } else if (cheer) {
+    circle(x - 2.6, y - 59, 1.1, "#2b2117");
+    circle(x + 2.6, y - 59, 1.1, "#2b2117");
+    ctx.fillStyle = "#7a3040";                                                  // açık ağız
+    ctx.beginPath();
+    ctx.arc(x, y - 54.5, 2.2, 0, Math.PI);
+    ctx.fill();
+  } else {
+    circle(x - 2.6, y - 59, 1.1, "#2b2117");
+    circle(x + 2.6, y - 59, 1.1, "#2b2117");
+    ctx.strokeStyle = "#7a3040";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(x, y - 56, 2.6, 0.25, Math.PI - 0.25);
+    ctx.stroke();
+  }
+}
+
+// --- YEŞİL OK küpü: uçuştaki topun yörüngesini kesikli yeşil çizgiyle öngörür ---
+function drawAim() {
+  if (state.aimUntil <= state.time || balls.length > 10) return;
+  const b = balls.find(b => !b.stuck && !b.decoy && !b.tun);
+  if (!b) return;
+  let { x, y } = b;
+  const m2 = Math.hypot(b.dx, b.dy) || 1;
+  let dx = b.dx / m2, dy = b.dy / m2;
+  const pts = [[x, y]];
+  for (let i = 0; i < 160; i++) {
+    x += dx * 6;
+    y += dy * 6;
+    if (x - 8 < state.inset) { x = state.inset + 8; dx = -dx; }                 // yan duvarlardan yansıma
+    else if (x + 8 > W - state.inset) { x = W - state.inset - 8; dx = -dx; }
+    else if (y - 8 < 0) { y = 8; dy = -dy; }
+    else if (y > paddle.y - 4) break;                                           // raket düzlemi: yol biter
+    else {
+      const ci = pxCellAt(x, y);
+      if (ci >= 0 && pxWall.active && pxSolid(pxWall.grid[ci])) break;          // ilk katı piksele kadar
+      if (bricks.some(br => !br.dead && x > br.x && x < br.x + BRICK.w && y > br.y && y < br.y + BRICK.h)) break;
+    }
+    pts.push([x, y]);
+  }
+  if (pts.length < 4) return;
+  ctx.strokeStyle = "rgba(67,214,79,0.75)";
+  ctx.lineWidth = 2;
+  ctx.setLineDash([7, 6]);
+  ctx.lineDashOffset = -state.time * 40;
+  path(pts);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  const n2 = pts.length, [ex2, ey2] = pts[n2 - 1], [px2, py2] = pts[n2 - 2];   // uçta ok başı
+  const a = Math.atan2(ey2 - py2, ex2 - px2);
+  ctx.fillStyle = "#43d64f";
+  path([[ex2 + Math.cos(a) * 8, ey2 + Math.sin(a) * 8],
+        [ex2 + Math.cos(a + 2.5) * 7, ey2 + Math.sin(a + 2.5) * 7],
+        [ex2 + Math.cos(a - 2.5) * 7, ey2 + Math.sin(a - 2.5) * 7]], true);
+  ctx.fill();
+}
+
 function drawPaddle() {
   const { x, y, w, h } = paddle;
   // Cila: raket hızına göre hafif eğilir, top değince squash yapar (canlı hissi)
@@ -410,12 +505,13 @@ function drawPaddle() {
   }
   // GÖRÜNMEZ RAKET: yalnızca vuruşta ve ara ara bir anlık belirir
   if (curseOn("gorunmez")) ctx.globalAlpha = Math.max(paddle.flash * 0.9, (state.time % 1.6) < 0.1 ? 0.45 : 0.03);
-  const blink = fxOn("stun") && (calmFx() || Math.floor(state.time * 12) % 2), pcol = blink ? "#ff4d6d" : T().pad, ps = settings.paddleStyle;
+  const kor = pxWall.mode === "koridor";   // CR7 koridoru: turuncu raket
+  const blink = fxOn("stun") && (calmFx() || Math.floor(state.time * 12) % 2), pcol = kor ? "#ff9f1c" : blink ? "#ff4d6d" : T().pad, ps = settings.paddleStyle;
   if (ps === "koseli") { ctx.fillStyle = pcol; ctx.fillRect(x, y, w, h); }
   else if (ps === "neon") {
     fillRR(x, y, w, h, 6, hexToRgba(pcol, 0.18));
     for (const [lw, c] of [[6, hexToRgba(pcol, 0.35)], [2, pcol]]) { ctx.strokeStyle = c; ctx.lineWidth = lw; ctx.strokeRect(x + 1, y + 1, w - 2, h - 2); }
-  } else if (ps === "gokkusagi") {
+  } else if (ps === "gokkusagi" && !kor) {   // koridorda gökkuşağı yerine turuncu parlak raket
     const h0 = state.time * 120;
     fillRR(x, y, w, h, 6, blink ? "#ff4d6d" : lgrad(x, 0, x + w, 0, [0, 1, 2, 3, 4].map(i => `hsl(${(h0 + i * 70) % 360},90%,62%)`)));
   } else {                      // parlak: gölge + dikey degrade + vurgu renginde uç kapakları + üst parlama
@@ -560,6 +656,7 @@ const EFFECT_TAGS = [
   ["fever", tr("ÇILGIN"), "#ff5d8f", FEVER_TIME], ["wide", tr("GENİŞ"), POWERS.W.color, WIDE_TIME], ["slow", tr("YAVAŞ"), POWERS.S.color, SLOW_TIME],
   ["fire", tr("ATEŞ"), POWERS.F.color], ["laser", tr("LAZER"), POWERS.L.color], ["magnet", tr("YAPIŞ"), POWERS.Y.color], ["big", tr("DEV"), POWERS.D.color],
   ["reverse", tr("TERS"), "#ff4d6d"], ["mini", tr("MİNİ"), "#ff4d6d"], ["haste", tr("HIZ"), "#ff4d6d"], ["stun", tr("SERSEM"), "#ff4d6d"],
+  ["aim", tr("YÖN"), "#43d64f"],
 ];
 function activeEffects() {
   const list = [];
@@ -721,6 +818,29 @@ const LEGEND = [
   [{ hp: 1 }, N_("1 vuruş")], [{ hp: 2 }, N_("2 vuruş")], [{ hp: 3 }, N_("3 vuruş")], [{ unbreakable: true }, N_("kırılmaz")], [{ explosive: true }, N_("patlar")],
   [{ electric: true }, N_("yıldırım")], [{ gold: true }, N_("altın")], [{ splitter: true }, N_("+top")], ["bumper", N_("tampon")], ["portal", N_("portal")],
 ];
+// Menü mod hapları: Kolay / Orta / Zor — tıklayınca seçilir, yeni oyunda uygulanır (ui.js yakalar)
+let menuModeBoxes = [];
+function drawMenuModes() {
+  const labels = { kolay: tr("Kolay"), normal: tr("Orta"), zor: tr("Zor") };
+  ctx.font = "bold 12px monospace";
+  const items = Object.entries(labels).map(([v, label]) => ({ v, label, w: ctx.measureText(label).width + 26 }));
+  const total = items.reduce((s2, it) => s2 + it.w, 0) + (items.length - 1) * 8;
+  let x = W / 2 - total / 2;
+  const y = H / 2 + 182, h = 21;
+  menuModeBoxes = [];
+  for (const it of items) {
+    const on = settings.difficulty === it.v;
+    fillRR(x, y, it.w, h, h / 2, on ? T().accent : hexToRgba(T().board, 0.9));
+    ctx.strokeStyle = on ? shade(T().accent, -0.25) : hexToRgba(T().dim, 0.7);
+    ctx.lineWidth = 1;
+    rrPath(x + 0.5, y + 0.5, it.w - 1, h - 1, h / 2);
+    ctx.stroke();
+    text((on ? "✓ " : "") + it.label, x + it.w / 2, y + 14.5, "bold 12px monospace", on ? T().board : T().dim, "center", it.w - 6);
+    menuModeBoxes.push({ x, y, w: it.w, h, v: it.v });
+    x += it.w + 8;
+  }
+}
+
 // Menü göstergesinin ikinci satırı: yeni nesil tuğlalar (adlar mevcut çeviri anahtarlarını yeniden kullanır)
 const NEW_TYPES = [
   ["H", N_("Yenilenen")], ["A", N_("Kalkanlı")], ["T", N_("İkiz")], ["I", N_("Buz")], ["V", N_("Virüs")], ["S", N_("Şifacı")],
@@ -758,7 +878,8 @@ function drawScreens() {
       blitBrick(brickSprite(brickColor(b), brickKind(b)), x, y + 1, 34 / BRICK.w);
       text(tr(label), x + 39, y + 12, "11px monospace", T().text, "left", 58);
     });
-    if (settings.hazards !== "kapali") text(tr("⚠ Lanetler seni durdurmaya çalışacak — yoğunluk: Ayarlar → Lanetler"), W / 2, H / 2 + 172, "13px monospace", CURSE_COLOR, "center", 610);
+    if (settings.hazards !== "kapali") text(tr("⚠ Lanetler seni durdurmaya çalışacak — yoğunluk: Ayarlar → Lanetler"), W / 2, H / 2 + 168, "13px monospace", CURSE_COLOR, "center", 610);
+    drawMenuModes();
     ctx.restore();
   } else if (m === "serve" && battle.active && battle.countdown > 0) {
     drawCountdown();
@@ -872,7 +993,7 @@ function draw() {
     ctx.restore();
   }
   ctx.globalAlpha = 1;
-  drawBolts(); drawMusicMid(); drawLasersAndBullets(); drawGhost(); drawPaddle(); drawBalls();
+  drawBolts(); drawMusicMid(); drawLasersAndBullets(); drawGhost(); drawCr7(); drawAim(); drawPaddle(); drawBalls();
   ctx.font = "bold 14px monospace";   // skor yazıları: kenarlıklı, büyüyerek belirir
   ctx.textAlign = "center";
   ctx.lineWidth = 3;

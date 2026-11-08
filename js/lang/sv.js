@@ -244,4 +244,13 @@ I18N_DATA.sv = {
 758: "Färgblindvänlig",
 759: "Blixtar och blinkningar",
 760: "Färgblindvänlig: blockens hållbarhetsfärger tas från en palett som går att skilja åt även vid färgblindhet (ljusblå, gul, cinnoberröd), och varje block visar prickar för återstående träffar. Med minskade blixtar stängs musikblixten av, färgerna i VANSINNESLÄGE skiftar långsamt och snabbt blinkande blir en fast färg.",
+
+761: "⚽ CR7-KORRIDOR",
+762: "RIKTNING",
+763: "⚽ SIUUU!",
+764: "⚽ Spela CR7-korridoren",
+
+765: "🔹 MIKROVÄGG",
+766: "Medel",
+767: "🔹 Spela Mikroväggen",
 };
