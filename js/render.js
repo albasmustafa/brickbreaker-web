@@ -498,46 +498,6 @@ function drawCr7() {
   }
 }
 
-// --- YEŞİL OK küpü: uçuştaki topun yörüngesini kesikli yeşil çizgiyle öngörür ---
-function drawAim() {
-  if (state.aimUntil <= state.time || balls.length > 10) return;
-  const b = balls.find(b => !b.stuck && !b.decoy && !b.tun);
-  if (!b) return;
-  let { x, y } = b;
-  const m2 = Math.hypot(b.dx, b.dy) || 1;
-  let dx = b.dx / m2, dy = b.dy / m2;
-  const pts = [[x, y]];
-  for (let i = 0; i < 160; i++) {
-    x += dx * 6;
-    y += dy * 6;
-    if (x - 8 < state.inset) { x = state.inset + 8; dx = -dx; }                 // yan duvarlardan yansıma
-    else if (x + 8 > W - state.inset) { x = W - state.inset - 8; dx = -dx; }
-    else if (y - 8 < 0) { y = 8; dy = -dy; }
-    else if (y > paddle.y - 4) break;                                           // raket düzlemi: yol biter
-    else {
-      const ci = pxCellAt(x, y);
-      if (ci >= 0 && pxWall.active && pxSolid(pxWall.grid[ci])) break;          // ilk katı piksele kadar
-      if (bricks.some(br => !br.dead && x > br.x && x < br.x + BRICK.w && y > br.y && y < br.y + BRICK.h)) break;
-    }
-    pts.push([x, y]);
-  }
-  if (pts.length < 4) return;
-  ctx.strokeStyle = "rgba(67,214,79,0.75)";
-  ctx.lineWidth = 2;
-  ctx.setLineDash([7, 6]);
-  ctx.lineDashOffset = -state.time * 40;
-  path(pts);
-  ctx.stroke();
-  ctx.setLineDash([]);
-  const n2 = pts.length, [ex2, ey2] = pts[n2 - 1], [px2, py2] = pts[n2 - 2];   // uçta ok başı
-  const a = Math.atan2(ey2 - py2, ex2 - px2);
-  ctx.fillStyle = "#43d64f";
-  path([[ex2 + Math.cos(a) * 8, ey2 + Math.sin(a) * 8],
-        [ex2 + Math.cos(a + 2.5) * 7, ey2 + Math.sin(a + 2.5) * 7],
-        [ex2 + Math.cos(a - 2.5) * 7, ey2 + Math.sin(a - 2.5) * 7]], true);
-  ctx.fill();
-}
-
 function drawPaddle() {
   const { x, y, w, h } = paddle;
   // Cila: raket hızına göre hafif eğilir, top değince squash yapar (canlı hissi)
@@ -592,16 +552,6 @@ function drawBalls() {
   const fire = isFire(), ballCol = fire ? "#ff6b35" : T().ball, rainbow = settings.trail === "gokkusagi";
   const crowd = balls.length > 40 || lowGfx();          // top fırtınası / düşük kalite: iz, hale ve gölge çizilmez
   const sb = !crowd && (state.mode === "serve" || state.mode === "playing") && balls.find(b => b.stuck);
-  if (sb) {                                              // cila: fırlatma bekleyen topa genişleyip sönen hedef halkası
-    const ph = (state.time * 1.4) % 1;
-    ctx.globalAlpha = (1 - ph) * 0.55;
-    ctx.strokeStyle = T().accent;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(sb.x, sb.y, sb.r + 3 + ph * 16, 0, TAU);
-    ctx.stroke();
-    ctx.globalAlpha = 1;
-  }
   for (const b of balls) {
     // HAYALET TOP: rakete yaklaşana kadar yalnızca ara ara görünür
     const ghostA = curseOn("hayalet") && b.y < paddle.y - 80 ? ((state.time * 2.2 + b.x * 0.004) % 1 < 0.1 ? 0.6 : 0.04) : 1;
@@ -709,7 +659,6 @@ const EFFECT_TAGS = [
   ["fever", tr("ÇILGIN"), "#ff5d8f", FEVER_TIME], ["wide", tr("GENİŞ"), POWERS.W.color, WIDE_TIME], ["slow", tr("YAVAŞ"), POWERS.S.color, SLOW_TIME],
   ["fire", tr("ATEŞ"), POWERS.F.color], ["laser", tr("LAZER"), POWERS.L.color], ["magnet", tr("YAPIŞ"), POWERS.Y.color], ["big", tr("DEV"), POWERS.D.color],
   ["reverse", tr("TERS"), "#ff4d6d"], ["mini", tr("MİNİ"), "#ff4d6d"], ["haste", tr("HIZ"), "#ff4d6d"], ["stun", tr("SERSEM"), "#ff4d6d"],
-  ["aim", tr("YÖN"), "#43d64f"],
 ];
 function activeEffects() {
   const list = [];
@@ -1056,7 +1005,7 @@ function draw() {
     ctx.restore();
   }
   ctx.globalAlpha = 1;
-  drawBolts(); drawMusicMid(); drawLasersAndBullets(); drawGhost(); drawCr7(); drawAim(); drawPaddle(); drawBalls();
+  drawBolts(); drawMusicMid(); drawLasersAndBullets(); drawGhost(); drawCr7(); drawPaddle(); drawBalls();
   ctx.font = "bold 14px monospace";   // skor yazıları: kenarlıklı, büyüyerek belirir
   ctx.textAlign = "center";
   ctx.lineWidth = 3;

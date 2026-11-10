@@ -192,7 +192,7 @@ Zor modun puan primi rekor ve liderlik tablosunda ödüllendirilir; kolayda skor
 Tünel Fırtınası'nın kardeşi, çok daha sadistik: **duvarın tamamı mavi piksel tuğla**, içinden tek geçiş — ortada **dar dikey koridor** (36 px, çelik dudaklı). Topu alt ortadan koridora sokmak raketin işi; gerisi boru hattı: top yukarı taşınır, tepede **zincir reaksiyonu** tutuşturur ve mavi duvar dalga dalga erir.
 
 - **Raket:** turuncu ve **dar (%72)** — koridorun ağzına topu oturtmak hassas kontrol ister.
-- **Küpler (koridor çıkışında):** 🟡 **+3** üç top ekler · 🟢 **→** 10 sn boyunca topun yörüngesini kesikli yeşil çizgiyle gösterir (sekme ve ilk tuğla dahil) · 🟠 **▲** 6 sn **ateş topu** (tuğlaları sekmeden deler).
+- **Küpler (koridor çıkışında):** 🟡 **+3** üç top ekler · 🟠 **×3** tüm topları üçe katlar · 🟠 **▲** 6 sn **ateş topu** (tuğlaları sekmeden deler).
 - **CR7:** sağ altta durur; zincir tutuşunca ve küp yakalayınca **kutlama** yapar (kollar havada, zıplar), top kaybedince **yüzünü kapatır**.
 - **Kazanınca:** ⚽ **SIUUU!** — 48 top sahaya saçılır, CR7 zıpla durur, konfeti yağar.
 - Meydan panelindeki **⚽ CR7 Koridoru'nu oyna** düğmesiyle her zaman pratik yapılabilir.
@@ -251,8 +251,8 @@ Klasik modun yanında tam bir oyun-bitirme deneyimi: **8 dünya × 5 bölüm** (
 
 Mikro Duvar'ın küçük parçalı iki kardeşi — üstteki dikdörtgenler çok sayıda minik parçaya bölünür:
 
-- **🧩 Mozaik Duvar (15):** duvar 28 px'lik **fayanslara** ayrılır; her fayans tek tondan mavi (küçük parça görünümü), bazıları çelik, aralarında boşluklar salınım yapar. Top fayans fayans öğütür, boşluklardan içre sızar. Küpler: ▲ ateş · → yön · +3.
-- **💠 Adalar Duvarı (16):** ~120 küçük **elmas tuğla takımı** boşluklar arasında serpilir; her dördüncünün **çelik çekirdeği** vardır — çevresinden kırmak gerekir. Top adaların arasında serbestçe dolaşır. Küpler: ▲ ateş · → yön · x3.
+- **🧩 Mozaik Duvar (15):** duvar 28 px'lik **fayanslara** ayrılır; her fayans tek tondan mavi (küçük parça görünümü), bazıları çelik, aralarında boşluklar salınım yapar. Top fayans fayans öğütür, boşluklardan içre sızar. Küpler: ▲ ateş · +3 top · ×3 çoğaltma.
+- **💠 Adalar Duvarı (16):** ~120 küçük **elmas tuğla takımı** boşluklar arasında serpilir; her dördüncünün **çelik çekirdeği** vardır — çevresinden kırmak gerekir. Top adaların arasında serbestçe dolaşır. Küpler: ▲ ateş · +3 top · ×3 çoğaltma.
 - İkisinde de kazanınca toplar sahaya saçılır. Meydan panelinden **🧩 Mozaik Duvar'ı oyna** ve **💠 Adalar Duvarı'nı oyna** düğmeleriyle her zaman pratik yapılır.
 
 ## Görsel kalite paketi (üstteki ögeler)

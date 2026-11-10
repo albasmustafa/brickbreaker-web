@@ -24,7 +24,7 @@ const PX_ORANGES = ["#ff7b00", "#ff8c1a", "#ff9f1c", "#e85d04", "#f48c06", "#ffa
 const PX_COLORS = () => pxWall.mode === "core" ? PX_ORANGES : PX_BLUES;
 const CUBE_KINDS = {
   plus: { label: "+3", color: "#ffd60a" }, mul: { label: "x3", color: "#ff8c1a" },
-  aim:  { label: "→", color: "#43d64f" }, fire: { label: "▲", color: "#ff6b35" },        // koridor küpleri: yön ve ateş
+  fire: { label: "▲", color: "#ff6b35" },                                                  // koridor küpü: ateş
   wide: { label: "↔", color: "#90be6d" },                                                  // CORE/BREAK: geniş raket
 };
 const pxWall = { active: false, mode: null, s: PX.s, cols: PX.cols, rows: PX.rows, grid: null, owner: null, tone: null, total: 0, left: 0, tunnels: [], cubes: [], burns: [],
@@ -81,7 +81,7 @@ function buildPixelWall(on) {
     // Çıkış küpleri: Tünel'de sarı +3 ve turuncu x3; Koridor'da yeşil ok ve ateş de var (üçüncü küp ağzın içinde)
     const ex = last.b[0] - last.dx * 6, ey = last.b[1] - last.dy * 6;
     const kinds = on === "koridor"
-      ? [["plus", -1, 0], ["aim", 1, 0], ["fire", 0, 26]]
+      ? [["plus", -1, 0], ["mul", 1, 0], ["fire", 0, 26]]
       : [["plus", -1, 0], ["mul", 1, 0]];
     for (const [kind, side, back] of kinds) {
       const hx = ex + last.px * side * 8.5 - last.dx * back, hy = ey + last.py * side * 8.5 - last.dy * back;
@@ -96,7 +96,7 @@ function buildPixelWall(on) {
       const i = rr * cols + c;
       if (grid[i] === PX_BLUE) grid[i] = PX_STEEL;
     }
-    for (const [kind, [a, b]] of [["fire", gaps[0]], ["aim", gaps[1]], ["plus", gaps[2]]]) {
+    for (const [kind, [a, b]] of [["fire", gaps[0]], ["plus", gaps[1]], ["mul", gaps[2]]]) {
       const hx = PX.x + (a + b) / 2 * s, hy = PX.y + 11 * s + 22;
       pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
     }
@@ -114,7 +114,7 @@ function buildPixelWall(on) {
       }
     }
     for (let i = th * T * cols; i < n; i++) { grid[i] = PX_HOLLOW; }   // artan alt şerit boş
-    for (const [kind, tx] of [["fire", 4], ["aim", 13], ["plus", 22]]) {   // üç fayans aralığı küp yuvası
+    for (const [kind, tx] of [["fire", 4], ["plus", 13], ["mul", 22]]) {   // üç fayans aralığı küp yuvası
       const hx = PX.x + (tx * T + T / 2) * s, hy = PX.y + (T + T / 2) * s;
       for (let r2 = 0; r2 < T; r2++) for (let c2 = 0; c2 < T; c2++) grid[(T + r2) * cols + tx * T + c2] = PX_HOLLOW;
       pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
@@ -138,7 +138,7 @@ function buildPixelWall(on) {
       const cx = 6 + ix * 13 + ((irand() * 5) | 0) - 2, cy = 4 + iy * 8 + ((irand() * 3) | 0) - 1;
       place(cx, cy, 3 + ((ix + iy) % 2), (ix * 2 + iy) % 4 === 0);
     }
-    for (const [kind, cx, cy] of [["fire", 30, 30], ["aim", 95, 8], ["mul", 160, 30]]) {   // aralarda üç küp
+    for (const [kind, cx, cy] of [["fire", 30, 30], ["plus", 95, 8], ["mul", 160, 30]]) {   // aralarda üç küp
       const hx = PX.x + cx * s, hy = PX.y + cy * s;
       for (let dy2 = -3; dy2 <= 3; dy2++) for (let dx2 = -3; dx2 <= 3; dx2++) {
         const c = cx + dx2, r2 = cy + dy2;
@@ -314,10 +314,6 @@ function pxCatch(q) {
     paddle.wideUntil = state.time + WIDE_TIME;
     addFloater(paddle.x + paddle.w / 2, paddle.y - 18, "↔ " + tr("GENİŞ") + "!", K.color);
     sfx("power");
-  } else if (q.kind === "aim") {
-    state.aimUntil = state.time + FX_TIME.aim;
-    addFloater(paddle.x + paddle.w / 2, paddle.y - 18, "→ " + tr("YÖN") + "!", K.color);
-    sfx("power");
   } else if (q.kind === "fire") {
     state.fireUntil = state.time + FX_TIME.fire;
     addFloater(paddle.x + paddle.w / 2, paddle.y - 18, "▲ " + tr("ATEŞ") + "!", K.color);
@@ -482,20 +478,6 @@ function drawPixelWall() {
   ctx.rect(PX.x - 2, PX.y - 2, ww + 4, wh * (1 - (1 - reveal) ** 3) + 4);
   ctx.clip();
   ctx.drawImage(P.canvas, PX.x, PX.y, ww, wh);
-  // Tünel içinde akış okları: topun gideceği yön
-  ctx.strokeStyle = "rgba(140,200,255,0.32)";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  for (const tn of P.tunnels) for (const g of tn.segs) {
-    for (let d = (state.time * 90) % 22; d < g.len; d += 22) {
-      const x = g.a[0] + g.dx * d, y = g.a[1] + g.dy * d;
-      if (y > PX.y + wh - 4) continue;
-      ctx.moveTo(x - g.dx * 3 + g.px * 5, y - g.dy * 3 + g.py * 5);
-      ctx.lineTo(x + g.dx * 3, y + g.dy * 3);
-      ctx.lineTo(x - g.dx * 3 - g.px * 5, y - g.dy * 3 - g.py * 5);
-    }
-  }
-  ctx.stroke();
   // kalite: enerjiye göre ısıl gradyan (beyaz sıcak → sarı → turuncu) + hale
   for (const b of P.burns) if (P.grid[b.i] === PX_BURN) {
     const bx = PX.x + (b.i % P.cols) * P.s, by = PX.y + ((b.i / P.cols) | 0) * P.s;
