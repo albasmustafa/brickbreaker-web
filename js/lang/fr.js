@@ -295,4 +295,8 @@ I18N_DATA.fr = {
 803: "Termine 4 mondes dans la Campagne",
 804: "Champion du Tour",
 805: "Termine toute la Campagne",
+
+806: "PAS SI VITE — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Jouer à Core/Break",
 };

@@ -295,4 +295,8 @@ I18N_DATA.sv = {
 803: "Klara 4 världar i Kampanjen",
 804: "Turnéns Mästare",
 805: "Klara hela Kampanjen",
+
+806: "INTE SÅ SNABBT — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Spela Core/Break",
 };

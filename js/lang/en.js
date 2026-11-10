@@ -295,4 +295,8 @@ I18N_DATA.en = {
 803: "Finish 4 worlds in the Campaign",
 804: "Tour Champion",
 805: "Finish the whole Campaign",
+
+806: "NOT SO FAST — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Play Core/Break",
 };

@@ -295,4 +295,8 @@ I18N_DATA.pl = {
 803: "Ukończ 4 światy w Kampanii",
 804: "Mistrz Trasy",
 805: "Ukończ całą Kampanię",
+
+806: "NIE TAK SZYBKO — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Zagraj w Core/Break",
 };

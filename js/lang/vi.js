@@ -295,4 +295,8 @@ I18N_DATA.vi = {
 803: "Hoàn thành 4 thế giới trong Chiến dịch",
 804: "Vô Địch Chuyến Đi",
 805: "Hoàn thành toàn bộ Chiến dịch",
+
+806: "CHƯA NHANH THẾ — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Chơi Core/Break",
 };

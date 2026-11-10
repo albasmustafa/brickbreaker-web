@@ -295,4 +295,8 @@ I18N_DATA.de = {
 803: "Beende 4 Welten in der Kampagne",
 804: "Tour-Champion",
 805: "Beende die ganze Kampagne",
+
+806: "NICHT SO SCHRELL — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Core/Break spielen",
 };

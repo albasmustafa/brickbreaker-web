@@ -295,4 +295,8 @@ I18N_DATA.hu = {
 803: "Fejez be 4 világot a Kampányban",
 804: "A Túra Bajnoka",
 805: "Fejezd be a teljes Kampányt",
+
+806: "NE ENNYIRE GYORSAN — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Core/Break játéka",
 };

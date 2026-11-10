@@ -295,4 +295,8 @@ I18N_DATA.nl = {
 803: "Voltooi 4 werelden in de Campagne",
 804: "Tourkampioen",
 805: "Voltooi de hele Campagne",
+
+806: "NIET ZO SNEL — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Speel Core/Break",
 };

@@ -295,4 +295,8 @@ I18N_DATA.cs = {
 803: "Dokonči 4 světy v Kampani",
 804: "Mistr Tury",
 805: "Dokonči celou Kampaň",
+
+806: "NE TAK RYCHLE — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Hrát Core/Break",
 };

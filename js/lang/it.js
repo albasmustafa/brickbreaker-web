@@ -295,4 +295,8 @@ I18N_DATA.it = {
 803: "Completa 4 mondi nella Campagna",
 804: "Campione del Giro",
 805: "Completa tutta la Campagna",
+
+806: "NON COSÌ IN FRETTA — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Gioca a Core/Break",
 };

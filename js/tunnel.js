@@ -20,9 +20,12 @@ const KORIDOR_PATHS = [
   [[378, 292], [378, 40]],                                                               // ortadan tepeye düz dar koridor
 ];
 const PX_BLUES = ["#1d5fe0", "#2470f5", "#2f80ff", "#3b8cff", "#1a56d0", "#4a9bff"];
+const PX_ORANGES = ["#ff7b00", "#ff8c1a", "#ff9f1c", "#e85d04", "#f48c06", "#ffa62b"];   // CORE/BREAK çekirdeği
+const PX_COLORS = () => pxWall.mode === "core" ? PX_ORANGES : PX_BLUES;
 const CUBE_KINDS = {
   plus: { label: "+3", color: "#ffd60a" }, mul: { label: "x3", color: "#ff8c1a" },
   aim:  { label: "→", color: "#43d64f" }, fire: { label: "▲", color: "#ff6b35" },        // koridor küpleri: yön ve ateş
+  wide: { label: "↔", color: "#90be6d" },                                                  // CORE/BREAK: geniş raket
 };
 const pxWall = { active: false, mode: null, s: PX.s, cols: PX.cols, rows: PX.rows, grid: null, owner: null, tone: null, total: 0, left: 0, tunnels: [], cubes: [], burns: [],
                  canvas: null, g: null, dirty: [], full: false, pend: 0, flushAt: 0, statAcc: 0, sfxAt: 0, enterSfxAt: 0, clankAt: 0,
@@ -42,14 +45,14 @@ function buildPixelWall(on) {
                           finale: false, storm: false, maxed: false, won: false, peak: 1 });
   if (!on) { pxWall.grid = pxWall.owner = null; pxWall.tunnels = []; pxWall.s = PX.s; pxWall.cols = PX.cols; pxWall.rows = PX.rows; return; }
   // MİNİK HÜCRELİ DUVARLAR (mikro/mozaik/adalar): hücre 4 px → aynı alanda ~2,25 kat daha çok minik tuğla
-  const s = on === "mikro" || on === "mozaik" || on === "adalar" ? 4 : PX.s;
+  const s = on === "mikro" || on === "mozaik" || on === "adalar" || on === "core" ? 4 : PX.s;
   const cols = Math.round(PX.cols * PX.s / s), rows = Math.round(PX.rows * PX.s / s), n = cols * rows;
   Object.assign(pxWall, { s, cols, rows });
   const grid = new Uint8Array(n).fill(PX_BLUE), owner = new Uint8Array(n), tone = new Uint8Array(n);
   const rand = seeded(4242);                          // tuğla tonları her seferinde aynı
   for (let i = 0; i < n; i++) tone[i] = (rand() * PX_BLUES.length) | 0;
   const center = i => [(i % cols) * s + s / 2, ((i / cols) | 0) * s + s / 2];
-  const paths = on === "koridor" ? KORIDOR_PATHS : (on === "mikro" || on === "mozaik" || on === "adalar") ? [] : TUNNEL_PATHS;
+  const paths = on === "koridor" ? KORIDOR_PATHS : (on === "mikro" || on === "mozaik" || on === "adalar" || on === "core") ? [] : TUNNEL_PATHS;
   // 1) Tünel içi (boşluk): yolun her kolu boyunca 36 px genişliğinde kanal
   paths.forEach((pts, k) => {
     for (let i = 0; i < n; i++) {
@@ -141,6 +144,25 @@ function buildPixelWall(on) {
         const c = cx + dx2, r2 = cy + dy2;
         if (c >= 0 && c < cols && r2 >= 0 && r2 < rows && Math.abs(dx2) + Math.abs(dy2) <= 3) grid[r2 * cols + c] = PX_HOLLOW;
       }
+      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
+    }
+  }
+  if (on === "core") {    // CORE/BREAK: koyu boşlukta TAM 3379 turuncu pikselden dairesel çekirdek (halkalı tonlar)
+    grid.fill(PX_HOLLOW);
+    const cx = (cols - 1) / 2, cy = (rows - 1) / 2;
+    const cand = [];
+    for (let i = 0; i < n; i++) {
+      const c = i % cols, r2 = (i / cols) | 0, d2 = (c - cx) ** 2 + (r2 - cy) ** 2;
+      cand.push([d2, i]);
+    }
+    cand.sort((a, b) => a[0] - b[0] || a[1] - b[1]);   // merkezden dışa: ilk 3379 hücre çekirdeği verir
+    for (let k = 0; k < 3379; k++) {
+      const i = cand[k][1];
+      grid[i] = PX_BLUE;
+      tone[i] = Math.floor(Math.sqrt(cand[k][0])) % PX_ORANGES.length;   // eş merkezli halkalar
+    }
+    for (const [kind, dc] of [["mul", -33], ["wide", 0], ["mul", 33]]) {  // çekirdeğin altında üç küp
+      const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 3) * s;
       pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
     }
   }
@@ -253,7 +275,7 @@ function pxBreak(i) {
   P.pend += 4 * (isFever() ? 2 : 1);
   if (++P.statAcc >= 20) { P.statAcc = 0; run.bricks++; track("bricks"); }   // 20 piksel = 1 tuğla (kariyer sayacı şişmesin)
   if (particles.length < 260 && Math.random() < 0.5) {
-    spawnParticles(PX.x + (i % pxWall.cols) * pxWall.s, PX.y + ((i / pxWall.cols) | 0) * pxWall.s, PX_BLUES[P.tone[i]], 2, pxWall.s, pxWall.s);
+    spawnParticles(PX.x + (i % pxWall.cols) * pxWall.s, PX.y + ((i / pxWall.cols) | 0) * pxWall.s, PX_COLORS()[P.tone[i]], 2, pxWall.s, pxWall.s);
   }
   if (state.time - P.sfxAt > 0.05) { P.sfxAt = state.time; sfx("brick", 1 + (P.left % 9)); }
   return true;
@@ -287,6 +309,10 @@ function pxCatch(q) {
         balls.push(Object.assign(newBall(false), { x: s.x, y: s.y, dx: Math.cos(base + a) * mag(), dy: Math.sin(base + a) * mag(), tunnelUntil: s.tunnelUntil || 0 }));
       }
     }
+  } else if (q.kind === "wide") {
+    paddle.wideUntil = state.time + WIDE_TIME;
+    addFloater(paddle.x + paddle.w / 2, paddle.y - 18, "↔ " + tr("GENİŞ") + "!", K.color);
+    sfx("power");
   } else if (q.kind === "aim") {
     state.aimUntil = state.time + FX_TIME.aim;
     addFloater(paddle.x + paddle.w / 2, paddle.y - 18, "→ " + tr("YÖN") + "!", K.color);
@@ -358,6 +384,7 @@ function pxWin() {
   for (let k = 0; k < 6; k++) spawnCoins(rnd(150, 650), rnd(140, 320), 18);
   for (let k = 0; k < 3; k++) tone("triangle", [784, 988, 1318][k], 0, 0.35, 0.2, 0.45 + k * 0.3);
   if (pxWall.mode) {
+    if (pxWall.mode === "core") callout(tr("ALL CLEAR!"), "#ff9f1c");
     if (pxWall.mode === "koridor") {
       if (typeof cr7Cheer === "function") cr7Cheer(5);
       callout(tr("⚽ SIUUU!"), "#ffd60a");
@@ -376,7 +403,7 @@ function pxPaintCell(i) {
   const g = pxWall.g, s = pxWall.s, cols = pxWall.cols, rows = pxWall.rows, c = i % cols, r = (i / cols) | 0, x = c * s, y = r * s, t = pxWall.grid[i];
   g.clearRect(x, y, s, s);
   if (t === PX_BLUE || t === PX_BURN) {               // piksel tuğla: üstü/solu parlak, altı/sağı gölgeli (büyük hücrede tam bevel)
-    g.fillStyle = PX_BLUES[pxWall.tone[i]];
+    g.fillStyle = PX_COLORS()[pxWall.tone[i]];
     g.fillRect(x + 0.5, y + 0.5, s - 1, s - 1);
     g.fillStyle = "rgba(255,255,255,0.35)";
     g.fillRect(x + 0.5, y + 0.5, s - 1, 1);

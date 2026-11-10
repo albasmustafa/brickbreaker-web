@@ -806,5 +806,8 @@ const I18N_KEYS = [
 "Kampanyada 4 dünyayı bitir", // 803
 "Tur Şampiyonu", // 804
 "Kampanyayı baştan sona bitir", // 805
+"NOT SO FAST — CORE/BREAK", // 806
+"ALL CLEAR!", // 807
+"🟠 Core/Break'i oyna", // 808
 ];
 const I18N_DATA = {};

@@ -295,4 +295,8 @@ I18N_DATA.es = {
 803: "Termina 4 mundos en la Campaña",
 804: "Campeón del Recorrido",
 805: "Termina toda la Campaña",
+
+806: "NI TAN RÁPIDO — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Jugar a Core/Break",
 };

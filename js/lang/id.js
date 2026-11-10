@@ -295,4 +295,8 @@ I18N_DATA.id = {
 803: "Selesaikan 4 dunia di Kampanye",
 804: "Juara Tur",
 805: "Selesaikan seluruh Kampanye",
+
+806: "TIDAK SECEPAT ITU — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Mainkan Core/Break",
 };

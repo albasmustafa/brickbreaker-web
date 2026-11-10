@@ -295,4 +295,8 @@ I18N_DATA.pt = {
 803: "Termine 4 mundos na Campanha",
 804: "Campeão do Tour",
 805: "Termine toda a Campanha",
+
+806: "NÃO TÃO RÁPIDO — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Jogar Core/Break",
 };

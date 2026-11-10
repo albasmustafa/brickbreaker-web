@@ -295,4 +295,8 @@ I18N_DATA.az = {
 803: "Kampaniyada 4 dünyanı bitir",
 804: "Tur Çempionu",
 805: "Bütün Kampaniyanı bitir",
+
+806: "O QƏDƏR DƏ SÜRƏTLİ DEYİL — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Core/Break oyna",
 };

@@ -26,7 +26,7 @@ js/i18n.js            dil seçimi, tr() çevirisi, RTL, statik HTML çevirisi
 js/themes.js          28 hazır tema, tema yönetimi, sonsuz rastgele tema üreteci
 js/settings.js        ayar tablosu: varsayılanlar + doğrulama + ayarlar panelinin satırları
 js/audio.js           Web Audio ses motoru, olay sesleri tablosu, raket sesleri
-js/levels.js          16 bölüm: 11 harita (2 boss) + Tünel Fırtınası + CR7 Koridoru + Mikro/Mozaik/Adalar duvarları
+js/levels.js          17 bölüm: 11 harita (2 boss) + CORE/BREAK + Tünel Fırtınası + CR7 Koridoru + Mikro/Mozaik/Adalar duvarları
 js/state.js           oyun durumu, varlık listeleri, top matematiği
 js/flow.js            bölüm kurma, oyun başlatma, can/bölüm geçişleri, duraklatma
 js/effects.js         parçacık, parça, çatlak, yıldırım, yazılar, sarsıntı
@@ -72,7 +72,7 @@ Okunaklı tek dosyada her bölümün başında kaynak dosyanın adı yazar. Ana 
 ## Testler
 
 `npm test` her testi temiz kayıtlı (boş localStorage) yeni bir sayfada çalıştırır; sayfadaki herhangi bir JS hatası testi düşürür. Kapsam:
-- **Oyun:** yükleme ve özellik envanteri; servis, oynanış, can, oyun sonu, duraklatma; koşu sayaçları ve pratikte kayıt dışı kalma; 15 kapsülün her biri; duvar bölgeleri, falso ve SMASH; tüm tuğla türleri; boss; kara delik, ÇILGIN MOD, lazer ve kalkan; 25 dil (her dil eksiksiz ve yer tutucuları uyumlu, html lang/dir ve RTL, dil seçici, tüm ekranlar ve panellerin her dilde hatasız ve tuvale sığarak çizilmesi, çevrilmemiş Türkçe metin kalmaması); Tünel Fırtınası (piksel duvar, tünelde taşınma, içeriden oyma ve zincir, +3/x3 küplerin raketle yakalanması, 300 top sınırı ve akıcılığı, kırılmaz çelik, kazanma ekranı, sonraki bölümde kapanma, panelden pratik); CR7 Koridoru (tam mavi duvar, dar koridor, ok/ateş küpleri, dar raket, CR7 koreografisi, kazanma saçılımı); Mozaik ve Adalar duvarları (fayans salınımı, tek ton fayanslar, elmas adalar, çelik çekirdekler, saçılım); Kampanya (40 bölümün geçerliliği, yıldız hesabı, kilitler, boss'lar, panel, kalıcılık, liderlik).
+- **Oyun:** yükleme ve özellik envanteri; servis, oynanış, can, oyun sonu, duraklatma; koşu sayaçları ve pratikte kayıt dışı kalma; 15 kapsülün her biri; duvar bölgeleri, falso ve SMASH; tüm tuğla türleri; boss; kara delik, ÇILGIN MOD, lazer ve kalkan; 25 dil (her dil eksiksiz ve yer tutucuları uyumlu, html lang/dir ve RTL, dil seçici, tüm ekranlar ve panellerin her dilde hatasız ve tuvale sığarak çizilmesi, çevrilmemiş Türkçe metin kalmaması); CORE/BREAK (3379 turuncu çekirdek, x3/↔ küpleri, ALL CLEAR saçılımı); Tünel Fırtınası (piksel duvar, tünelde taşınma, içeriden oyma ve zincir, +3/x3 küplerin raketle yakalanması, 300 top sınırı ve akıcılığı, kırılmaz çelik, kazanma ekranı, sonraki bölümde kapanma, panelden pratik); CR7 Koridoru (tam mavi duvar, dar koridor, ok/ateş küpleri, dar raket, CR7 koreografisi, kazanma saçılımı); Mozaik ve Adalar duvarları (fayans salınımı, tek ton fayanslar, elmas adalar, çelik çekirdekler, saçılım); Kampanya (40 bölümün geçerliliği, yıldız hesabı, kilitler, boss'lar, panel, kalıcılık, liderlik).
 - **Meydan okuma:** bölüm kilidi, pratik başlatma, günlük tek deneme, günlük kurallar, seri/tarih hesabı, kalıcılık ve bozuk kayıt.
 - **Lanetler:** 21 lanetin her biri, ayrıntılı davranışlarıyla.
 - **Yeni nesil:** altı yeni tuğla türünün tümü (ikiz çift kırımı, kalkan aşınması, buz dondurması, virüs güçlendirmesi, şifa nabzı, yenilenme); günlük/haftalığa tohumdan simetrik yordamsal haritalar, SERT TUĞLALAR ve VİRÜS SALGINI paktları, Düşen Duvar laneti, ritm bonusu ve yeni dramaturg görevleri.
@@ -154,7 +154,15 @@ GitHub Actions (`.github/workflows/ci.yml`) her push ve pull request'te Node 22 
 - **Cila:** bölüm açılışında tuğlalar çapraz dalga ile belirir; raket hızına göre eğilir, top değince squash yapar; fırlatma bekleyen topa genişleyen hedef halkası; duyuru yazılarının arkasında zemin hapı; bölüm sonunda ve yeni rekorde konfeti; can kaybında kenarlarda sönen kırmızı vinyet; oyun sonu kartında skor yukarı sayar; menü başlığı nabız gibi parlar ve gösterge yeni nesil tuğlaları tanıtır; pakt/koleksiyon/rakip kartları hover'da kalkar.
 - **Rekor:** `localStorage` (`bb_highscore`), oyun sonunda "YENİ REKOR" işareti.
 
-## Tünel Fırtınası (12. bölüm)
+## CORE/BREAK (12. bölüm) — "NOT SO FAST"
+
+Koyu arka planda **tam 3379 turuncu piksel tuğladan** oluşan, eş merkezli halkalı **dairesel çekirdek**. Çelik yok, tünel yok — saf öğütme.
+
+- **Küpler (çekirdeğin altında):** 🟠 **x3** topları üçe katlar · 🟢 **↔** raket 10 sn genişler. Yakalanan küpler birkaç saniye sonra yeniden belirir — çok denemede **biriktir**.
+- Hepsini temizle: **ALL CLEAR!** + toplar sahaya saçılır.
+- Meydan panelindeki **🟠 Core/Break'i oyna** düğmesiyle her zaman pratik.
+
+## Tünel Fırtınası (13. bölüm)
 
 - **Piksel duvar:** sahanın üst yarısı yaklaşık **3000 küçük mavi piksel tuğladan** oluşan tek bir duvardır. Her tuğla tek vuruşta kırılır. Duvar bölüm başında yukarıdan aşağı belirir.
 - **Çelik tüneller:** duvarın içinden **kırılmaz gri çelik** iki tünel geçer: solda **L**, sağda **sarmal**. Girişleri duvarın altına açılır, içlerindeki oklar akış yönünü gösterir.
@@ -179,7 +187,7 @@ Menü ekranındaki üç hapla veya Ayarlar → Zorluk'tan seçilir; **yalnızca 
 
 Zor modun puan primi rekor ve liderlik tablosunda ödüllendirilir; kolayda skor buna göre kısılır.
 
-## CR7 Koridoru (13. bölüm)
+## CR7 Koridoru (14. bölüm)
 
 Tünel Fırtınası'nın kardeşi, çok daha sadistik: **duvarın tamamı mavi piksel tuğla**, içinden tek geçiş — ortada **dar dikey koridor** (36 px, çelik dudaklı). Topu alt ortadan koridora sokmak raketin işi; gerisi boru hattı: top yukarı taşınır, tepede **zincir reaksiyonu** tutuşturur ve mavi duvar dalga dalga erir.
 
@@ -221,7 +229,7 @@ Teknik notlar (i18n):
 - **Haftalık Kaos Tohumu:** Her hafta (pazartesi) aynı tohum: aynı **tohumdan üretilmiş simetrik bölümler**, aynı kapsül ve lanet sırası. Pakt, dramaturg, hayalet ve son top bahsi kapalıdır; skorlar aynı koşulda karşılaştırılır. 🎯 Meydan panelinden `BBW1:` sonuç kodu alınır.
 - **Şarkıdan Bölüm:** Bir ses dosyası seçilir; BPM, bas ve tiz enerjisi analiz edilip 3 bölüm (+ güçlü finalde boss) üretilir. Aynı şarkı aynı bölümü verir; `BBS1:` kodu ile paylaşılır. Şarkı arka planda çalar ve mevcut müzik senkronuyla birleşir.
 
-## Mikro Duvar (14. bölüm)
+## Mikro Duvar (15. bölüm)
 
 Üstteki kutuların **küçük hali**: hücre boyutu 4 px'e iner (aynı alanda ~2,25 kat tuğla → 11.700+ minik tuğla) ve her 11. sıra **çelik kaburga** ile takviye edilir. Kaburgalar yalnız üç boşluktan geçer — topun duvara **girmesi zordur**: dış katmanı öğütür, boşlukları bulur, ateş topuyla delemeye başlar.
 
@@ -239,7 +247,7 @@ Klasik modun yanında tam bir oyun-bitirme deneyimi: **8 dünya × 5 bölüm** (
 - **Piksel ziyaretleri:** Tünel dünyası Mikro Duvar'a, Aurora Mozaik'e, Derin Deniz Adalar'a, Siberpunk CR7 Koridoru'na uğrar.
 - **Ödüller:** dünya sonu +puan, **kampanya liderlik tablosu**, İlk Dünya / Turun Yarısı / Tur Şampiyonu başarımları.
 
-## Mozaik Duvar & Adalar Duvarı (15–16. bölüm)
+## Mozaik Duvar & Adalar Duvarı (16–17. bölüm)
 
 Mikro Duvar'ın küçük parçalı iki kardeşi — üstteki dikdörtgenler çok sayıda minik parçaya bölünür:
 

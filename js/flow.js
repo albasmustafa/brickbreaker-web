@@ -298,6 +298,7 @@ function nextLevel() {
   serveBall();
   if (settings.autoTheme === "bolum") randomTheme();
   if (state.boss) { callout("⚠ " + tr(state.boss.name) + " ⚠", "#ff4d6d"); sfx("bossRoar"); }
+  else if (pxWall.mode === "core") callout(tr("NOT SO FAST — CORE/BREAK"), "#ff9f1c");
   else if (pxWall.mode === "koridor") callout(tr("⚽ CR7 KORİDORU"), "#ffd60a");
   else if (pxWall.mode === "mikro") callout(tr("🔹 MİKRO DUVAR"), "#4cc9f0");
   else if (pxWall.mode === "mozaik") callout(tr("🧩 MOZAİK DUVAR"), "#c77dff");

@@ -295,4 +295,8 @@ I18N_DATA.ro = {
 803: "Termină 4 lumi în Campanie",
 804: "Campion al Turului",
 805: "Termină toată Campania",
+
+806: "NU AȘA DE REPEDE — CORE/BREAK",
+807: "ALL CLEAR!",
+808: "🟠 Joacă Core/Break",
 };
