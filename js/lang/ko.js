@@ -299,4 +299,6 @@ I18N_DATA.ko = {
 806: "그렇게 빠르지 않아 — CORE/BREAK",
 807: "ALL CLEAR!",
 808: "🟠 Core/Break 플레이",
+
+809: "형태 코드",
 };

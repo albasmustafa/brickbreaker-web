@@ -35,9 +35,11 @@ function paintBrickBody(g, col, style) {
   const rect = (x, y, rw, rh, c) => { g.fillStyle = c; g.fillRect(x, y, rw, rh); };
   const frame = (inset, lw, c) => { g.strokeStyle = c; g.lineWidth = lw; g.strokeRect(inset, inset, w - inset * 2, h - inset * 2); };
   if (style === "parlak") {
-    fillRR(1.5, 3, w, h, 6, "rgba(0,0,0,0.32)", g);                                            // gölge
-    fillRR(0, 0, w, h, 6, lgrad(0, 0, 0, h, [[0, shade(col, 0.32)], [0.55, col], [1, shade(col, -0.32)]], g), g);
+    fillRR(1.5, 3, w, h, 6, "rgba(0,0,0,0.32)", g);                                            // düşen gölge
+    fillRR(2.5, 4.5, w, h, 6, "rgba(0,0,0,0.14)", g);                                          // kalite: AO ikinci yumuşak katman
+    fillRR(0, 0, w, h, 6, lgrad(0, 0, 0, h, [[0, shade(col, 0.42)], [0.35, shade(col, 0.15)], [0.7, col], [1, shade(col, -0.38)]], g), g);   // 4 duraklı gövde
     fillRR(3, 2, w - 6, h * 0.42, 4, lgrad(0, 0, 0, h * 0.5, ["rgba(255,255,255,0.55)", "rgba(255,255,255,0.04)"], g), g);   // cam parlaması
+    fillRR(1.5, h - 6.5, w - 3, 5.5, 4, "rgba(0,0,0,0.20)", g);                                // kalite: iç gölge (alt kenar)
     g.strokeStyle = shade(col, -0.45);
     g.lineWidth = 1;
     rrPath(0.5, 0.5, w - 1, h - 1, 6, g);
@@ -230,6 +232,18 @@ function drawBricks() {
         ctx.fillRect(px, py, 2.5, 2.5);
       }
     }
+    if (settings.shapeCode === "acik") {              // kalite: şekil kodu — koyu kontur + dayanıklılık deseni (renk körü dostu)
+      ctx.strokeStyle = "rgba(0,0,0,0.55)";
+      ctx.lineWidth = 1.5;
+      rrPath(x + 0.75, y + 0.75, BRICK.w - 1.5, BRICK.h - 1.5, rounded ? 5 : 0);
+      ctx.stroke();
+      if (kind === "n" && b.maxHp >= 2) {
+        ctx.strokeStyle = "rgba(0,0,0,0.4)";
+        path([[x + 8, y + BRICK.h - 5], [x + BRICK.w - 8, y + 5]]);
+        ctx.stroke();
+        if (b.maxHp >= 3) { path([[x + 8, y + 5], [x + BRICK.w - 8, y + BRICK.h - 5]]); ctx.stroke(); }
+      }
+    }
     // HP noktacıkları: kalan dayanıklılık kadar, sağ üstten sola (çatlakların üstüne)
     if ((settings.hpDots || cvdOn()) && !b.unbreakable && !b.explosive) {
       const dc = dotColorFor(col);
@@ -260,6 +274,38 @@ function drawTwinLinks() {
     ctx.stroke();
     ctx.setLineDash([]);
   }
+}
+
+// Kalite: top = ışık kaynağı — yakındaki tuğla/duvar üzerine yumuşak radyal ışık (top fırtınasında kapalı)
+function drawBallLight() {
+  if (balls.length > 20) return;
+  const list = balls.filter(b => !b.decoy && !b.stuck).slice(0, 6);
+  if (!list.length) return;
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+  const col = isFire() ? "#ff9f1c" : "#cfe8ff";
+  for (const b of list) {
+    const r = 70, g2 = ctx.createRadialGradient(b.x, b.y, 4, b.x, b.y, r);
+    g2.addColorStop(0, hexToRgba(col, 0.18));
+    g2.addColorStop(1, hexToRgba(col, 0));
+    ctx.fillStyle = g2;
+    ctx.fillRect(b.x - r, b.y - r, r * 2, r * 2);
+  }
+  ctx.restore();
+}
+
+// Kalite: kırılma şok dalgaları — genişleyip sönen halkalar
+function drawShocks() {
+  for (const s of shocks) {
+    const p = 1 - s.life / 0.3;
+    ctx.globalAlpha = (s.life / 0.3) * 0.55;
+    ctx.strokeStyle = s.color;
+    ctx.lineWidth = 2.5 - p * 1.5;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, 6 + p * 42, 0, TAU);
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
 }
 
 // Parıltılar: ara ara rastgele bir tuğlada beliren dört köşeli yıldız
@@ -997,7 +1043,7 @@ function draw() {
   const feverHue = (state.time * (calmFx() ? 30 : 300)) % 360;   // parlama azaltılınca renkler yavaş döner
   if (isFever()) { ctx.fillStyle = `hsla(${feverHue},90%,55%,0.10)`; ctx.fillRect(0, 0, W, H); }   // ÇILGIN MOD tonu
 
-  drawStars(); drawZones(); drawHoles(); drawMusicBack(); drawPixelWall(); drawTwinLinks(); drawBricks(); drawGlints(); drawBoss();
+  drawStars(); drawZones(); drawHoles(); drawMusicBack(); drawPixelWall(); drawTwinLinks(); drawBricks(); drawBallLight(); drawShocks(); drawGlints(); drawBoss();
   drawPowerups(); drawObstacles(); drawUfo(); drawWallPanels();
   for (const p of particles) { ctx.globalAlpha = clamp(p.life * 2.5, 0, 1); ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, p.size, p.size); }
   for (const f of fragments) {  // dönen tuğla parçaları

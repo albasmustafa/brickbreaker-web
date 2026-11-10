@@ -255,6 +255,14 @@ Mikro Duvar'ın küçük parçalı iki kardeşi — üstteki dikdörtgenler çok
 - **💠 Adalar Duvarı (16):** ~120 küçük **elmas tuğla takımı** boşluklar arasında serpilir; her dördüncünün **çelik çekirdeği** vardır — çevresinden kırmak gerekir. Top adaların arasında serbestçe dolaşır. Küpler: ▲ ateş · → yön · x3.
 - İkisinde de kazanınca toplar sahaya saçılır. Meydan panelinden **🧩 Mozaik Duvar'ı oyna** ve **💠 Adalar Duvarı'nı oyna** düğmeleriyle her zaman pratik yapılır.
 
+## Görsel kalite paketi (üstteki ögeler)
+
+- **Sprite kalitesi:** parlak tuğla gövdesi 4 duraklı degrade + AO katmanı + iç gölge; piksel hücrelerde boşluğa bakan kenar AO'su (açık üst / koyu alt).
+- **Isıl zincir:** yanan hücreler enerjiye göre beyaz sıcak → sarı → turuncu boyanır ve hale taşır; kırılan korlar turuncu iz bırakır.
+- **Top ışık kaynağı:** topun çevresine yumuşak radyal ışık düşer (ateş topu turuncu; top fırtınasında kapalı).
+- **Şok dalgaları:** kırılmalarda genişleyip sönen halkalar; zincir reaksiyonunda mavi şok; komşu tuğlalar titrer (hız sınırlı, hareket azaltmada kapalı).
+- **Şekil kodu (Ayarlar → Görünüm):** renk körü dostu — her tuğlaya koyu kontur, 2 vuruşluga tek çapraz, 3 vuruşluga çapraz çift desen.
+
 ## Genel görsel cila
 
 Kartlar (menü, duraklatma, bölüm sonu, oyun sonu) belirdiğinde üstlerinden bir kez **ışık süpürmesi** geçer; toplar azken yumuşak bir **parıltı halesi** taşır; piksel duvarların altında **gölge** ve hücrelerde tam **bevel** vardır; yıldızlı/kar arka planlar raketi izleyen hafif **paralaksla** derinlik kazanır.

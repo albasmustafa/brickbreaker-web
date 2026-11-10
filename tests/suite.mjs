@@ -56,7 +56,7 @@ test("Yükleme, arayüz ve özellik envanteri", async ({ p, expect }) => {
   expect(r.powers === "WMSFLYDKOHQRNZCB", "16 kapsül: " + r.powers);
   expect(r.curses === 22, "22 lanet: " + r.curses);
   expect(r.bosses === "TUĞLA KRAL,DEMİR İMPARATOR", "2 boss");
-  expect(r.looks === 8 && r.paddle === 9 && r.arch === 5 && r.musicFx === 12, "görünüm/raket sesi/müzik tabloları");
+  expect(r.looks === 9 && r.paddle === 9 && r.arch === 5 && r.musicFx === 12, "görünüm/raket sesi/müzik tabloları");
   expect(r.sfx >= 36, "ses tablosu: " + r.sfx);
   expect(r.skills === "caylak,usta,efsane" && r.types === "XEZ$+HATIVS", "bot seviyeleri ve tuğla türleri: " + r.types);
   expect(r.codex === 38 && r.codexPanel, "38 koleksiyon kartı, panel kapalı: " + JSON.stringify([r.codex, r.codexPanel]));
@@ -1450,7 +1450,7 @@ test("Görünüm seçenekleri ve kalıcılık (sayfa yenilenince)", async ({ p, 
   const n = await p.eval(`(() => { __start(1); applyPower("F"); applyPower("L"); applyPower("K"); applyPower("O"); let n = 0;
     for (const k in LOOKS) for (const v of LOOKS[k]) { settings[k] = v; if (k === "bgFx") initStars(); __sim(30); n++; }
     for (const k in LOOKS) settings[k] = LOOKS[k][0]; return n; })()`);
-  expect(n === 33, "33 görünüm seçeneğinin hepsi çizilir: " + n);
+  expect(n === 35, "35 görünüm seçeneğinin hepsi çizilir: " + n);
   await p.eval(`(() => { settingsBtn.click();
     for (const [k, v] of [["ballShape", "yildiz"], ["brickStyle", "3d"], ["bgFx", "izgara"], ["paddleSound", "boing"], ["hazards", "kabus"], ["hpDots", "true"]])
       settingsPanel.querySelector('[data-opt="' + k + '"][data-val="' + v + '"]').click();

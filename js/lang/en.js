@@ -299,4 +299,6 @@ I18N_DATA.en = {
 806: "NOT SO FAST — CORE/BREAK",
 807: "ALL CLEAR!",
 808: "🟠 Play Core/Break",
+
+809: "Shape code",
 };

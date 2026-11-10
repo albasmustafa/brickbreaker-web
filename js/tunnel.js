@@ -212,7 +212,7 @@ function pxBall(b, ox, oy, sdt) {
       if (broke >= 4 || pxWall.grid[i] === PX_STEEL || !pxBreak(i)) continue;
       broke++;
       if (inside) {
-        if (!pxWall.chained) { pxWall.chained = true; callout(tr("ZİNCİR REAKSİYON!"), "#4cc9f0"); sfx("boom"); addShake(6); pxIgnite(i, 14); if (pxWall.mode === "koridor" && typeof cr7Cheer === "function") cr7Cheer(1.4); }
+        if (!pxWall.chained) { pxWall.chained = true; callout(tr("ZİNCİR REAKSİYON!"), "#4cc9f0"); sfx("boom"); addShake(6); pxIgnite(i, 14); addShock(b.x, b.y, "#4cc9f0"); if (pxWall.mode === "koridor" && typeof cr7Cheer === "function") cr7Cheer(1.4); }
         else pxIgnite(i, 5);
       }
     }
@@ -275,7 +275,8 @@ function pxBreak(i) {
   P.pend += 4 * (isFever() ? 2 : 1);
   if (++P.statAcc >= 20) { P.statAcc = 0; run.bricks++; track("bricks"); }   // 20 piksel = 1 tuğla (kariyer sayacı şişmesin)
   if (particles.length < 260 && Math.random() < 0.5) {
-    spawnParticles(PX.x + (i % pxWall.cols) * pxWall.s, PX.y + ((i / pxWall.cols) | 0) * pxWall.s, PX_COLORS()[P.tone[i]], 2, pxWall.s, pxWall.s);
+spawnParticles(PX.x + (i % pxWall.cols) * pxWall.s, PX.y + ((i / pxWall.cols) | 0) * pxWall.s,
+                   t === PX_BURN ? "#ff8c1a" : PX_COLORS()[P.tone[i]], t === PX_BURN ? 3 : 2, pxWall.s, pxWall.s);   // kalite: kor rengi iz
   }
   if (state.time - P.sfxAt > 0.05) { P.sfxAt = state.time; sfx("brick", 1 + (P.left % 9)); }
   return true;
@@ -405,10 +406,12 @@ function pxPaintCell(i) {
   if (t === PX_BLUE || t === PX_BURN) {               // piksel tuğla: üstü/solu parlak, altı/sağı gölgeli (büyük hücrede tam bevel)
     g.fillStyle = PX_COLORS()[pxWall.tone[i]];
     g.fillRect(x + 0.5, y + 0.5, s - 1, s - 1);
-    g.fillStyle = "rgba(255,255,255,0.35)";
+    const openAbove = r > 0 && !pxSolid(g[i - cols]);
+    const openBelow = r < rows - 1 && !pxSolid(g[i + cols]);
+    g.fillStyle = openAbove ? "rgba(255,255,255,0.5)" : "rgba(255,255,255,0.3)";   // AO: boşluğa bakan kenar daha belirgin
     g.fillRect(x + 0.5, y + 0.5, s - 1, 1);
     if (s >= 6) g.fillRect(x + 0.5, y + 0.5, 1, s - 1);
-    g.fillStyle = "rgba(0,0,30,0.35)";
+    g.fillStyle = openBelow ? "rgba(0,0,30,0.5)" : "rgba(0,0,30,0.32)";
     g.fillRect(x + 0.5, y + s - 1.5, s - 1, 1);
     if (s >= 6) g.fillRect(x + s - 1.5, y + 0.5, 1, s - 1);
   } else if (t === PX_STEEL) {                        // fırçalanmış çelik: kenarlarda pah
@@ -493,9 +496,14 @@ function drawPixelWall() {
     }
   }
   ctx.stroke();
-  // Tutuşan hücreler (zincir cephesi)
-  ctx.fillStyle = calmFx() || Math.sin(state.time * 40) > 0 ? "#ffd166" : "#ffffff";   // 20 Hz titreme; parlama azaltılınca sabit
-  for (const b of P.burns) if (P.grid[b.i] === PX_BURN) ctx.fillRect(PX.x + (b.i % PX.cols) * PX.s, PX.y + ((b.i / PX.cols) | 0) * PX.s, PX.s - 0.5, PX.s - 0.5);
+  // kalite: enerjiye göre ısıl gradyan (beyaz sıcak → sarı → turuncu) + hale
+  for (const b of P.burns) if (P.grid[b.i] === PX_BURN) {
+    const bx = PX.x + (b.i % P.cols) * P.s, by = PX.y + ((b.i / P.cols) | 0) * P.s;
+    if (b.e >= 4) { ctx.fillStyle = "rgba(255,140,26,0.35)"; ctx.fillRect(bx - 2, by - 2, P.s + 4, P.s + 4); }
+    const hot = b.e >= 9 ? "#fff7cc" : b.e >= 5 ? "#ffd166" : "#ff8c1a";
+    ctx.fillStyle = calmFx() ? hot : (Math.sin(state.time * 40 + b.i) > 0 ? hot : "#ffffff");
+    ctx.fillRect(bx, by, P.s - 0.5, P.s - 0.5);
+  }
   for (const q of P.cubes) {
     if (q.st === "idle") drawCube(q.hx, q.hy + Math.sin(state.time * 4 + q.ph) * 0.8, q.kind, 0, q.pop > 0 ? Math.max(0.01, easeOutBack(1 - q.pop)) : 1);
   }

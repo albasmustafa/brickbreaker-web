@@ -299,4 +299,6 @@ I18N_DATA.vi = {
 806: "CHƯA NHANH THẾ — CORE/BREAK",
 807: "ALL CLEAR!",
 808: "🟠 Chơi Core/Break",
+
+809: "Mã hình dạng",
 };

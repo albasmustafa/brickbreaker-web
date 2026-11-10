@@ -299,4 +299,6 @@ I18N_DATA.hu = {
 806: "NE ENNYIRE GYORSAN — CORE/BREAK",
 807: "ALL CLEAR!",
 808: "🟠 Core/Break játéka",
+
+809: "Alakzatkód",
 };

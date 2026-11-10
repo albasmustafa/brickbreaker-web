@@ -299,4 +299,6 @@ I18N_DATA.nl = {
 806: "NIET ZO SNEL — CORE/BREAK",
 807: "ALL CLEAR!",
 808: "🟠 Speel Core/Break",
+
+809: "Vormcode",
 };

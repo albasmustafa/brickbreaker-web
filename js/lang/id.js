@@ -299,4 +299,6 @@ I18N_DATA.id = {
 806: "TIDAK SECEPAT ITU — CORE/BREAK",
 807: "ALL CLEAR!",
 808: "🟠 Mainkan Core/Break",
+
+809: "Kode bentuk",
 };

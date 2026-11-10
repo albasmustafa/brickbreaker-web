@@ -121,6 +121,9 @@ function destroyBrick(b) {
   sfx("brick", state.combo, b.maxHp);
   if (b.maxHp >= 3) { state.hitstop = Math.max(state.hitstop, 0.03); addShake(3.5); }   // sert tuğla: mikro donma + biraz daha sarsıntı
   else addShake(2.5);
+  addShock(cx, b.y + BRICK.h / 2, isFever() ? "#ff5d8f" : "#ffffff");                     // kalite: şok dalgası halkası
+  if (bricks.length < 300) for (const o of bricks)                                        // kalite: komşu tuğlalar titrer
+    if (!o.dead && o !== b && Math.abs(o.col - b.col) <= 1 && Math.abs(o.row - b.row) <= 1) o.wob = Math.max(o.wob || 0, 0.5);
   if (music.on && music.beat > 0.55) {   // RİTİM BONUSU: vuruşa denk gelen kırışta küçük ödül
     run.beats++;
     addScore(15);

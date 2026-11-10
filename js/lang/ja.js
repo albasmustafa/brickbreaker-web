@@ -299,4 +299,6 @@ I18N_DATA.ja = {
 806: "そうはさせない — CORE/BREAK",
 807: "ALL CLEAR!",
 808: "🟠CORE/BREAKを遊ぶ",
+
+809: "形状コード",
 };

@@ -299,4 +299,6 @@ I18N_DATA.cs = {
 806: "NE TAK RYCHLE — CORE/BREAK",
 807: "ALL CLEAR!",
 808: "🟠 Hrát Core/Break",
+
+809: "Kód tvaru",
 };

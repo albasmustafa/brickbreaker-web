@@ -299,4 +299,6 @@ I18N_DATA.fr = {
 806: "PAS SI VITE — CORE/BREAK",
 807: "ALL CLEAR!",
 808: "🟠 Jouer à Core/Break",
+
+809: "Code de forme",
 };

@@ -299,4 +299,6 @@ I18N_DATA.sv = {
 806: "INTE SÅ SNABBT — CORE/BREAK",
 807: "ALL CLEAR!",
 808: "🟠 Spela Core/Break",
+
+809: "Formkod",
 };

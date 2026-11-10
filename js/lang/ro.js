@@ -299,4 +299,6 @@ I18N_DATA.ro = {
 806: "NU AȘA DE REPEDE — CORE/BREAK",
 807: "ALL CLEAR!",
 808: "🟠 Joacă Core/Break",
+
+809: "Cod de formă",
 };

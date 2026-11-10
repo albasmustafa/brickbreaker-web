@@ -809,5 +809,6 @@ const I18N_KEYS = [
 "NOT SO FAST — CORE/BREAK", // 806
 "ALL CLEAR!", // 807
 "🟠 Core/Break'i oyna", // 808
+"Şekil kodu", // 809
 ];
 const I18N_DATA = {};

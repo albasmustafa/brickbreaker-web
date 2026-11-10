@@ -33,6 +33,7 @@ const SETTING_ROWS = [
   { key: "paddleStyle", look: true, label: tr("Raket"), def: "yuvarlak", opts: "yuvarlak:Parlak|koseli:Köşeli|neon:Neon|gokkusagi:Gökkuşağı" },
   { key: "brickStyle", look: true, label: tr("Tuğla stili"), def: "parlak", opts: "parlak:Parlak|duz:Düz|yuvarlak:Yuvarlak|3d:3D|cam:Cam|neon:Neon" },
   { key: "brickColor", look: true, label: tr("Tuğla rengi"), def: "hp", opts: "hp:Dayanıklılığa göre|gokkusagi:Gökkuşağı" },
+  { key: "shapeCode", look: true, label: tr("Şekil kodu"), def: "kapali", opts: "kapali:Kapalı|acik:Açık" },
   { key: "bgFx", look: true, label: tr("Arka plan"), def: "yildiz", opts: "yildiz:Yıldızlar|kar:Kar|kabarcik:Kabarcık|matrix:Matrix|izgara:Synthwave ızgara|kapali:Kapalı" },
   { key: "particles", look: true, label: tr("Parçacık"), def: "normal", opts: "az:Az|normal:Normal|cok:Çok|asiri:Aşırı" },
   { key: "autoTheme", look: true, label: tr("Otomatik tema"), def: "kapali", opts: "kapali:Kapalı|bolum:Her bölümde yeni rastgele tema" },

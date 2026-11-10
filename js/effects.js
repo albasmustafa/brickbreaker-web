@@ -18,6 +18,17 @@ function spawnCoins(x, y, count) {
     particles.push({ x, y, vx: rnd(-220, 220), vy: rnd(-520, -200), size: rnd(4, 7), life: rnd(0.8, 1.3), color: Math.random() < 0.5 ? "#ffd60a" : "#ffc300" });
   }
 }
+// Kalite: kırılma şok dalgaları (hız sınırlı; top fırtınında ve hareket azaltmada kapalı)
+let shocks = [];
+let shockAt = 0;
+function addShock(x, y, color) {
+  if (balls.length > 20 || calmFx()) return;
+  if (state.time - shockAt < 0.06) return;
+  shockAt = state.time;
+  if (shocks.length > 12) shocks.shift();
+  shocks.push({ x, y, life: 0.3, color: color || "#ffffff" });
+}
+
 function addFloater(x, y, text, color) {
   if (floaters.length > 30) floaters.shift();
   floaters.push({ x, y, text, color, life: 0.8 });
@@ -95,6 +106,8 @@ function updateEffects(dt) {
   for (const bo of bolts) bo.life -= dt;
   bolts = bolts.filter(bo => bo.life > 0);
   if (state.callout && (state.callout.life -= dt) <= 0) state.callout = null;
+  for (const s of shocks) s.life -= dt;
+  shocks = shocks.filter(s => s.life > 0);
   if (state.boss) state.boss.flash = Math.max(0, state.boss.flash - dt * 6);
   state.shake = Math.max(0, state.shake - dt * 18);
 }

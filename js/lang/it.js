@@ -299,4 +299,6 @@ I18N_DATA.it = {
 806: "NON COSÌ IN FRETTA — CORE/BREAK",
 807: "ALL CLEAR!",
 808: "🟠 Gioca a Core/Break",
+
+809: "Codice di forma",
 };

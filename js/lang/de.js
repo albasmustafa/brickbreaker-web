@@ -299,4 +299,6 @@ I18N_DATA.de = {
 806: "NICHT SO SCHRELL — CORE/BREAK",
 807: "ALL CLEAR!",
 808: "🟠 Core/Break spielen",
+
+809: "Formcode",
 };

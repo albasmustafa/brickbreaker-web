@@ -299,4 +299,6 @@ I18N_DATA.az = {
 806: "O QƏDƏR DƏ SÜRƏTLİ DEYİL — CORE/BREAK",
 807: "ALL CLEAR!",
 808: "🟠 Core/Break oyna",
+
+809: "Forma kodu",
 };

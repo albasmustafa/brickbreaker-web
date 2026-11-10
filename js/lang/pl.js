@@ -299,4 +299,6 @@ I18N_DATA.pl = {
 806: "NIE TAK SZYBKO — CORE/BREAK",
 807: "ALL CLEAR!",
 808: "🟠 Zagraj w Core/Break",
+
+809: "Kod kształtu",
 };

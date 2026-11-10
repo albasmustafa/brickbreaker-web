@@ -299,4 +299,6 @@ I18N_DATA.es = {
 806: "NI TAN RÁPIDO — CORE/BREAK",
 807: "ALL CLEAR!",
 808: "🟠 Jugar a Core/Break",
+
+809: "Código de forma",
 };
