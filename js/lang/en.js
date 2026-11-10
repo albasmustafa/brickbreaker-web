@@ -301,4 +301,11 @@ I18N_DATA.en = {
 808: "🟠 Play Core/Break",
 
 809: "Shape code",
+
+810: "⭕ RING",
+811: "⭐ STAR",
+812: "💧 DROP",
+813: "⭕ Play the Ring",
+814: "⭐ Play the Star",
+815: "💧 Play the Drop",
 };

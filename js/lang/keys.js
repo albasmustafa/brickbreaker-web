@@ -810,5 +810,11 @@ const I18N_KEYS = [
 "ALL CLEAR!", // 807
 "🟠 Core/Break'i oyna", // 808
 "Şekil kodu", // 809
+"⭕ HALKA", // 810
+"⭐ YILDIZ", // 811
+"💧 DAMLA", // 812
+"⭕ Halka'yı oyna", // 813
+"⭐ Yıldız'ı oyna", // 814
+"💧 Damla'yı oyna", // 815
 ];
 const I18N_DATA = {};

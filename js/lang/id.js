@@ -301,4 +301,11 @@ I18N_DATA.id = {
 808: "🟠 Mainkan Core/Break",
 
 809: "Kode bentuk",
+
+810: "⭕ CINCIN",
+811: "⭐ BINTANG",
+812: "💧 TETESAN",
+813: "⭕ Mainkan Cincin",
+814: "⭐ Mainkan Bintang",
+815: "💧 Mainkan Tetesan",
 };

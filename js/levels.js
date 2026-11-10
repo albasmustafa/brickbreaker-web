@@ -103,4 +103,7 @@ const LEVELS = [
   { pixel: "mikro", map: [] },    // 15: MİKRO DUVAR — minik (4 px) tuğlalar ve boşluklu çelik kaburgalar; top zor girer
   { pixel: "mozaik", map: [] },   // 16: MOZAİK DUVAR — 28 px fayanslar mavi/çelik/boşluk salınımıyla; küçük parçalar her yanda
   { pixel: "adalar", map: [] },   // 17: ADALAR DUVARI — serpilmiş elmas tuğla takımları, kimi çelik çekirdekli
+  { pixel: "halka", map: [] },    // 18: HALKA — kalın dairesel halka, altta küçük delik; top oradan girer
+  { pixel: "yildiz", map: [] },   // 19: YILDIZ — beş köşeli yıldız; kollar arasında delikler
+  { pixel: "damla", map: [] },    // 20: DAMLA — elmas biçimi, alt uçta dar delik — serpilmiş elmas tuğla takımları, kimi çelik çekirdekli
 ];

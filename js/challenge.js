@@ -99,7 +99,8 @@ function renderChallenge() {
     return el("button", {
       className: n === max ? "active" : "",
       textContent: (boss ? "☠ " : def.pixel === "core" ? "🟠 " : def.pixel === "koridor" ? "⚽ " : def.pixel === "mikro" ? "🔹 " : def.pixel === "mozaik" ? "🧩 " :
-                    def.pixel === "adalar" ? "💠 " : def.pixel ? "🌀 " : "") + n,
+                    def.pixel === "adalar" ? "💠 " : def.pixel === "halka" ? "⭕ " : def.pixel === "yildiz" ? "⭐ " :
+                    def.pixel === "damla" ? "💧 " : def.pixel ? "🌀 " : "") + n,
       title: locked ? tr("Önce klasik oyunda {n}. bölüme ulaş", { n }) : tr("Bölüm {n} pratiği", { n }),
       disabled: locked,
       onclick: () => startPractice(n),
@@ -141,4 +142,7 @@ onClick("koridor-start", () => startPractice(KORIDOR_LEVEL, true));
 onClick("mikro-start", () => startPractice(MIKRO_LEVEL, true));
 onClick("mozaik-start", () => startPractice(MOZAIK_LEVEL, true));
 onClick("adalar-start", () => startPractice(ADALAR_LEVEL, true));
+onClick("halka-start", () => startPractice(LEVELS.findIndex(l => l.pixel === "halka") + 1, true));
+onClick("yildiz-start", () => startPractice(LEVELS.findIndex(l => l.pixel === "yildiz") + 1, true));
+onClick("damla-start", () => startPractice(LEVELS.findIndex(l => l.pixel === "damla") + 1, true));
 renderChallenge();

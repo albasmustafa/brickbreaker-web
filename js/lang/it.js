@@ -301,4 +301,11 @@ I18N_DATA.it = {
 808: "🟠 Gioca a Core/Break",
 
 809: "Codice di forma",
+
+810: "⭕ ANELLO",
+811: "⭐ STELLA",
+812: "💧 GOCCIA",
+813: "⭕ Gioca all'Anello",
+814: "⭐ Gioca alla Stella",
+815: "💧 Gioca alla Goccia",
 };

@@ -301,4 +301,11 @@ I18N_DATA.de = {
 808: "🟠 Core/Break spielen",
 
 809: "Formcode",
+
+810: "⭕ RING",
+811: "⭐ STERN",
+812: "💧 TROPFEN",
+813: "⭕ Ring spielen",
+814: "⭐ Stern spielen",
+815: "💧 Tropfen spielen",
 };

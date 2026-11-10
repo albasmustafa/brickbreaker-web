@@ -301,4 +301,11 @@ I18N_DATA.pt = {
 808: "🟠 Jogar Core/Break",
 
 809: "Código de forma",
+
+810: "⭕ ANEL",
+811: "⭐ ESTRELA",
+812: "💧 GOTA",
+813: "⭕ Jogar o Anel",
+814: "⭐ Jogar a Estrela",
+815: "💧 Jogar a Gota",
 };

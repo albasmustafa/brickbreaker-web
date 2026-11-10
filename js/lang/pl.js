@@ -301,4 +301,11 @@ I18N_DATA.pl = {
 808: "🟠 Zagraj w Core/Break",
 
 809: "Kod kształtu",
+
+810: "⭕ PIERŚCIEŃ",
+811: "⭐ GWIAZDA",
+812: "💧 KROPLA",
+813: "⭕ Zagraj w Pierścień",
+814: "⭐ Zagraj w Gwiazdę",
+815: "💧 Zagraj w Kroplę",
 };

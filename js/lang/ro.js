@@ -301,4 +301,11 @@ I18N_DATA.ro = {
 808: "🟠 Joacă Core/Break",
 
 809: "Cod de formă",
+
+810: "⭕ INEL",
+811: "⭐ STEA",
+812: "💧 PICĂTURĂ",
+813: "⭕ Joacă Inelul",
+814: "⭐ Joacă Steaua",
+815: "💧 Joacă Picătura",
 };

@@ -301,4 +301,11 @@ I18N_DATA.sv = {
 808: "🟠 Spela Core/Break",
 
 809: "Formkod",
+
+810: "⭕ RING",
+811: "⭐ STJÄRNA",
+812: "💧 DROPPE",
+813: "⭕ Spela Ringen",
+814: "⭐ Spela Stjärnan",
+815: "💧 Spela Droppen",
 };

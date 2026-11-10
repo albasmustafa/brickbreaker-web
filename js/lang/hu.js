@@ -301,4 +301,11 @@ I18N_DATA.hu = {
 808: "🟠 Core/Break játéka",
 
 809: "Alakzatkód",
+
+810: "⭕ GYŰRŰ",
+811: "⭐ CSILLAG",
+812: "💧 CSEPP",
+813: "⭕ Gyűrű játéka",
+814: "⭐ Csillag játéka",
+815: "💧 Csepp játéka",
 };

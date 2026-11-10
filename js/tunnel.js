@@ -45,14 +45,14 @@ function buildPixelWall(on) {
                           finale: false, storm: false, maxed: false, won: false, peak: 1 });
   if (!on) { pxWall.grid = pxWall.owner = null; pxWall.tunnels = []; pxWall.s = PX.s; pxWall.cols = PX.cols; pxWall.rows = PX.rows; return; }
   // MİNİK HÜCRELİ DUVARLAR (mikro/mozaik/adalar): hücre 4 px → aynı alanda ~2,25 kat daha çok minik tuğla
-  const s = on === "mikro" || on === "mozaik" || on === "adalar" || on === "core" ? 4 : PX.s;
+  const s = on === "mikro" || on === "mozaik" || on === "adalar" || on === "core" || on === "halka" || on === "yildiz" || on === "damla" ? 4 : PX.s;
   const cols = Math.round(PX.cols * PX.s / s), rows = Math.round(PX.rows * PX.s / s), n = cols * rows;
   Object.assign(pxWall, { s, cols, rows });
   const grid = new Uint8Array(n).fill(PX_BLUE), owner = new Uint8Array(n), tone = new Uint8Array(n);
   const rand = seeded(4242);                          // tuğla tonları her seferinde aynı
   for (let i = 0; i < n; i++) tone[i] = (rand() * PX_BLUES.length) | 0;
   const center = i => [(i % cols) * s + s / 2, ((i / cols) | 0) * s + s / 2];
-  const paths = on === "koridor" ? KORIDOR_PATHS : (on === "mikro" || on === "mozaik" || on === "adalar" || on === "core") ? [] : TUNNEL_PATHS;
+  const paths = on === "koridor" ? KORIDOR_PATHS : (on === "mikro" || on === "mozaik" || on === "adalar" || on === "core" || on === "halka" || on === "yildiz" || on === "damla") ? [] : TUNNEL_PATHS;
   // 1) Tünel içi (boşluk): yolun her kolu boyunca 36 px genişliğinde kanal
   paths.forEach((pts, k) => {
     for (let i = 0; i < n; i++) {
@@ -163,6 +163,60 @@ function buildPixelWall(on) {
     }
     for (const [kind, dc] of [["mul", -33], ["wide", 0], ["mul", 33]]) {  // çekirdeğin altında üç küp
       const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 3) * s;
+      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
+    }
+  }
+  if (on === "halka") {
+    grid.fill(PX_HOLLOW);
+    const cx = cols / 2, cy = rows / 2, R = 27, TH = 8, gapW = 4;
+    for (let i = 0; i < n; i++) {
+      const c = i % cols, r2 = (i / cols) | 0;
+      const dx = c - cx, dy = r2 - cy, d = Math.sqrt(dx * dx + dy * dy);
+      if (d < R - TH || d > R) continue;
+      const ang = Math.atan2(dy, dx);
+      const da = Math.abs(((ang - Math.PI / 2 + Math.PI) % (2 * Math.PI)) - Math.PI);
+      if (da < gapW / (d + 1)) continue;
+      grid[i] = PX_BLUE;
+      tone[i] = Math.floor(d) % PX_BLUES.length;
+    }
+    for (const [kind, dc] of [["mul", -16], ["plus", 0], ["mul", 16]]) {
+      const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 2) * s;
+      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
+    }
+  }
+  if (on === "yildiz") {
+    grid.fill(PX_HOLLOW);
+    const cx = cols / 2, cy = rows / 2 - 2, R = 32, r_in = R * 0.42;
+    for (let i = 0; i < n; i++) {
+      const c = i % cols, r2 = (i / cols) | 0;
+      const dx = c - cx, dy = r2 - cy, d = Math.sqrt(dx * dx + dy * dy);
+      if (d > R) continue;
+      const ang = Math.atan2(dy, dx) + Math.PI / 2;
+      const seg = Math.PI * 2 / 5;
+      const phase = ((ang % seg) + seg) % seg;
+      const frac = phase / seg;
+      const boundary = frac < 0.5 ? r_in + (R - r_in) * (1 - frac * 2) : r_in + (R - r_in) * ((frac - 0.5) * 2);
+      if (d <= boundary) { grid[i] = PX_BLUE; tone[i] = Math.floor(d / 4) % PX_BLUES.length; }
+    }
+    for (const [kind, dc] of [["fire", -30], ["mul", 0], ["plus", 30]]) {
+      const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 2) * s;
+      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
+    }
+  }
+  if (on === "damla") {
+    grid.fill(PX_HOLLOW);
+    const cx = cols / 2, cy = rows / 2 - 4, H = 28, W2 = 22, gapW = 5;
+    for (let i = 0; i < n; i++) {
+      const c = i % cols, r2 = (i / cols) | 0;
+      const dx = Math.abs(c - cx), dy = r2 - cy;
+      const diamond = dx / W2 + Math.abs(dy) / H;
+      if (diamond > 1) continue;
+      if (dy > H * 0.6 && dx < gapW) continue;
+      grid[i] = PX_BLUE;
+      tone[i] = Math.floor(diamond * 5) % PX_BLUES.length;
+    }
+    for (const [kind, dc] of [["mul", -16], ["fire", 0], ["mul", 16]]) {
+      const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 2) * s;
       pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
     }
   }

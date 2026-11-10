@@ -302,6 +302,9 @@ function nextLevel() {
   else if (pxWall.mode === "koridor") callout(tr("⚽ CR7 KORİDORU"), "#ffd60a");
   else if (pxWall.mode === "mikro") callout(tr("🔹 MİKRO DUVAR"), "#4cc9f0");
   else if (pxWall.mode === "mozaik") callout(tr("🧩 MOZAİK DUVAR"), "#c77dff");
+  else if (pxWall.mode === "halka") callout(tr("⭕ HALKA"), "#4cc9f0");
+  else if (pxWall.mode === "yildiz") callout(tr("⭐ YILDIZ"), "#ffd60a");
+  else if (pxWall.mode === "damla") callout(tr("💧 DAMLA"), "#06d6a0");
   else if (pxWall.mode === "adalar") callout(tr("💠 ADALAR DUVARI"), "#06d6a0");
   else if (pxWall.active) callout(tr("🌀 TÜNEL FIRTINASI"), "#4cc9f0");
   else callout(tr("BÖLÜM {n}", { n: state.level }), T().accent);

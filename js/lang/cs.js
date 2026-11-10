@@ -301,4 +301,11 @@ I18N_DATA.cs = {
 808: "🟠 Hrát Core/Break",
 
 809: "Kód tvaru",
+
+810: "⭕ PRSTEN",
+811: "⭐ HVĚZDA",
+812: "💧 KAPKA",
+813: "⭕ Hrát Prsten",
+814: "⭐ Hrát Hvězdu",
+815: "💧 Hrát Kapku",
 };

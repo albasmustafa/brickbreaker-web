@@ -301,4 +301,11 @@ I18N_DATA.az = {
 808: "🟠 Core/Break oyna",
 
 809: "Forma kodu",
+
+810: "⭕ HALQA",
+811: "⭐ ULDUZ",
+812: "💧 DAMLA",
+813: "⭕ Halqanı oyna",
+814: "⭐ Ulduzu oyna",
+815: "💧 Damlayı oyna",
 };

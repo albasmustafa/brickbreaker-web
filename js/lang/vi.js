@@ -301,4 +301,11 @@ I18N_DATA.vi = {
 808: "🟠 Chơi Core/Break",
 
 809: "Mã hình dạng",
+
+810: "⭕ VÒNG",
+811: "⭐ NGÔI SAO",
+812: "💧 GIỌT",
+813: "⭕ Chơi Vòng",
+814: "⭐ Chơi Ngôi Sao",
+815: "💧 Chơi Giọt",
 };

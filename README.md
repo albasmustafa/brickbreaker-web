@@ -26,7 +26,7 @@ js/i18n.js            dil seçimi, tr() çevirisi, RTL, statik HTML çevirisi
 js/themes.js          28 hazır tema, tema yönetimi, sonsuz rastgele tema üreteci
 js/settings.js        ayar tablosu: varsayılanlar + doğrulama + ayarlar panelinin satırları
 js/audio.js           Web Audio ses motoru, olay sesleri tablosu, raket sesleri
-js/levels.js          17 bölüm: 11 harita (2 boss) + CORE/BREAK + Tünel Fırtınası + CR7 Koridoru + Mikro/Mozaik/Adalar duvarları
+js/levels.js          20 bölüm: 11 harita (2 boss) + CORE/BREAK + Tünel Fırtınası + CR7 Koridoru + Mikro/Mozaik/Adalar duvarları
 js/state.js           oyun durumu, varlık listeleri, top matematiği
 js/flow.js            bölüm kurma, oyun başlatma, can/bölüm geçişleri, duraklatma
 js/effects.js         parçacık, parça, çatlak, yıldırım, yazılar, sarsıntı
@@ -246,6 +246,16 @@ Klasik modun yanında tam bir oyun-bitirme deneyimi: **8 dünya × 5 bölüm** (
 - **Boss'lar:** Gece Bekçisi'nden SİBER İMPARATOR'a 8 boss — kampanya boss'ları öfkelenince daha geniş yelpaze (5'li), bazıları minyon diker, final boss'u tepeden mermi yağmuru yağdırır.
 - **Piksel ziyaretleri:** Tünel dünyası Mikro Duvar'a, Aurora Mozaik'e, Derin Deniz Adalar'a, Siberpunk CR7 Koridoru'na uğrar.
 - **Ödüller:** dünya sonu +puan, **kampanya liderlik tablosu**, İlk Dünya / Turun Yarısı / Tur Şampiyonu başarımları.
+
+## Halka, Yıldız ve Damla (18–20. bölümler)
+
+Küçük piksel tuğlalardan **şekilli duvarlar** — her birinde topun girmesi gereken küçük bir delik var:
+
+- **⭕ Halka (18):** kalın dairesel tuğla halkası, **altta 4 hücrelik delik** — top deliği bulup içeri girer, içeriden kırar.
+- **⭐ Yıldız (19):** beş köşeli yıldız; **kolların arasında doğal delikler** — top aralardan sızar, köşeleri öğütür.
+- **💧 Damla (20):** elmas/damla biçimi, **alt uçta 5 hücrelik dar delik** — top ucu bulup içeri süzülür.
+
+Her birinde üç küp, koyu boşluk ve çelik yok — saf şekil öğütme. Meydan panelinden ayrı düğmelerle pratik yapılır.
 
 ## Mozaik Duvar & Adalar Duvarı (16–17. bölüm)
 

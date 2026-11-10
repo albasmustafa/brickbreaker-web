@@ -301,4 +301,11 @@ I18N_DATA.nl = {
 808: "🟠 Speel Core/Break",
 
 809: "Vormcode",
+
+810: "⭕ RING",
+811: "⭐ STER",
+812: "💧 DRUPPEL",
+813: "⭕ Speel de Ring",
+814: "⭐ Speel de Ster",
+815: "💧 Speel de Druppel",
 };
