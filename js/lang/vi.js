@@ -308,4 +308,17 @@ I18N_DATA.vi = {
 813: "⭕ Chơi Vòng",
 814: "⭐ Chơi Ngôi Sao",
 815: "💧 Chơi Giọt",
+
+816: "🔺 TAM GIÁC",
+817: "⬛ HÌNH VUÔNG",
+818: "⚡ ZIGZAG",
+819: "💥 BOM",
+820: "❤ TIM",
+821: "🐍 RẮN",
+822: "🔺 Chơi Tam Giác",
+823: "⬛ Chơi Hình Vuông",
+824: "⚡ Chơi Zigzag",
+825: "💥 Chơi Bom",
+826: "❤ Chơi Tim",
+827: "🐍 Chơi Rắn",
 };

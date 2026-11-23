@@ -48,7 +48,7 @@ test("Yükleme, arayüz ve özellik envanteri", async ({ p, expect }) => {
     musicFx: MUSIC_FX_ALL.length, skills: Object.keys(BOT_SKILL).join(","), types: Object.keys(BRICK_TYPES).join(""), rows: settingsPanel.querySelectorAll(".setrow").length,
     tiers: TIERS.map(t => t.name).join(), ach: ACHIEVEMENTS.length, stats: Object.keys(STATS).length, career: careerPanel.hidden && versusPanel.querySelector(".rank-card") !== null,
     codex: CODEX_CARDS.length, codexPanel: codexPanel.hidden, song: typeof generateSongLevels === "function" })`);
-  expect(r.mode === "menu" && r.bricks === 46 && r.levels === 20, "menü ve ilk bölüm: " + JSON.stringify(r));
+  expect(r.mode === "menu" && r.bricks === 46 && r.levels === 26, "menü ve ilk bölüm: " + JSON.stringify(r));
   expect(r.themes === 28, "28 hazır tema");
   expect(r.tools === 10, "araç çubuğunda 10 düğme (ses, tema, rastgele, stüdyo, rekabet, meydan, editör, kariyer, ayarlar, tam ekran): " + r.tools);
   expect(r.tiers === "Bronz,Gümüş,Altın,Platin,Elmas,Usta,Efsane" && r.ach === 32 && r.stats === 21 && r.career, "7 lig, 32 başarım, 21 sayaç, rütbe kartı: " + JSON.stringify([r.tiers, r.ach, r.stats, r.career]));
@@ -916,7 +916,7 @@ test("Tünel Fırtınası: piksel duvar, çelik tüneller, zincir, küpler, 300 
     state.clearAt = state.time; update(STEP);
     const afterTunnel = [state.level, pxWall.active, pxWall.mode];
     const chain = [];
-    for (let k = 0; k < 7; k++) {                  // piksel zinciri: koridor → mikro → mozaik → adalar → halka → yildiz → damla → 21
+    for (let k = 0; k < 13; k++) {                  // piksel zinciri: koridor → mikro → mozaik → adalar → halka → yildiz → damla → 21
       state.mode = "playing"; levelCleared();
       state.clearAt = state.time; update(STEP);
       chain.push(state.level + ":" + (pxWall.active ? pxWall.mode : "-"));
@@ -928,10 +928,10 @@ test("Tünel Fırtınası: piksel duvar, çelik tüneller, zincir, küpler, 300 
     return { afterTunnel, chain: chain.join(), next, practice, menu: pxWall.active, label: [...levelGrid.querySelectorAll("button")].pop().textContent };
   })()`);
   expect(n.afterTunnel.join() === "14,true,koridor", "13.ten sonra CR7 Koridoru açılır: " + JSON.stringify(n.afterTunnel));
-  expect(n.chain === "15:mikro,16:mozaik,17:adalar,18:halka,19:yildiz,20:damla,21:-", "piksel zinciri: " + n.chain);
-  expect(n.next[0] === 21 && n.next[1] === false, "damladan sonra piksel duvar kapanır: " + n.next);
+  expect(n.chain === "15:mikro,16:mozaik,17:adalar,18:halka,19:yildiz,20:damla,21:ucgen,22:kare,23:zikzak,24:bomba,25:kalp,26:yilan,27:-", "piksel zinciri: " + n.chain);
+  expect(n.next[0] === 27 && n.next[1] === false, "damladan sonra piksel duvar kapanır: " + n.next);
   expect(n.practice.join() === "13,true,true,serve", "Meydan panelinden her zaman pratik: " + n.practice);
-  expect(n.menu === false && n.label === "💧 20", "menüde kapalı, bölüm ızgarasında 💧 20: " + JSON.stringify(n));
+  expect(n.menu === false && n.label === "🐍 26", "menüde kapalı, bölüm ızgarasında 💧 20: " + JSON.stringify(n));
 });
 
 test("CR7 Koridoru: tam mavi duvar, dar koridor, ok/ateş küpleri, dar raket, CR7, kazanma saçılımı", async ({ p, expect }) => {
@@ -1073,6 +1073,46 @@ test("Şekil duvarları: Halka, Yıldız, Damla — delikten giriş, küpler, ka
     toMenu(); $("damla-start").click(); const d = [state.level, pxWall.mode];
     toMenu(); return { h: h.join(), y: y.join(), d: d.join() }; })()`);
   expect(pr.h === "18,halka" && pr.y === "19,yildiz" && pr.d === "20,damla", "panelden şekil pratiği: " + JSON.stringify(pr));
+});
+
+test("Altı yeni şekil: Üçgen, Kare, Zikzak, Bomba, Kalp, Yılan — delikler, küpler, kazanma", async ({ p, expect }) => {
+  const r = await p.eval(`(() => {
+    const shapes = {};
+    const modes = [["ucgen", 21], ["kare", 22], ["zikzak", 23], ["bomba", 24], ["kalp", 25], ["yilan", 26]];
+    for (const [mode, lv] of modes) {
+      __start(lv);
+      const P = pxWall, g = P.grid, count = t => g.reduce((a, v) => a + (v === t ? 1 : 0), 0);
+      shapes[mode] = { mode: P.mode, level: state.level, total: P.total, hollow: count(PX_HOLLOW),
+                       steel: count(PX_STEEL), cubes: P.cubes.map(q => q.kind).join(","),
+                       bricks: bricks.length };
+      // topu şekle doğru fırlat
+      const b = __ballAt(400, 380, 0, -mag());
+      for (let i = 0; i < 300; i++) update(STEP);
+      shapes[mode].broke = P.total - P.left;
+      shapes[mode].ballOk = isFinite((balls[0] || b).x);
+      // kazanma
+      for (let i = 0; i < g.length; i++) pxBreak(i);
+      P.burns = [];
+      if (state.mode !== "playing") state.mode = "playing";
+      update(STEP);
+      shapes[mode].won = P.won && state.mode === "levelclear";
+    }
+    return shapes;
+  })()`);
+  for (const mode of ["ucgen", "kare", "zikzak", "bomba", "kalp", "yilan"]) {
+    const sh = r[mode];
+    expect(sh.mode === mode && sh.level >= 21 && sh.level <= 26 && sh.bricks === 0, mode + " kuruldu: " + JSON.stringify(sh));
+    expect(sh.total > 200 && sh.hollow > 8000, mode + " yeterli tuğla + boşluk: " + JSON.stringify([sh.total, sh.hollow]));
+    expect(sh.steel === 0, mode + " çelik yok");
+    expect(sh.cubes.split(",").length === 3, mode + " üç küp: " + sh.cubes);
+    expect(sh.broke > 0 && sh.ballOk, mode + " top şekli öğütür: " + sh.broke);
+    expect(sh.won, mode + " kazanma");
+  }
+  const pr = await p.eval(`(() => { toMenu(); $("ucgen-start").click(); const u = [state.level, pxWall.mode];
+    toMenu(); $("kare-start").click(); const k = [state.level, pxWall.mode];
+    toMenu(); $("bomba-start").click(); const b = [state.level, pxWall.mode];
+    toMenu(); return { u: u.join(), k: k.join(), b: b.join() }; })()`);
+  expect(pr.u === "21,ucgen" && pr.k === "22,kare" && pr.b === "24,bomba", "panelden şekil pratiği: " + JSON.stringify(pr));
 });
 
 test("Modlar: kolay/orta/zor — hız, can, raket, kapsül, lanet sıklığı, puan; menü hapları tıklanır", async ({ p, expect }) => {

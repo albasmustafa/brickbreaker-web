@@ -308,4 +308,17 @@ I18N_DATA.de = {
 813: "⭕ Ring spielen",
 814: "⭐ Stern spielen",
 815: "💧 Tropfen spielen",
+
+816: "🔺 DREIECK",
+817: "⬛ QUADRAT",
+818: "⚡ ZICKZACK",
+819: "💥 BOMBE",
+820: "❤ HERZ",
+821: "🐍 SCHLANGE",
+822: "🔺 Dreieck spielen",
+823: "⬛ Quadrat spielen",
+824: "⚡ Zickzack spielen",
+825: "💥 Bombe spielen",
+826: "❤ Herz spielen",
+827: "🐍 Schlange spielen",
 };

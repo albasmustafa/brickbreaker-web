@@ -308,4 +308,17 @@ I18N_DATA.en = {
 813: "⭕ Play the Ring",
 814: "⭐ Play the Star",
 815: "💧 Play the Drop",
+
+816: "🔺 TRIANGLE",
+817: "⬛ SQUARE",
+818: "⚡ ZIGZAG",
+819: "💥 BOMB",
+820: "❤ HEART",
+821: "🐍 SNAKE",
+822: "🔺 Play the Triangle",
+823: "⬛ Play the Square",
+824: "⚡ Play the Zigzag",
+825: "💥 Play the Bomb",
+826: "❤ Play the Heart",
+827: "🐍 Play the Snake",
 };

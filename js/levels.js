@@ -105,5 +105,11 @@ const LEVELS = [
   { pixel: "adalar", map: [] },   // 17: ADALAR DUVARI — serpilmiş elmas tuğla takımları, kimi çelik çekirdekli
   { pixel: "halka", map: [] },    // 18: HALKA — kalın dairesel halka, altta küçük delik; top oradan girer
   { pixel: "yildiz", map: [] },   // 19: YILDIZ — beş köşeli yıldız; kollar arasında delikler
-  { pixel: "damla", map: [] },    // 20: DAMLA — elmas biçimi, alt uçta dar delik — serpilmiş elmas tuğla takımları, kimi çelik çekirdekli
+  { pixel: "damla", map: [] },    // 20: DAMLA — elmas biçimi, alt uçta dar delik
+  { pixel: "ucgen", map: [] },    // 21: ÜÇGEN — eşkenar üçgen, tabanında delik
+  { pixel: "kare", map: [] },     // 22: KARE — kalın çerçeve, her kenarda delik
+  { pixel: "zikzak", map: [] },   // 23: ZİKZAK — yatay zikzak şeritler
+  { pixel: "bomba", map: [] },    // 24: BOMBA — daire + fitil, altta delik
+  { pixel: "kalp", map: [] },     // 25: KALP — kalp şekli, alt uçta delik
+  { pixel: "yilan", map: [] },    // 26: YILAN — S şeklinde kıvrımlı koridor — elmas biçimi, alt uçta dar delik — serpilmiş elmas tuğla takımları, kimi çelik çekirdekli
 ];

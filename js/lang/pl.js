@@ -308,4 +308,17 @@ I18N_DATA.pl = {
 813: "⭕ Zagraj w Pierścień",
 814: "⭐ Zagraj w Gwiazdę",
 815: "💧 Zagraj w Kroplę",
+
+816: "🔺 TRÓJKĄT",
+817: "⬛ KWADRAT",
+818: "⚡ ZYGMANY",
+819: "💥 BOMBA",
+820: "❤ SERCE",
+821: "🐍 WĄŻ",
+822: "🔺 Zagraj w Trójkąt",
+823: "⬛ Zagraj w Kwadrat",
+824: "⚡ Zagraj w Zygzak",
+825: "💥 Zagraj w Bombę",
+826: "❤ Zagraj w Serce",
+827: "🐍 Zagraj w Węża",
 };

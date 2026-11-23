@@ -308,4 +308,17 @@ I18N_DATA.cs = {
 813: "⭕ Hrát Prsten",
 814: "⭐ Hrát Hvězdu",
 815: "💧 Hrát Kapku",
+
+816: "🔺 TROJÚHELNÍK",
+817: "⬛ ČTVEREC",
+818: "⚡ ZIGZAG",
+819: "💥 BOMBA",
+820: "❤ SRDCE",
+821: "🐍 HAD",
+822: "🔺 Hrát Trojúhelník",
+823: "⬛ Hrát Čtverec",
+824: "⚡ Hrát Zigzag",
+825: "💥 Hrát Bombu",
+826: "❤ Hrát Srdce",
+827: "🐍 Hrát Hada",
 };

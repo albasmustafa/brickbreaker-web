@@ -308,4 +308,17 @@ I18N_DATA.it = {
 813: "⭕ Gioca all'Anello",
 814: "⭐ Gioca alla Stella",
 815: "💧 Gioca alla Goccia",
+
+816: "🔺 TRIANGOLO",
+817: "⬛ QUADRATO",
+818: "⚡ ZIGZAG",
+819: "💥 BOMBA",
+820: "❤ CUORE",
+821: "🐍 SERPENTE",
+822: "🔺 Gioca al Triangolo",
+823: "⬛ Gioca al Quadrato",
+824: "⚡ Gioca allo Zigzag",
+825: "⚡ Gioca alla Bomba",
+826: "❤ Gioca al Cuore",
+827: "🐍 Gioca al Serpente",
 };

@@ -45,14 +45,14 @@ function buildPixelWall(on) {
                           finale: false, storm: false, maxed: false, won: false, peak: 1 });
   if (!on) { pxWall.grid = pxWall.owner = null; pxWall.tunnels = []; pxWall.s = PX.s; pxWall.cols = PX.cols; pxWall.rows = PX.rows; return; }
   // MİNİK HÜCRELİ DUVARLAR (mikro/mozaik/adalar): hücre 4 px → aynı alanda ~2,25 kat daha çok minik tuğla
-  const s = on === "mikro" || on === "mozaik" || on === "adalar" || on === "core" || on === "halka" || on === "yildiz" || on === "damla" ? 4 : PX.s;
+  const s = on === "mikro" || on === "mozaik" || on === "adalar" || on === "core" || on === "halka" || on === "yildiz" || on === "damla" || on === "ucgen" || on === "kare" || on === "zikzak" || on === "bomba" || on === "kalp" || on === "yilan" ? 4 : PX.s;
   const cols = Math.round(PX.cols * PX.s / s), rows = Math.round(PX.rows * PX.s / s), n = cols * rows;
   Object.assign(pxWall, { s, cols, rows });
   const grid = new Uint8Array(n).fill(PX_BLUE), owner = new Uint8Array(n), tone = new Uint8Array(n);
   const rand = seeded(4242);                          // tuğla tonları her seferinde aynı
   for (let i = 0; i < n; i++) tone[i] = (rand() * PX_BLUES.length) | 0;
   const center = i => [(i % cols) * s + s / 2, ((i / cols) | 0) * s + s / 2];
-  const paths = on === "koridor" ? KORIDOR_PATHS : (on === "mikro" || on === "mozaik" || on === "adalar" || on === "core" || on === "halka" || on === "yildiz" || on === "damla") ? [] : TUNNEL_PATHS;
+  const paths = on === "koridor" ? KORIDOR_PATHS : (on === "mikro" || on === "mozaik" || on === "adalar" || on === "core" || on === "halka" || on === "yildiz" || on === "damla" || on === "ucgen" || on === "kare" || on === "zikzak" || on === "bomba" || on === "kalp" || on === "yilan") ? [] : TUNNEL_PATHS;
   // 1) Tünel içi (boşluk): yolun her kolu boyunca 36 px genişliğinde kanal
   paths.forEach((pts, k) => {
     for (let i = 0; i < n; i++) {
@@ -216,6 +216,119 @@ function buildPixelWall(on) {
       tone[i] = Math.floor(diamond * 5) % PX_BLUES.length;
     }
     for (const [kind, dc] of [["mul", -16], ["fire", 0], ["mul", 16]]) {
+      const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 2) * s;
+      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
+    }
+  }
+  if (on === "ucgen") {     // ÜÇGEN: eşkenar üçgen, tabanında delik — top tabandan girer
+    grid.fill(PX_HOLLOW);
+    const cx = cols / 2, H = 34, W2 = 30, gapW = 6;
+    for (let i = 0; i < n; i++) {
+      const c = i % cols, r2 = (i / cols) | 0;
+      const dy = (rows - 4 - r2) / H;                  // 0 (tepe) → 1 (taban)
+      if (dy < 0 || dy > 1) continue;
+      const halfW = W2 * dy;
+      if (Math.abs(c - cx) > halfW) continue;
+      if (dy > 0.85 && Math.abs(c - cx) < gapW) continue; // tabanda delik
+      grid[i] = PX_BLUE;
+      tone[i] = Math.floor(dy * 5) % PX_BLUES.length;
+    }
+    for (const [kind, dc] of [["mul", -14], ["plus", 0], ["mul", 14]]) {
+      const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 2) * s;
+      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
+    }
+  }
+  if (on === "kare") {      // KARE: kalın çerçeve, her kenarda birer delik — top her yönden girebilir
+    grid.fill(PX_HOLLOW);
+    const cx = cols / 2, cy = rows / 2, W2 = 32, H2 = 16, TH = 6, gapW = 5;
+    for (let i = 0; i < n; i++) {
+      const c = i % cols, r2 = (i / cols) | 0;
+      const dx = Math.abs(c - cx), dy = Math.abs(r2 - cy);
+      const inside = dx < W2 - TH && dy < H2 - TH;
+      const outside = dx > W2 || dy > H2;
+      if (inside || outside) continue;
+      // kenarlarda delikler: her kenarın ortasında
+      if ((dy < H2 - TH + 1 && dy > H2 - TH - 1) && Math.abs(c - cx) < gapW) continue; // üst/alt
+      if ((dx < W2 - TH + 1 && dx > W2 - TH - 1) && Math.abs(r2 - cy) < gapW) continue; // sol/sağ
+      grid[i] = PX_BLUE;
+      tone[i] = (dx > dy ? Math.floor(dx / 3) : Math.floor(dy / 3)) % PX_BLUES.length;
+    }
+    for (const [kind, dc] of [["fire", -14], ["mul", 0], ["plus", 14]]) {
+      const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 2) * s;
+      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
+    }
+  }
+  if (on === "zikzak") {    // ZİKZAK: yatay zikzak şeritler, aralarından geçilir
+    grid.fill(PX_HOLLOW);
+    const cx = cols / 2, amp = 22, TH = 5;
+    for (let i = 0; i < n; i++) {
+      const c = i % cols, r2 = (i / cols) | 0;
+      if (r2 < 4 || r2 > rows - 6) continue;
+      const bandCenter = cx + Math.sin(r2 * 0.35) * amp;   // sürekli kıvrım
+      if (Math.abs(c - bandCenter) > TH) continue;
+      grid[i] = PX_BLUE;
+      tone[i] = Math.floor(r2 / 4) % PX_BLUES.length;
+    }
+    for (const [kind, dc] of [["mul", -14], ["fire", 0], ["mul", 14]]) {
+      const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 2) * s;
+      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
+    }
+  }
+  if (on === "bomba") {     // BOMBA: daire gövde + fitil; gövdenin altında delik
+    grid.fill(PX_HOLLOW);
+    const cx = cols / 2, cy = rows / 2 + 2, R = 22;
+    for (let i = 0; i < n; i++) {
+      const c = i % cols, r2 = (i / cols) | 0;
+      const dx = c - cx, dy = r2 - cy;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d <= R) {
+        if (dy > R * 0.7 && Math.abs(dx) < 5) continue;   // alt delik
+        grid[i] = PX_BLUE;
+        tone[i] = Math.floor(d / 4) % PX_BLUES.length;
+      }
+    }
+    // fitil: sağ üstte kıvrık şerit
+    for (let t = 0; t < 12; t++) {
+      const fx = Math.round(cx + R * 0.5 + t * 0.8), fy = Math.round(cy - R * 0.5 - t * 0.6);
+      if (fx < cols && fy >= 0) { const fi = fy * cols + fx; grid[fi] = PX_BLUE; tone[fi] = 3; }
+    }
+    for (const [kind, dc] of [["fire", -14], ["mul", 0], ["plus", 14]]) {
+      const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 2) * s;
+      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
+    }
+  }
+  if (on === "kalp") {      // KALP: kalp şekli, alt sivri uçta delik
+    grid.fill(PX_HOLLOW);
+    const cx = cols / 2, cy = rows / 2 - 4;
+    for (let i = 0; i < n; i++) {
+      const c = i % cols, r2 = (i / cols) | 0;
+      const x = (c - cx) / 18, y = -(r2 - cy) / 18;
+      const v = (x * x + y * y - 1) ** 3 - x * x * y * y * y;
+      if (v > 0) continue;
+      if (y < -0.7 && Math.abs(x) < 0.25) continue;       // alt uçta delik
+      grid[i] = PX_BLUE;
+      tone[i] = Math.floor(Math.abs(x) * 3 + Math.abs(y) * 2) % PX_BLUES.length;
+    }
+    for (const [kind, dc] of [["mul", -14], ["plus", 0], ["fire", 14]]) {
+      const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 2) * s;
+      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
+    }
+  }
+  if (on === "yilan") {     // YILAN: S şeklinde kıvrımlı koridor duvarları — top kıvrımları takip eder
+    grid.fill(PX_HOLLOW);
+    const cx = cols / 2, TH = 7;
+    for (let i = 0; i < n; i++) {
+      const c = i % cols, r2 = (i / cols) | 0;
+      if (r2 < 3 || r2 > rows - 6) continue;
+      const t = (r2 - 3) / (rows - 9);
+      const snakeX = cx + Math.sin(t * Math.PI * 3) * 38;
+      if (Math.abs(c - snakeX) > TH) continue;
+      // alt uçta delik
+      if (t > 0.9 && Math.abs(c - snakeX) < 4) continue;
+      grid[i] = PX_BLUE;
+      tone[i] = Math.floor(t * 6) % PX_BLUES.length;
+    }
+    for (const [kind, dc] of [["mul", -14], ["fire", 0], ["plus", 14]]) {
       const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 2) * s;
       pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
     }

@@ -26,7 +26,7 @@ js/i18n.js            dil seçimi, tr() çevirisi, RTL, statik HTML çevirisi
 js/themes.js          28 hazır tema, tema yönetimi, sonsuz rastgele tema üreteci
 js/settings.js        ayar tablosu: varsayılanlar + doğrulama + ayarlar panelinin satırları
 js/audio.js           Web Audio ses motoru, olay sesleri tablosu, raket sesleri
-js/levels.js          20 bölüm: 11 harita (2 boss) + CORE/BREAK + Tünel Fırtınası + CR7 Koridoru + Mikro/Mozaik/Adalar duvarları
+js/levels.js          26 bölüm: 11 harita (2 boss) + CORE/BREAK + Tünel Fırtınası + CR7 Koridoru + Mikro/Mozaik/Adalar duvarları
 js/state.js           oyun durumu, varlık listeleri, top matematiği
 js/flow.js            bölüm kurma, oyun başlatma, can/bölüm geçişleri, duraklatma
 js/effects.js         parçacık, parça, çatlak, yıldırım, yazılar, sarsıntı
@@ -246,6 +246,19 @@ Klasik modun yanında tam bir oyun-bitirme deneyimi: **8 dünya × 5 bölüm** (
 - **Boss'lar:** Gece Bekçisi'nden SİBER İMPARATOR'a 8 boss — kampanya boss'ları öfkelenince daha geniş yelpaze (5'li), bazıları minyon diker, final boss'u tepeden mermi yağmuru yağdırır.
 - **Piksel ziyaretleri:** Tünel dünyası Mikro Duvar'a, Aurora Mozaik'e, Derin Deniz Adalar'a, Siberpunk CR7 Koridoru'na uğrar.
 - **Ödüller:** dünya sonu +puan, **kampanya liderlik tablosu**, İlk Dünya / Turun Yarısı / Tur Şampiyonu başarımları.
+
+## Altı Yeni Şekil (21–26. bölümler) — Üçgen, Kare, Zikzak, Bomba, Kalp, Yılan
+
+Her biri farklı geometri, her birinde topun girmesi gereken **küçük delikler**:
+
+- **🔺 Üçgen (21):** eşkenar üçgen, **tabanında delik** — top tabandan girer, tepeden kırmaya çalışır.
+- **⬛ Kare (22):** kalın çerçeve, **her kenarın ortasında birer delik** — top her yönden girebilir.
+- **⚡ Zikzak (23):** yatay **S şeklinde kıvrımlı şeritler** — top kıvrımların arasında dolanır.
+- **💥 Bomba (24):** daire gövde + sağ üstte **kıvrık fitil**; gövdenin altında delik.
+- **❤ Kalp (25):** matematiksel kalp eğrisi (implicit heart curve), **alt sivri uçta delik**.
+- **🐍 Yılan (26):** **S şeklinde uzun kıvrımlı koridor** — top kıvrımları takip eder, alt uçtan girer.
+
+Her birinde üç küp (×3/+/ateş), koyu boşluk ve çelik yok. Meydan panelinden ayrı düğmelerle pratik.
 
 ## Halka, Yıldız ve Damla (18–20. bölümler)
 

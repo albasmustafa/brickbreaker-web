@@ -308,4 +308,17 @@ I18N_DATA.nl = {
 813: "⭕ Speel de Ring",
 814: "⭐ Speel de Ster",
 815: "💧 Speel de Druppel",
+
+816: "🔺 DRIEHOEK",
+817: "⬛ VIERKANT",
+818: "⚡ ZIGZAG",
+819: "💥 BOM",
+820: "❤ HART",
+821: "🐍 SLANG",
+822: "🔺 Speel de Driehoek",
+823: "⬛ Speel het Vierkant",
+824: "⚡ Speel de Zigzag",
+825: "💥 Speel de Bom",
+826: "❤ Speel het Hart",
+827: "🐍 Speel de Slang",
 };

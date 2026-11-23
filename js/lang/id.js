@@ -308,4 +308,17 @@ I18N_DATA.id = {
 813: "⭕ Mainkan Cincin",
 814: "⭐ Mainkan Bintang",
 815: "💧 Mainkan Tetesan",
+
+816: "🔺 SEGITIGA",
+817: "⬛ PERSEGI",
+818: "⚡ ZIGZAG",
+819: "💥 BOM",
+820: "❤ HATI",
+821: "🐍 ULAR",
+822: "🔺 Mainkan Segitiga",
+823: "⬛ Mainkan Persegi",
+824: "⚡ Mainkan Zigzag",
+825: "💥 Mainkan Bom",
+826: "❤ Mainkan Hati",
+827: "🐍 Mainkan Ular",
 };

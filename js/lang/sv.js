@@ -308,4 +308,17 @@ I18N_DATA.sv = {
 813: "⭕ Spela Ringen",
 814: "⭐ Spela Stjärnan",
 815: "💧 Spela Droppen",
+
+816: "🔺 TRIANGEL",
+817: "⬛ KVADRAT",
+818: "⚡ SICKSACK",
+819: "💥 BOMB",
+820: "❤ HJÄRTA",
+821: "🐍 ORM",
+822: "🔺 Spela Triangeln",
+823: "⬛ Spela Kvadraten",
+824: "⚡ Spela Sicksacken",
+825: "💥 Spela Bomben",
+826: "❤ Spela Hjärtat",
+827: "🐍 Spela Ormen",
 };

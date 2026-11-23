@@ -308,4 +308,17 @@ I18N_DATA.hu = {
 813: "⭕ Gyűrű játéka",
 814: "⭐ Csillag játéka",
 815: "💧 Csepp játéka",
+
+816: "🔺 HÁROMSZÖG",
+817: "⬛ NÉGYZET",
+818: "⚡ CIKCAK",
+819: "💥 BOMBA",
+820: "❤ SZÍV",
+821: "🐍 KÍGYÓ",
+822: "🔺 Háromszög játéka",
+823: "⬛ Négyzet játéka",
+824: "⚡ Cikcak játéka",
+825: "💥 Bomba játéka",
+826: "❤ Szív játéka",
+827: "🐍 Kígyó játéka",
 };

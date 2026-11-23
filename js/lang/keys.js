@@ -816,5 +816,17 @@ const I18N_KEYS = [
 "⭕ Halka'yı oyna", // 813
 "⭐ Yıldız'ı oyna", // 814
 "💧 Damla'yı oyna", // 815
+"🔺 ÜÇGEN", // 816
+"⬛ KARE", // 817
+"⚡ ZİKZAK", // 818
+"💥 BOMBA", // 819
+"❤ KALP", // 820
+"🐍 YILAN", // 821
+"🔺 Üçgen'i oyna", // 822
+"⬛ Kare'yi oyna", // 823
+"⚡ Zikzak'ı oyna", // 824
+"💥 Bomba'yı oyna", // 825
+"❤ Kalp'i oyna", // 826
+"🐍 Yılan'ı oyna", // 827
 ];
 const I18N_DATA = {};

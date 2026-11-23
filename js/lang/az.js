@@ -308,4 +308,17 @@ I18N_DATA.az = {
 813: "⭕ Halqanı oyna",
 814: "⭐ Ulduzu oyna",
 815: "💧 Damlayı oyna",
+
+816: "🔺 ÜÇBUCAQ",
+817: "⬛ KVADRAT",
+818: "⚡ ZİQZAQ",
+819: "💥 BOMBA",
+820: "❤ ÜRƏK",
+821: "🐍 İLAN",
+822: "🔺 Üçbucağı oyna",
+823: "⬛ Kvadratı oyna",
+824: "⚡ Ziqzaqı oyna",
+825: "💥 Bombanı oyna",
+826: "❤ Ürəyi oyna",
+827: "🐍 İlanı oyna",
 };

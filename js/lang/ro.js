@@ -308,4 +308,17 @@ I18N_DATA.ro = {
 813: "⭕ Joacă Inelul",
 814: "⭐ Joacă Steaua",
 815: "💧 Joacă Picătura",
+
+816: "🔺 TRIUNGHI",
+817: "⬛ PĂTRAT",
+818: "⚡ ZIGZAG",
+819: "💥 BOMBĂ",
+820: "❤ INIMĂ",
+821: "🐍 ȘARPE",
+822: "🔺 Joacă Triunghiul",
+823: "⬛ Joacă Pătratul",
+824: "⚡ Joacă Zigzag-ul",
+825: "💥 Joacă Bomba",
+826: "❤ Joacă Inima",
+827: "🐍 Joacă Șarpele",
 };

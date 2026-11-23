@@ -100,6 +100,9 @@ function renderChallenge() {
       className: n === max ? "active" : "",
       textContent: (boss ? "☠ " : def.pixel === "core" ? "🟠 " : def.pixel === "koridor" ? "⚽ " : def.pixel === "mikro" ? "🔹 " : def.pixel === "mozaik" ? "🧩 " :
                     def.pixel === "adalar" ? "💠 " : def.pixel === "halka" ? "⭕ " : def.pixel === "yildiz" ? "⭐ " :
+                    def.pixel === "ucgen" ? "🔺 " : def.pixel === "kare" ? "⬛ " :
+                    def.pixel === "zikzak" ? "⚡ " : def.pixel === "bomba" ? "💥 " :
+                    def.pixel === "kalp" ? "❤ " : def.pixel === "yilan" ? "🐍 " :
                     def.pixel === "damla" ? "💧 " : def.pixel ? "🌀 " : "") + n,
       title: locked ? tr("Önce klasik oyunda {n}. bölüme ulaş", { n }) : tr("Bölüm {n} pratiği", { n }),
       disabled: locked,
@@ -145,4 +148,10 @@ onClick("adalar-start", () => startPractice(ADALAR_LEVEL, true));
 onClick("halka-start", () => startPractice(LEVELS.findIndex(l => l.pixel === "halka") + 1, true));
 onClick("yildiz-start", () => startPractice(LEVELS.findIndex(l => l.pixel === "yildiz") + 1, true));
 onClick("damla-start", () => startPractice(LEVELS.findIndex(l => l.pixel === "damla") + 1, true));
+onClick("ucgen-start", () => startPractice(LEVELS.findIndex(l => l.pixel === "ucgen") + 1, true));
+onClick("kare-start", () => startPractice(LEVELS.findIndex(l => l.pixel === "kare") + 1, true));
+onClick("zikzak-start", () => startPractice(LEVELS.findIndex(l => l.pixel === "zikzak") + 1, true));
+onClick("bomba-start", () => startPractice(LEVELS.findIndex(l => l.pixel === "bomba") + 1, true));
+onClick("kalp-start", () => startPractice(LEVELS.findIndex(l => l.pixel === "kalp") + 1, true));
+onClick("yilan-start", () => startPractice(LEVELS.findIndex(l => l.pixel === "yilan") + 1, true));
 renderChallenge();
