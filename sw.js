@@ -1,6 +1,6 @@
 // Servis çalışanı: oyunu uygulama olarak kurulabilir ve çevrim dışı oynanabilir yapar.
 // Önce ağ (güncel dosya), ağ yoksa önbellek. Yalnızca http/https üzerinden çalışır (npm start ya da bir web sunucusu).
-const CACHE = "brickbreaker-v9";
+const CACHE = "brickbreaker-v10";
 const FILES = ["./", "index.html", "css/style.css", "favicon.svg", "manifest.webmanifest",
   ...["core", "lang/keys", "lang/en", "lang/de", "lang/fr", "lang/es", "lang/it", "lang/pt", "lang/ru", "lang/uk", "lang/pl", "lang/nl", "lang/sv", "lang/el", "lang/cs", "lang/ro", "lang/hu", "lang/az", "lang/ar", "lang/fa", "lang/hi", "lang/id", "lang/vi", "lang/zh", "lang/ja", "lang/ko", "i18n", "themes", "settings", "audio", "levels", "state", "flow", "effects", "physics", "tunnel", "curses", "update", "render", "music", "ui", "career", "codex", "ghost", "weekly", "songlevel", "challenge", "campaign", "director", "versus", "pacts", "lastchance", "editor", "perf", "main"].map(f => "js/" + f + ".js")];
 

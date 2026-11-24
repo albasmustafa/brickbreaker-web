@@ -99,17 +99,17 @@ const LEVELS = [
   ],
   { pixel: "core", map: [] },    // 12: CORE/BREAK — koyu boşlukta 3379 turuncu pikselden dairesel çekirdek; x3 ve ↔ küpleri
   { pixel: "tunnel", map: [] },   // 13: TÜNEL FIRTINASI — binlerce piksel tuğla, çelik L ve sarmal tüneller (js/tunnel.js)
-  { pixel: "koridor", map: [] },  // 14: CR7 KORİDORU — tamı tamına mavi duvar, ortada dar dikey koridor; +3/ok/ateş küpleri
+  { pixel: "koridor", map: [] },  // 14: CR7 KORİDORU — tamı tamına mavi duvar, ortada dar dikey koridor; +3/×3/ateş küpleri
   { pixel: "mikro", map: [] },    // 15: MİKRO DUVAR — minik (4 px) tuğlalar ve boşluklu çelik kaburgalar; top zor girer
   { pixel: "mozaik", map: [] },   // 16: MOZAİK DUVAR — 28 px fayanslar mavi/çelik/boşluk salınımıyla; küçük parçalar her yanda
   { pixel: "adalar", map: [] },   // 17: ADALAR DUVARI — serpilmiş elmas tuğla takımları, kimi çelik çekirdekli
-  { pixel: "halka", map: [] },    // 18: HALKA — kalın dairesel halka, altta küçük delik; top oradan girer
-  { pixel: "yildiz", map: [] },   // 19: YILDIZ — beş köşeli yıldız; kollar arasında delikler
-  { pixel: "damla", map: [] },    // 20: DAMLA — elmas biçimi, alt uçta dar delik
-  { pixel: "ucgen", map: [] },    // 21: ÜÇGEN — eşkenar üçgen, tabanında delik
-  { pixel: "kare", map: [] },     // 22: KARE — kalın çerçeve, her kenarda delik
-  { pixel: "zikzak", map: [] },   // 23: ZİKZAK — yatay zikzak şeritler
-  { pixel: "bomba", map: [] },    // 24: BOMBA — daire + fitil, altta delik
-  { pixel: "kalp", map: [] },     // 25: KALP — kalp şekli, alt uçta delik
-  { pixel: "yilan", map: [] },    // 26: YILAN — S şeklinde kıvrımlı koridor — elmas biçimi, alt uçta dar delik — serpilmiş elmas tuğla takımları, kimi çelik çekirdekli
+  { pixel: "halka", map: [] },      // 18: HALKA — kalın dairesel hat, altta delik; top oradan içeri girer
+  { pixel: "yildiz", map: [] },     // 19: YILDIZ — beş köşeli yıldızın hattı, alt çukurda delik
+  { pixel: "damla", map: [] },      // 20: DAMLA — altı yuvarlak, sivri damlanın hattı, altta delik
+  { pixel: "ucgen", map: [] },      // 21: ÜÇGEN — tabanı geniş üçgenin hattı, tabanda delik
+  { pixel: "dikdortgen", map: [] }, // 22: DİKDÖRTGEN — geniş çerçeve, tabanda delik
+  { pixel: "zikzak", map: [] },     // 23: ZİKZAK — üç ince zigzak şerit, aralarında kanallar
+  { pixel: "bomba", map: [] },      // 24: BOMBA — dolu daire, içinde boşluk; alta inen delik ve fitil
+  { pixel: "kalp", map: [] },       // 25: KALP — kalp eğrisinin hattı, alt uçta delik
+  { pixel: "yilan", map: [] },      // 26: YILAN — S biçiminde kıvrılan kalın şerit, çatallı kuyruk
 ];

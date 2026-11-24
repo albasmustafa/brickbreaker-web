@@ -247,35 +247,31 @@ Klasik modun yanında tam bir oyun-bitirme deneyimi: **8 dünya × 5 bölüm** (
 - **Piksel ziyaretleri:** Tünel dünyası Mikro Duvar'a, Aurora Mozaik'e, Derin Deniz Adalar'a, Siberpunk CR7 Koridoru'na uğrar.
 - **Ödüller:** dünya sonu +puan, **kampanya liderlik tablosu**, İlk Dünya / Turun Yarısı / Tur Şampiyonu başarımları.
 
-## Altı Yeni Şekil (21–26. bölümler) — Üçgen, Kare, Zikzak, Bomba, Kalp, Yılan
+## Şekil Duvarları (18–26. bölümler) — Halka, Yıldız, Damla, Üçgen, Dikdörtgen, Zikzak, Bomba, Kalp, Yılan
 
-Her biri farklı geometri, her birinde topun girmesi gereken **küçük delikler**:
+Dokuz bölümde üstteki duvar 4 piksellik **minik hücrelerden** kuruludur ve tek bir **şeklin hattını** çizer; şeklin içi boştur. Kapalı biçimlerde top, alttaki **kapıdan** (orta 7 hücre = 28 px; topun çapı 16 px) içeri girer ve duvarı içeriden öğütür. Hepsinde şeklin altında üç küp (▲ ateş · +3 top · ×3 çoğaltma), çelik yok. Meydan panelindeki ayrı düğmelerle pratik yapılır; kazanılınca toplar sahaya saçılır.
 
-- **🔺 Üçgen (21):** eşkenar üçgen, **tabanında delik** — top tabandan girer, tepeden kırmaya çalışır.
-- **⬛ Kare (22):** kalın çerçeve, **her kenarın ortasında birer delik** — top her yönden girebilir.
-- **⚡ Zikzak (23):** yatay **S şeklinde kıvrımlı şeritler** — top kıvrımların arasında dolanır.
-- **💥 Bomba (24):** daire gövde + sağ üstte **kıvrık fitil**; gövdenin altında delik.
-- **❤ Kalp (25):** matematiksel kalp eğrisi (implicit heart curve), **alt sivri uçta delik**.
-- **🐍 Yılan (26):** **S şeklinde uzun kıvrımlı koridor** — top kıvrımları takip eder, alt uçtan girer.
+**Kapalı biçimler** — top alt ortadan içeri girer:
 
-Her birinde üç küp (×3/+/ateş), koyu boşluk ve çelik yok. Meydan panelinden ayrı düğmelerle pratik.
+- **⭕ Halka (18):** yarıçapı 27, kalınlığı 8 hücre olan daire hattı; kapı dairenin altındadır.
+- **⭐ Yıldız (19):** beş köşeli yıldız hattı (dış yarıçap 31, iç yarıçap 15); kapı alt çukurun dibindedir.
+- **💧 Damla (20):** altı yuvarlak (yarıçap 24), yukarı doğru 34 hücrede sivrilen damla; kapı alttadır.
+- **🔺 Üçgen (21):** tabanı 68 hücre geniş, 58 hücre yüksek üçgen hattı; kapı tabanın ortasındadır.
+- **⬛ Dikdörtgen (22):** 112 × 44 hücrelik çerçeve; kapı kısa kenarın (tabanın) ortasındadır, öteki üç kenar kapalıdır.
+- **💥 Bomba (24):** yarıçapı 25, ortası 10 hücrelik boşluk olan dolu daire; boşluktan gövdenin altına inen 7 hücrelik kanal kapıdır. Sağ üstte koyu bir **fitil** şeridi yükselir.
+- **❤ Kalp (25):** kalp eğrisinin hattı; kapı, alt V'nin topa daraldığı satırdan başlar.
 
-## Halka, Yıldız ve Damla (18–20. bölümler)
+**Açık biçimler** — girilecek kapı yoktur, top biçimin arasında dolaşır:
 
-Küçük piksel tuğlalardan **şekilli duvarlar** — her birinde topun girmesi gereken küçük bir delik var:
-
-- **⭕ Halka (18):** kalın dairesel tuğla halkası, **altta 4 hücrelik delik** — top deliği bulup içeri girer, içeriden kırar.
-- **⭐ Yıldız (19):** beş köşeli yıldız; **kolların arasında doğal delikler** — top aralardan sızar, köşeleri öğütür.
-- **💧 Damla (20):** elmas/damla biçimi, **alt uçta 5 hücrelik dar delik** — top ucu bulup içeri süzülür.
-
-Her birinde üç küp, koyu boşluk ve çelik yok — saf şekil öğütme. Meydan panelinden ayrı düğmelerle pratik yapılır.
+- **⚡ Zikzak (23):** üç ince yatay zikzak şerit (üçgen dalga; genlik 11 hücre, kalınlık 4–5); aralarındaki kanallar 14 hücre genişliğindedir.
+- **🐍 Yılan (26):** kalınlığı 20 hücre dolayında tek bir S şeridi; iki yanı da açıktır, kuyruğu çatallıdır.
 
 ## Mozaik Duvar & Adalar Duvarı (16–17. bölüm)
 
 Mikro Duvar'ın küçük parçalı iki kardeşi — üstteki dikdörtgenler çok sayıda minik parçaya bölünür:
 
-- **🧩 Mozaik Duvar (15):** duvar 28 px'lik **fayanslara** ayrılır; her fayans tek tondan mavi (küçük parça görünümü), bazıları çelik, aralarında boşluklar salınım yapar. Top fayans fayans öğütür, boşluklardan içre sızar. Küpler: ▲ ateş · +3 top · ×3 çoğaltma.
-- **💠 Adalar Duvarı (16):** ~120 küçük **elmas tuğla takımı** boşluklar arasında serpilir; her dördüncünün **çelik çekirdeği** vardır — çevresinden kırmak gerekir. Top adaların arasında serbestçe dolaşır. Küpler: ▲ ateş · +3 top · ×3 çoğaltma.
+- **🧩 Mozaik Duvar (16):** duvar 28 px'lik **fayanslara** ayrılır; her fayans tek tondan mavi (küçük parça görünümü), bazıları çelik, aralarında boşluklar salınım yapar. Top fayans fayans öğütür, boşluklardan içeri sızar. Küpler: ▲ ateş · +3 top · ×3 çoğaltma.
+- **💠 Adalar Duvarı (17):** ~120 küçük **elmas tuğla takımı** boşluklar arasında serpilir; her dördüncünün **çelik çekirdeği** vardır — çevresinden kırmak gerekir. Top adaların arasında serbestçe dolaşır. Küpler: ▲ ateş · +3 top · ×3 çoğaltma.
 - İkisinde de kazanınca toplar sahaya saçılır. Meydan panelinden **🧩 Mozaik Duvar'ı oyna** ve **💠 Adalar Duvarı'nı oyna** düğmeleriyle her zaman pratik yapılır.
 
 ## Görsel kalite paketi (üstteki ögeler)
@@ -286,7 +282,7 @@ Mikro Duvar'ın küçük parçalı iki kardeşi — üstteki dikdörtgenler çok
 - **Şok dalgaları:** kırılmalarda genişleyip sönen halkalar; zincir reaksiyonunda mavi şok; komşu tuğlalar titrer (hız sınırlı, hareket azaltmada kapalı).
 - **Şekil kodu (Ayarlar → Görünüm):** renk körü dostu — her tuğlaya koyu kontur, 2 vuruşluga tek çapraz, 3 vuruşluga çapraz çift desen.
 
-## Genel görsel cila
+## Görsel cila
 
 Kartlar (menü, duraklatma, bölüm sonu, oyun sonu) belirdiğinde üstlerinden bir kez **ışık süpürmesi** geçer; toplar azken yumuşak bir **parıltı halesi** taşır; piksel duvarların altında **gölge** ve hücrelerde tam **bevel** vardır; yıldızlı/kar arka planlar raketi izleyen hafif **paralaksla** derinlik kazanır.
 

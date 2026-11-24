@@ -40,19 +40,47 @@ const pxCellAt = (x, y) => {
 const inSegRect = (x, y, a, b, ext = 0) => x > Math.min(a[0], b[0]) - PX.half - ext && x < Math.max(a[0], b[0]) + PX.half + ext &&
                                           y > Math.min(a[1], b[1]) - PX.half - ext && y < Math.max(a[1], b[1]) + PX.half + ext;
 
+// MİNİK HÜCRELİ DUVARLAR (4 px hücre; yoksa 6 px): aynı alanda ~2,25 kat daha çok minik tuğla
+const PX_SMALL = new Set(["mikro", "mozaik", "adalar", "core", "halka", "yildiz", "damla", "ucgen", "dikdortgen", "zikzak", "bomba", "kalp", "yilan"]);
+
+// --- Şekil duvarları: dış hattı çizilen, içi boş biçimler (halka, yıldız, damla, üçgen, dikdörtgen, kalp) ---
+// inside(dx, dy): merkezden (dx, dy) hücre uzaklıktaki hücre biçimin içinde mi? Hat TH hücre kalın: içinde olup
+// TH çemberindeki 16 noktadan biriyle dışarı taşan hücreler hat olur (sivri uçlarda hat kendiliğinden kalınlaşır).
+function outlineCells(grid, cols, rows, cx, cy, inside, TH, tone) {
+  const ring = Array.from({ length: 16 }, (_, k) => [Math.round(TH * Math.cos(k * TAU / 16)), Math.round(TH * Math.sin(k * TAU / 16))]);
+  for (let r2 = 0; r2 < rows; r2++) for (let c = 0; c < cols; c++) {
+    const dx = c - cx, dy = r2 - cy;
+    if (!inside(dx, dy) || ring.every(([ox, oy]) => inside(dx + ox, dy + oy))) continue;   // dışarıda ya da hattan içeride: boş
+    grid[r2 * cols + c] = PX_BLUE;
+    tone[r2 * cols + c] = Math.floor(Math.hypot(dx, dy) / 3) % PX_BLUES.length;
+  }
+}
+const SHAPE_HOLE = 3;   // delik yarı genişliği, orta sütundan hücre sayısı (dahil): 7 hücre = 28 px; topun çapı 16 px
+// Alt kenarın ortasında delik: fromRow'dan aşağı orta sütun ± SHAPE_HOLE hücreye tuğla koymaz
+function cutBottomHole(grid, cols, rows, cx, fromRow) {
+  for (let r2 = Math.max(0, fromRow | 0); r2 < rows; r2++)
+    for (let c = cx - SHAPE_HOLE; c <= cx + SHAPE_HOLE; c++) grid[r2 * cols + c] = PX_HOLLOW;
+}
+// Şeklin altına üç küp (▲ ateş · +3 top · ×3 çoğaltma): top değince düşer, rakete yakalanır
+function pushShapeCubes(cx, s, rows, rand, spread = 14) {
+  for (const [kind, dc] of [["fire", -spread], ["plus", 0], ["mul", spread]]) {
+    const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 2) * s;
+    pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
+  }
+}
+
 function buildPixelWall(on) {
   Object.assign(pxWall, { active: !!on, mode: on || null, burns: [], cubes: [], dirty: [], pend: 0, flushAt: 0, statAcc: 0, entered: false, chained: false,
                           finale: false, storm: false, maxed: false, won: false, peak: 1 });
   if (!on) { pxWall.grid = pxWall.owner = null; pxWall.tunnels = []; pxWall.s = PX.s; pxWall.cols = PX.cols; pxWall.rows = PX.rows; return; }
-  // MİNİK HÜCRELİ DUVARLAR (mikro/mozaik/adalar): hücre 4 px → aynı alanda ~2,25 kat daha çok minik tuğla
-  const s = on === "mikro" || on === "mozaik" || on === "adalar" || on === "core" || on === "halka" || on === "yildiz" || on === "damla" || on === "ucgen" || on === "kare" || on === "zikzak" || on === "bomba" || on === "kalp" || on === "yilan" ? 4 : PX.s;
+  const s = PX_SMALL.has(on) ? 4 : PX.s;                // minik hücreli duvarlarda hücre 4 px (yoksa 6 px)
   const cols = Math.round(PX.cols * PX.s / s), rows = Math.round(PX.rows * PX.s / s), n = cols * rows;
   Object.assign(pxWall, { s, cols, rows });
   const grid = new Uint8Array(n).fill(PX_BLUE), owner = new Uint8Array(n), tone = new Uint8Array(n);
   const rand = seeded(4242);                          // tuğla tonları her seferinde aynı
   for (let i = 0; i < n; i++) tone[i] = (rand() * PX_BLUES.length) | 0;
   const center = i => [(i % cols) * s + s / 2, ((i / cols) | 0) * s + s / 2];
-  const paths = on === "koridor" ? KORIDOR_PATHS : (on === "mikro" || on === "mozaik" || on === "adalar" || on === "core" || on === "halka" || on === "yildiz" || on === "damla" || on === "ucgen" || on === "kare" || on === "zikzak" || on === "bomba" || on === "kalp" || on === "yilan") ? [] : TUNNEL_PATHS;
+  const paths = on === "koridor" ? KORIDOR_PATHS : on === "tunnel" ? TUNNEL_PATHS : [];
   // 1) Tünel içi (boşluk): yolun her kolu boyunca 36 px genişliğinde kanal
   paths.forEach((pts, k) => {
     for (let i = 0; i < n; i++) {
@@ -166,172 +194,109 @@ function buildPixelWall(on) {
       pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
     }
   }
-  if (on === "halka") {
+  if (on === "halka") {     // HALKA: kalın dairesel hat, altta delik — top oradan içeri girer
     grid.fill(PX_HOLLOW);
-    const cx = cols / 2, cy = rows / 2, R = 27, TH = 8, gapW = 4;
+    const cx = (cols - 1) / 2, cy = rows / 2, R = 27, TH = 8;
     for (let i = 0; i < n; i++) {
-      const c = i % cols, r2 = (i / cols) | 0;
-      const dx = c - cx, dy = r2 - cy, d = Math.sqrt(dx * dx + dy * dy);
+      const d = Math.hypot(i % cols - cx, ((i / cols) | 0) - cy);
       if (d < R - TH || d > R) continue;
-      const ang = Math.atan2(dy, dx);
-      const da = Math.abs(((ang - Math.PI / 2 + Math.PI) % (2 * Math.PI)) - Math.PI);
-      if (da < gapW / (d + 1)) continue;
       grid[i] = PX_BLUE;
       tone[i] = Math.floor(d) % PX_BLUES.length;
     }
-    for (const [kind, dc] of [["mul", -16], ["plus", 0], ["mul", 16]]) {
-      const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 2) * s;
-      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
-    }
+    cutBottomHole(grid, cols, rows, cx, cy + R - TH - 1);
+    pushShapeCubes(cx, s, rows, rand);
   }
-  if (on === "yildiz") {
+  if (on === "yildiz") {    // YILDIZ: beş köşeli yıldızın hattı; alt çukurun dibi delikle açılır
     grid.fill(PX_HOLLOW);
-    const cx = cols / 2, cy = rows / 2 - 2, R = 32, r_in = R * 0.42;
-    for (let i = 0; i < n; i++) {
-      const c = i % cols, r2 = (i / cols) | 0;
-      const dx = c - cx, dy = r2 - cy, d = Math.sqrt(dx * dx + dy * dy);
-      if (d > R) continue;
-      const ang = Math.atan2(dy, dx) + Math.PI / 2;
-      const seg = Math.PI * 2 / 5;
-      const phase = ((ang % seg) + seg) % seg;
-      const frac = phase / seg;
-      const boundary = frac < 0.5 ? r_in + (R - r_in) * (1 - frac * 2) : r_in + (R - r_in) * ((frac - 0.5) * 2);
-      if (d <= boundary) { grid[i] = PX_BLUE; tone[i] = Math.floor(d / 4) % PX_BLUES.length; }
-    }
-    for (const [kind, dc] of [["fire", -30], ["mul", 0], ["plus", 30]]) {
-      const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 2) * s;
-      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
-    }
+    const cx = (cols - 1) / 2, cy = rows / 2, R = 31, rIn = R * 0.48, TH = 5, seg = TAU / 5;
+    const star = (dx, dy) => {
+      const d = Math.hypot(dx, dy);
+      if (d > R) return false;
+      const frac = (((Math.atan2(dy, dx) + Math.PI / 2) % seg) + seg) % seg / seg;   // 0 = uç, 0.5 = çukur; bir uç yukarıda
+      return d <= rIn + (R - rIn) * Math.abs(2 * frac - 1);
+    };
+    outlineCells(grid, cols, rows, cx, cy, star, TH, tone);
+    cutBottomHole(grid, cols, rows, cx, cy + rIn - 2 * TH);   // sivri çukurda hat kalınlaşır: delik daha yukarıdan başlar
+    pushShapeCubes(cx, s, rows, rand);
   }
-  if (on === "damla") {
+  if (on === "damla") {     // DAMLA: altı yuvarlak, üstü sivri; altta delik
     grid.fill(PX_HOLLOW);
-    const cx = cols / 2, cy = rows / 2 - 4, H = 28, W2 = 22, gapW = 5;
+    const cx = (cols - 1) / 2, R = 24, HORN = 34, TH = 5, cy = rows - 5 - R;
+    const drop = (dx, dy) => {
+      if (dy >= 0) return dx * dx + dy * dy <= R * R;         // yuvarlak kısım
+      const t = -dy / HORN;                                    // sivri kısım: yavaş daralıp ucta sivrilir
+      return t <= 1 && Math.abs(dx) <= R * (1 - t * t) ** 0.6;
+    };
+    outlineCells(grid, cols, rows, cx, cy, drop, TH, tone);
+    cutBottomHole(grid, cols, rows, cx, cy + R - TH - 1);
+    pushShapeCubes(cx, s, rows, rand);
+  }
+  if (on === "ucgen") {     // ÜÇGEN: tabanı geniş üçgenin hattı; tabanın ortasında delik
+    grid.fill(PX_HOLLOW);
+    const cx = (cols - 1) / 2, H = 58, W2 = 34, TH = 5, base = rows - 3;
+    const tri = (dx, dy) => { const h = 1 + dy / H; return h >= 0 && h <= 1 && Math.abs(dx) <= W2 * h; };   // h: 0 = uç, 1 = taban
+    outlineCells(grid, cols, rows, cx, base, tri, TH, tone);
+    cutBottomHole(grid, cols, rows, cx, base - TH - 1);
+    pushShapeCubes(cx, s, rows, rand);
+  }
+  if (on === "dikdortgen") {   // DİKDÖRTGEN: geniş çerçeve; tabanda delik
+    grid.fill(PX_HOLLOW);
+    const cx = (cols - 1) / 2, cy = rows / 2, W2 = 56, H2 = 22, TH = 6;
+    outlineCells(grid, cols, rows, cx, cy, (dx, dy) => Math.abs(dx) <= W2 && Math.abs(dy) <= H2, TH, tone);
+    cutBottomHole(grid, cols, rows, cx, cy + H2 - TH - 1);
+    pushShapeCubes(cx, s, rows, rand);
+  }
+  if (on === "zikzak") {    // ZİKZAK: üç ince zigzak şerit — top şeritler arasındaki kanallarda kıvrılarak ilerler
+    grid.fill(PX_HOLLOW);
+    const cx = (cols - 1) / 2, P = cols / 4, AMP = 11, TH = 2;
     for (let i = 0; i < n; i++) {
-      const c = i % cols, r2 = (i / cols) | 0;
-      const dx = Math.abs(c - cx), dy = r2 - cy;
-      const diamond = dx / W2 + Math.abs(dy) / H;
-      if (diamond > 1) continue;
-      if (dy > H * 0.6 && dx < gapW) continue;
+      const c = i % cols, r2 = (i / cols) | 0, tri = Math.abs((c % P) / P * 4 - 2) - 1;   // üçgen dalga, -1..1
+      if (![14, 33, 52].some(rc => Math.abs(r2 - rc - tri * AMP) <= TH)) continue;
       grid[i] = PX_BLUE;
-      tone[i] = Math.floor(diamond * 5) % PX_BLUES.length;
+      tone[i] = Math.floor(r2 / 3) % PX_BLUES.length;
     }
-    for (const [kind, dc] of [["mul", -16], ["fire", 0], ["mul", 16]]) {
-      const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 2) * s;
-      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
-    }
+    pushShapeCubes(cx, s, rows, rand);
   }
-  if (on === "ucgen") {     // ÜÇGEN: eşkenar üçgen, tabanında delik — top tabandan girer
+  if (on === "bomba") {     // BOMBA: dolu daire, içinde küçük boşluk; boşluktan alta inen delik, sağ üstte fitil
     grid.fill(PX_HOLLOW);
-    const cx = cols / 2, H = 34, W2 = 30, gapW = 6;
+    const cx = (cols - 1) / 2, cy = rows / 2 + 1, R = 25, CORE = 10;
     for (let i = 0; i < n; i++) {
-      const c = i % cols, r2 = (i / cols) | 0;
-      const dy = (rows - 4 - r2) / H;                  // 0 (tepe) → 1 (taban)
-      if (dy < 0 || dy > 1) continue;
-      const halfW = W2 * dy;
-      if (Math.abs(c - cx) > halfW) continue;
-      if (dy > 0.85 && Math.abs(c - cx) < gapW) continue; // tabanda delik
+      const dx = i % cols - cx, dy = ((i / cols) | 0) - cy, d = Math.hypot(dx, dy);
+      if (d > R || d < CORE || (Math.abs(dx) <= SHAPE_HOLE && dy > 0)) continue;
       grid[i] = PX_BLUE;
-      tone[i] = Math.floor(dy * 5) % PX_BLUES.length;
+      tone[i] = Math.floor(d / 3) % PX_BLUES.length;
     }
-    for (const [kind, dc] of [["mul", -14], ["plus", 0], ["mul", 14]]) {
-      const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 2) * s;
-      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
+    for (let k = 0; k <= 9; k++) {                        // fitil: gövdeden sağ yukarı çıkan koyu şerit
+      const fx = Math.round(cx + 10 + k * 0.7), fy = Math.round(cy - 23 - k), fi = fy * cols + fx;
+      if (fx + 1 < cols && fy + 1 < rows) for (const fj of [fi, fi + 1, fi + cols, fi + cols + 1]) { grid[fj] = PX_BLUE; tone[fj] = 4; }
     }
+    pushShapeCubes(cx, s, rows, rand);
   }
-  if (on === "kare") {      // KARE: kalın çerçeve, her kenarda birer delik — top her yönden girebilir
+  if (on === "kalp") {      // KALP: kalp eğrisinin hattı; alt uçta delik
     grid.fill(PX_HOLLOW);
-    const cx = cols / 2, cy = rows / 2, W2 = 32, H2 = 16, TH = 6, gapW = 5;
-    for (let i = 0; i < n; i++) {
-      const c = i % cols, r2 = (i / cols) | 0;
-      const dx = Math.abs(c - cx), dy = Math.abs(r2 - cy);
-      const inside = dx < W2 - TH && dy < H2 - TH;
-      const outside = dx > W2 || dy > H2;
-      if (inside || outside) continue;
-      // kenarlarda delikler: her kenarın ortasında
-      if ((dy < H2 - TH + 1 && dy > H2 - TH - 1) && Math.abs(c - cx) < gapW) continue; // üst/alt
-      if ((dx < W2 - TH + 1 && dx > W2 - TH - 1) && Math.abs(r2 - cy) < gapW) continue; // sol/sağ
-      grid[i] = PX_BLUE;
-      tone[i] = (dx > dy ? Math.floor(dx / 3) : Math.floor(dy / 3)) % PX_BLUES.length;
-    }
-    for (const [kind, dc] of [["fire", -14], ["mul", 0], ["plus", 14]]) {
-      const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 2) * s;
-      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
-    }
+    const cx = (cols - 1) / 2, cy = rows / 2 + 1, S = 26, TH = 5;
+    const heart = (dx, dy) => { const x = dx / S, y = -dy / S; return (x * x + y * y - 1) ** 3 <= x * x * y * y * y; };
+    outlineCells(grid, cols, rows, cx, cy, heart, TH, tone);
+    // Kalbin alt V'si aşağı doğru daralır: delik, orta sütunlar topa (7 hücre) dar geldiği ilk satırda
+    // başlar. Sabit satır verildiğinde kapı 3 hücreye iniyor, top hedefe varmadan duvara değiyordu.
+    const acik = r2 => { for (let c = cx - SHAPE_HOLE; c <= cx + SHAPE_HOLE; c++) if (grid[r2 * cols + c] !== PX_HOLLOW) return false; return true; };
+    let giris = cy;
+    while (giris < rows && acik(giris)) giris++;
+    cutBottomHole(grid, cols, rows, cx, giris);
+    pushShapeCubes(cx, s, rows, rand);
   }
-  if (on === "zikzak") {    // ZİKZAK: yatay zikzak şeritler, aralarından geçilir
+  if (on === "yilan") {     // YILAN: S biçiminde kıvrılan kalın şerit; kuyruğu çatallı
     grid.fill(PX_HOLLOW);
-    const cx = cols / 2, amp = 22, TH = 5;
-    for (let i = 0; i < n; i++) {
-      const c = i % cols, r2 = (i / cols) | 0;
-      if (r2 < 4 || r2 > rows - 6) continue;
-      const bandCenter = cx + Math.sin(r2 * 0.35) * amp;   // sürekli kıvrım
-      if (Math.abs(c - bandCenter) > TH) continue;
-      grid[i] = PX_BLUE;
-      tone[i] = Math.floor(r2 / 4) % PX_BLUES.length;
-    }
-    for (const [kind, dc] of [["mul", -14], ["fire", 0], ["mul", 14]]) {
-      const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 2) * s;
-      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
-    }
-  }
-  if (on === "bomba") {     // BOMBA: daire gövde + fitil; gövdenin altında delik
-    grid.fill(PX_HOLLOW);
-    const cx = cols / 2, cy = rows / 2 + 2, R = 22;
-    for (let i = 0; i < n; i++) {
-      const c = i % cols, r2 = (i / cols) | 0;
-      const dx = c - cx, dy = r2 - cy;
-      const d = Math.sqrt(dx * dx + dy * dy);
-      if (d <= R) {
-        if (dy > R * 0.7 && Math.abs(dx) < 5) continue;   // alt delik
-        grid[i] = PX_BLUE;
-        tone[i] = Math.floor(d / 4) % PX_BLUES.length;
-      }
-    }
-    // fitil: sağ üstte kıvrık şerit
-    for (let t = 0; t < 12; t++) {
-      const fx = Math.round(cx + R * 0.5 + t * 0.8), fy = Math.round(cy - R * 0.5 - t * 0.6);
-      if (fx < cols && fy >= 0) { const fi = fy * cols + fx; grid[fi] = PX_BLUE; tone[fi] = 3; }
-    }
-    for (const [kind, dc] of [["fire", -14], ["mul", 0], ["plus", 14]]) {
-      const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 2) * s;
-      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
-    }
-  }
-  if (on === "kalp") {      // KALP: kalp şekli, alt sivri uçta delik
-    grid.fill(PX_HOLLOW);
-    const cx = cols / 2, cy = rows / 2 - 4;
-    for (let i = 0; i < n; i++) {
-      const c = i % cols, r2 = (i / cols) | 0;
-      const x = (c - cx) / 18, y = -(r2 - cy) / 18;
-      const v = (x * x + y * y - 1) ** 3 - x * x * y * y * y;
-      if (v > 0) continue;
-      if (y < -0.7 && Math.abs(x) < 0.25) continue;       // alt uçta delik
-      grid[i] = PX_BLUE;
-      tone[i] = Math.floor(Math.abs(x) * 3 + Math.abs(y) * 2) % PX_BLUES.length;
-    }
-    for (const [kind, dc] of [["mul", -14], ["plus", 0], ["fire", 14]]) {
-      const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 2) * s;
-      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
-    }
-  }
-  if (on === "yilan") {     // YILAN: S şeklinde kıvrımlı koridor duvarları — top kıvrımları takip eder
-    grid.fill(PX_HOLLOW);
-    const cx = cols / 2, TH = 7;
+    const cx = (cols - 1) / 2, TH = 10;
     for (let i = 0; i < n; i++) {
       const c = i % cols, r2 = (i / cols) | 0;
       if (r2 < 3 || r2 > rows - 6) continue;
-      const t = (r2 - 3) / (rows - 9);
-      const snakeX = cx + Math.sin(t * Math.PI * 3) * 38;
-      if (Math.abs(c - snakeX) > TH) continue;
-      // alt uçta delik
-      if (t > 0.9 && Math.abs(c - snakeX) < 4) continue;
+      const t = (r2 - 3) / (rows - 9), sx = cx + Math.sin(t * Math.PI * 3) * 38;
+      if (Math.abs(c - sx) > TH || (t > 0.9 && Math.abs(c - sx) < 4)) continue;
       grid[i] = PX_BLUE;
       tone[i] = Math.floor(t * 6) % PX_BLUES.length;
     }
-    for (const [kind, dc] of [["mul", -14], ["fire", 0], ["plus", 14]]) {
-      const hx = PX.x + (cx + dc) * s, hy = PX.y + (rows + 2) * s;
-      pxWall.cubes.push({ kind, hx, hy, x: hx, y: hy, vy: 0, rot: 0, st: "idle", at: 0, pop: 0, ph: rand() * 6 });
-    }
+    pushShapeCubes(cx, s, rows, rand);
   }
   let blue = 0;
   for (let i = 0; i < n; i++) if (grid[i] === PX_BLUE) blue++;

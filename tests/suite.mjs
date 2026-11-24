@@ -928,13 +928,13 @@ test("Tünel Fırtınası: piksel duvar, çelik tüneller, zincir, küpler, 300 
     return { afterTunnel, chain: chain.join(), next, practice, menu: pxWall.active, label: [...levelGrid.querySelectorAll("button")].pop().textContent };
   })()`);
   expect(n.afterTunnel.join() === "14,true,koridor", "13.ten sonra CR7 Koridoru açılır: " + JSON.stringify(n.afterTunnel));
-  expect(n.chain === "15:mikro,16:mozaik,17:adalar,18:halka,19:yildiz,20:damla,21:ucgen,22:kare,23:zikzak,24:bomba,25:kalp,26:yilan,27:-", "piksel zinciri: " + n.chain);
+  expect(n.chain === "15:mikro,16:mozaik,17:adalar,18:halka,19:yildiz,20:damla,21:ucgen,22:dikdortgen,23:zikzak,24:bomba,25:kalp,26:yilan,27:-", "piksel zinciri: " + n.chain);
   expect(n.next[0] === 27 && n.next[1] === false, "damladan sonra piksel duvar kapanır: " + n.next);
   expect(n.practice.join() === "13,true,true,serve", "Meydan panelinden her zaman pratik: " + n.practice);
   expect(n.menu === false && n.label === "🐍 26", "menüde kapalı, bölüm ızgarasında 💧 20: " + JSON.stringify(n));
 });
 
-test("CR7 Koridoru: tam mavi duvar, dar koridor, ok/ateş küpleri, dar raket, CR7, kazanma saçılımı", async ({ p, expect }) => {
+test("CR7 Koridoru: tam mavi duvar, dar koridor, ×3/ateş küpleri, dar raket, CR7, kazanma saçılımı", async ({ p, expect }) => {
   const r = await p.eval(`(() => {
     __start(14);
     const P = pxWall, g = P.grid, count = t => g.reduce((s, v) => s + (v === t), 0);
@@ -1030,91 +1030,110 @@ test("CORE/BREAK: 3379 turuncu çekirdek, x3 ve ↔ küpleri, ALL CLEAR", async 
   expect(pr.join() === "12,true,true,core,serve", "panelden CORE/BREAK pratiği: " + pr);
 });
 
-test("Şekil duvarları: Halka, Yıldız, Damla — delikten giriş, küpler, kazanma", async ({ p, expect }) => {
+test("Şekil duvarları (18–26): simetrik hatlar, delikten içeri giriş, kanallar, küpler, kazanma", async ({ p, expect }) => {
   const r = await p.eval(`(() => {
-    const shapes = {};
-    for (const [mode, lv] of [["halka", 18], ["yildiz", 19], ["damla", 20]]) {
+    const res = {};
+    // Kapalı biçimler: top alt ortadan düz yukarı gitmeli ve İLK tuğlayı kırmadan içindeki hedefe ulaşmalı
+    const closed = { halka: [18, 272], yildiz: [19, 224], damla: [20, 288], ucgen: [21, 300], dikdortgen: [22, 264], bomba: [24, 240], kalp: [25, 272] };
+    for (const mode in closed) {
+      const [lv, target] = closed[mode];
       __start(lv);
-      const P = pxWall, g = P.grid, count = t => g.reduce((a, v) => a + (v === t ? 1 : 0), 0);
-      const cx = P.cols / 2;
-      // delik: alt merkez hücresi boş mu (halka/damla); yıldızda kol arası
-      const cxr = Math.round(cx);
-      const holeOpen = mode === "yildiz"
-        ? [...Array(P.rows * P.cols).keys()].some(ix => g[ix] === PX_HOLLOW && (ix % P.cols) > cxr - 20 && (ix % P.cols) < cxr + 20 && ((ix / P.cols) | 0) < P.rows * 0.8)
-        : g[(P.rows - 3) * P.cols + cxr] === PX_HOLLOW;
-      shapes[mode] = { mode: P.mode, level: state.level, total: P.total, hollow: count(PX_HOLLOW),
-                       steel: count(PX_STEEL), cubes: P.cubes.map(q => q.kind).join(","),
-                       holeOpen, bricks: bricks.length };
-      // topu deliğe yönlendir: halka/damla alttan, yıldız üstten
-      const ball = __ballAt(PX.x + cx * P.s, mode === "yildiz" ? 80 : PX.y + P.rows * P.s + 30, 0, mode === "yildiz" ? mag() : -mag());
-      for (let i = 0; i < 400; i++) update(STEP);
-      shapes[mode].broke = P.total - P.left;
-      shapes[mode].ballOk = isFinite((balls[0] || ball).x);
-      // kazanma
-      for (let i = 0; i < g.length; i++) pxBreak(i);
+      const P = pxWall, cx = (P.cols - 1) / 2, g = P.grid, left0 = P.left;
+      const cubes = P.cubes.map(q => q.kind).join(",");
+      P.cubes.length = 0;                      // küpler yolda düşüp rakete yakalanmasın
+      paddle.x = 0;                            // raket başka şey yakalamasın
+      let bottom = 0, sym = true;
+      for (let i = 0; i < g.length; i++) {
+        if (g[i] !== PX_BLUE) continue;
+        bottom = Math.max(bottom, (i / P.cols) | 0);
+        if (g[((i / P.cols) | 0) * P.cols + (2 * cx - i % P.cols)] !== PX_BLUE) sym = false;
+      }
+      let corridor = true;                     // delik: şeklin altından hedefe kadar orta 7 sütun boş
+      for (let r2 = Math.floor((target - PX.y) / P.s); r2 <= bottom; r2++)
+        for (let c = cx - 3; c <= cx + 3; c++) if (g[r2 * P.cols + c] !== PX_HOLLOW) corridor = false;
+      const b = __ballAt(400, 400, 0, -mag());
+      let entryAt = -1, brokeAt = -1;
+      for (let i = 0; i < 480 && brokeAt < 0; i++) {
+        update(STEP);
+        if (entryAt < 0 && !b.gone && b.y <= target) entryAt = i;
+        if (P.left < left0) brokeAt = i;
+      }
+      res[mode] = { mode: P.mode, level: state.level, total: P.total, bricks: bricks.length, cubes, sym, corridor, entryAt, brokeAt };
+    }
+    // ZİKZAK: her sütunda üç şerit; şeritler ince, aralarındaki kanallar topa geniş
+    __start(23);
+    { const P = pxWall, g = P.grid; let minGap = 1e9, minTh = 1e9, maxTh = 0, three = true;
+      for (let c = 0; c < P.cols; c++) {
+        const runs = []; let start = -1;
+        for (let r2 = 0; r2 < P.rows; r2++) {
+          const on = g[r2 * P.cols + c] === PX_BLUE;
+          if (on && start < 0) start = r2;
+          if (!on && start >= 0) { runs.push([start, r2 - 1]); start = -1; }
+        }
+        if (start >= 0) runs.push([start, P.rows - 1]);      // son satırda biten şerit de sayılır
+        if (runs.length !== 3) three = false;
+        runs.forEach((rn, k) => {
+          minTh = Math.min(minTh, rn[1] - rn[0] + 1); maxTh = Math.max(maxTh, rn[1] - rn[0] + 1);
+          if (k) minGap = Math.min(minGap, rn[0] - runs[k - 1][1] - 1);
+        });
+      }
+      res.zikzak = { mode: P.mode, level: state.level, total: P.total, three, minTh, maxTh, minGap, cubes: P.cubes.map(q => q.kind).join(",") };
+    }
+    // YILAN: her satırda tek kalın şerit, iki yanı da açık
+    __start(26);
+    { const P = pxWall, g = P.grid; let minTh = 1e9, maxTh = 0, one = true, open = true;
+      for (let r2 = 12; r2 <= 52; r2++) {
+        const runs = []; let start = -1;
+        for (let c = 0; c < P.cols; c++) {
+          const on = g[r2 * P.cols + c] === PX_BLUE;
+          if (on && start < 0) start = c;
+          if (!on && start >= 0) { runs.push([start, c - 1]); start = -1; }
+        }
+        if (start >= 0) runs.push([start, P.cols - 1]);
+        if (runs.length !== 1) one = false;
+        else {
+          const th = runs[0][1] - runs[0][0] + 1;
+          minTh = Math.min(minTh, th); maxTh = Math.max(maxTh, th);
+          if (runs[0][0] < 8 || P.cols - 1 - runs[0][1] < 8) open = false;
+        }
+      }
+      res.yilan = { mode: P.mode, level: state.level, total: P.total, one, minTh, maxTh, open, cubes: P.cubes.map(q => q.kind).join(",") };
+    }
+    const won = {};
+    for (const lv of [18, 19, 20, 21, 22, 23, 24, 25, 26]) {   // hepsini kır → kazanma
+      __start(lv);
+      const P = pxWall;
+      for (let i = 0; i < P.grid.length; i++) pxBreak(i);
       P.burns = [];
       if (state.mode !== "playing") state.mode = "playing";
       update(STEP);
-      shapes[mode].won = P.won && state.mode === "levelclear";
+      won[P.mode] = P.won && state.mode === "levelclear";
     }
-    return shapes;
+    return { res, won };
   })()`);
-  for (const mode of ["halka", "yildiz", "damla"]) {
-    const sh = r[mode];
-    expect(sh.mode === mode && sh.bricks === 0 && sh.total > 300, mode + " duvarı kuruldu: " + JSON.stringify(sh));
-    expect(sh.hollow > 8000 && sh.steel === 0, mode + " koyu boşluk, çelik yok: " + sh.hollow);
-    expect(sh.holeOpen, mode + " deliği açık");
-    expect(sh.cubes.split(",").length === 3, mode + " üç küp: " + sh.cubes);
-    expect(sh.broke > 5 && sh.ballOk, mode + " top duvarı öğütür: " + sh.broke);
-    expect(sh.won, mode + " kazanma ekranı");
+  for (const [mode, lv] of [["halka", 18], ["yildiz", 19], ["damla", 20], ["ucgen", 21], ["dikdortgen", 22], ["bomba", 24], ["kalp", 25]]) {
+    const x = r.res[mode];
+    expect(x.mode === mode && x.level === lv && x.bricks === 0 && x.total >= 700, mode + " hattı çizildi: " + JSON.stringify(x));
+    expect(x.cubes === "fire,plus,mul", mode + " küpleri: " + x.cubes);
+    if (mode !== "bomba") expect(x.sym, mode + " ortaya simetrik");            // bombanın fitili tek yanda
+    expect(x.corridor, mode + " delik içeriye açık");
+    expect(x.entryAt >= 0 && x.brokeAt > x.entryAt, mode + ": top ilk tuğlayı kırmadan delikten içeri girmeli, sonra içeriden kırmalı: " + JSON.stringify(x));
   }
-  const pr = await p.eval(`(() => { toMenu(); $("halka-start").click(); const h = [state.level, pxWall.mode];
-    toMenu(); $("yildiz-start").click(); const y = [state.level, pxWall.mode];
-    toMenu(); $("damla-start").click(); const d = [state.level, pxWall.mode];
-    toMenu(); return { h: h.join(), y: y.join(), d: d.join() }; })()`);
-  expect(pr.h === "18,halka" && pr.y === "19,yildiz" && pr.d === "20,damla", "panelden şekil pratiği: " + JSON.stringify(pr));
-});
-
-test("Altı yeni şekil: Üçgen, Kare, Zikzak, Bomba, Kalp, Yılan — delikler, küpler, kazanma", async ({ p, expect }) => {
-  const r = await p.eval(`(() => {
-    const shapes = {};
-    const modes = [["ucgen", 21], ["kare", 22], ["zikzak", 23], ["bomba", 24], ["kalp", 25], ["yilan", 26]];
-    for (const [mode, lv] of modes) {
-      __start(lv);
-      const P = pxWall, g = P.grid, count = t => g.reduce((a, v) => a + (v === t ? 1 : 0), 0);
-      shapes[mode] = { mode: P.mode, level: state.level, total: P.total, hollow: count(PX_HOLLOW),
-                       steel: count(PX_STEEL), cubes: P.cubes.map(q => q.kind).join(","),
-                       bricks: bricks.length };
-      // topu şekle doğru fırlat
-      const b = __ballAt(400, 380, 0, -mag());
-      for (let i = 0; i < 300; i++) update(STEP);
-      shapes[mode].broke = P.total - P.left;
-      shapes[mode].ballOk = isFinite((balls[0] || b).x);
-      // kazanma
-      for (let i = 0; i < g.length; i++) pxBreak(i);
-      P.burns = [];
-      if (state.mode !== "playing") state.mode = "playing";
-      update(STEP);
-      shapes[mode].won = P.won && state.mode === "levelclear";
+  const z = r.res.zikzak, y = r.res.yilan;
+  expect(z.mode === "zikzak" && z.level === 23 && z.three && z.minTh >= 4 && z.maxTh <= 5 && z.minGap >= 13 && z.cubes === "fire,plus,mul",
+         "zikzak: her sütunda üç ince şerit, aralarında geniş kanal: " + JSON.stringify(z));
+  expect(y.mode === "yilan" && y.level === 26 && y.one && y.minTh >= 19 && y.maxTh <= 22 && y.open && y.cubes === "fire,plus,mul",
+         "yılan: tek kalın şerit, iki yanı açık: " + JSON.stringify(y));
+  for (const mode of ["halka", "yildiz", "damla", "ucgen", "dikdortgen", "zikzak", "bomba", "kalp", "yilan"]) expect(r.won[mode], mode + " kazanma ekranı");
+  const pr = await p.eval(`(() => { const out = {};
+    for (const [id, lv] of [["halka-start", 18], ["yildiz-start", 19], ["damla-start", 20], ["ucgen-start", 21], ["dikdortgen-start", 22], ["zikzak-start", 23], ["bomba-start", 24], ["kalp-start", 25], ["yilan-start", 26]]) {
+      toMenu(); document.getElementById(id).click(); out[id] = [state.level, run.practice, pxWall.mode].join();
     }
-    return shapes;
-  })()`);
-  for (const mode of ["ucgen", "kare", "zikzak", "bomba", "kalp", "yilan"]) {
-    const sh = r[mode];
-    expect(sh.mode === mode && sh.level >= 21 && sh.level <= 26 && sh.bricks === 0, mode + " kuruldu: " + JSON.stringify(sh));
-    expect(sh.total > 200 && sh.hollow > 8000, mode + " yeterli tuğla + boşluk: " + JSON.stringify([sh.total, sh.hollow]));
-    expect(sh.steel === 0, mode + " çelik yok");
-    expect(sh.cubes.split(",").length === 3, mode + " üç küp: " + sh.cubes);
-    expect(sh.broke > 0 && sh.ballOk, mode + " top şekli öğütür: " + sh.broke);
-    expect(sh.won, mode + " kazanma");
-  }
-  const pr = await p.eval(`(() => { toMenu(); $("ucgen-start").click(); const u = [state.level, pxWall.mode];
-    toMenu(); $("kare-start").click(); const k = [state.level, pxWall.mode];
-    toMenu(); $("bomba-start").click(); const b = [state.level, pxWall.mode];
-    toMenu(); return { u: u.join(), k: k.join(), b: b.join() }; })()`);
-  expect(pr.u === "21,ucgen" && pr.k === "22,kare" && pr.b === "24,bomba", "panelden şekil pratiği: " + JSON.stringify(pr));
+    toMenu(); return out; })()`);
+  const want = { "halka-start": "18,true,halka", "yildiz-start": "19,true,yildiz", "damla-start": "20,true,damla", "ucgen-start": "21,true,ucgen", "dikdortgen-start": "22,true,dikdortgen",
+                 "zikzak-start": "23,true,zikzak", "bomba-start": "24,true,bomba", "kalp-start": "25,true,kalp", "yilan-start": "26,true,yilan" };
+  expect(JSON.stringify(pr) === JSON.stringify(want), "panelden her şeklin pratiği: " + JSON.stringify(pr));
 });
-
 test("Modlar: kolay/orta/zor — hız, can, raket, kapsül, lanet sıklığı, puan; menü hapları tıklanır", async ({ p, expect }) => {
   const r = await p.eval(`(() => {
     // Menü hapları çizildi ve kutular dolu

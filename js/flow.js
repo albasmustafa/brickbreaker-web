@@ -306,7 +306,7 @@ function nextLevel() {
   else if (pxWall.mode === "yildiz") callout(tr("⭐ YILDIZ"), "#ffd60a");
   else if (pxWall.mode === "damla") callout(tr("💧 DAMLA"), "#06d6a0");
   else if (pxWall.mode === "ucgen") callout(tr("🔺 ÜÇGEN"), "#4cc9f0");
-  else if (pxWall.mode === "kare") callout(tr("⬛ KARE"), "#c77dff");
+  else if (pxWall.mode === "dikdortgen") callout(tr("⬛ DİKDÖRTGEN"), "#c77dff");
   else if (pxWall.mode === "zikzak") callout(tr("⚡ ZİKZAK"), "#ffd60a");
   else if (pxWall.mode === "bomba") callout(tr("💥 BOMBA"), "#ff6b35");
   else if (pxWall.mode === "kalp") callout(tr("❤ KALP"), "#ff4d6d");
